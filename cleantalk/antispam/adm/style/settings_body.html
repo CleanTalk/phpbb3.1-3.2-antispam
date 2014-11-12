@@ -1,0 +1,46 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1>{L_ACP_CLEANTALK_SETTINGS}</h1>
+
+<form id="acp_board" method="post" action="{U_ACTION}">
+	<fieldset>
+		<dl>
+			<dt><label for="cleantalk_antispam_regs">{L_ACP_CLEANTALK_REGS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_REGS_DESCR}</span></dt>
+			<dd>
+			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="1" <!-- IF CLEANTALK_ANTISPAM_REGS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="0" <!-- IF not CLEANTALK_ANTISPAM_REGS -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			</dd>
+		</dl>
+
+		<dl>
+			<dt><label for="cleantalk_antispam_guests">{L_ACP_CLEANTALK_GUESTS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_GUESTS_DESCR}</span></dt>
+			<dd>
+			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="1" <!-- IF CLEANTALK_ANTISPAM_GUESTS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="0" <!-- IF not CLEANTALK_ANTISPAM_GUESTS -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			</dd>
+		</dl>
+
+		<dl>
+			<dt><label for="cleantalk_antispam_nusers">{L_ACP_CLEANTALK_NUSERS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_NUSERS_DESCR}</span></dt>
+			<dd>
+			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="1" <!-- IF CLEANTALK_ANTISPAM_NUSERS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="0" <!-- IF not CLEANTALK_ANTISPAM_NUSERS -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			</dd>
+		</dl>
+
+		<dl>
+			<dt><label for="cleantalk_antispam_apikey">{L_ACP_CLEANTALK_APIKEY_LABEL}</label><br /><span>{L_ACP_CLEANTALK_APIKEY_DESCR1}<a target="_blank" href="https://cleantalk.org/install/phpbb3?step=2">https://cleantalk.org</a>{L_ACP_CLEANTALK_APIKEY_DESCR2}</span></dt>
+			<dd>
+			    <input type="text" size="40" maxlength="60" name="cleantalk_antispam_apikey" value="{CLEANTALK_ANTISPAM_APIKEY}"/>
+			</dd>
+		</dl>
+
+		<p class="submit-buttons">
+			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
+			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
+		</p>
+
+		{S_FORM_TOKEN}
+	</fieldset>
+</form>
+<!-- INCLUDE overall_footer.html -->

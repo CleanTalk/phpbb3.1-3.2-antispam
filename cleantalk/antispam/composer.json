@@ -1,0 +1,27 @@
+{
+	"name": "cleantalk/antispam",
+	"type": "phpbb-extension",
+	"description": "CleanTalk. Spam protection.",
+	"homepage": "https://cleantalk.org",
+	"version": "4.2",
+	"time": "2014-11-07",
+	"license": "GPL-2.0",
+	"authors": [{
+			"name": "Alexey Znaev",
+			"email": "welcome@cleantalk.org",
+			"homepage": "https://cleantalk.org",
+			"role": "Developer"
+		}],
+	"require": {
+		"php": ">=5.3.3"
+	},
+	"require-dev": {
+		"phpbb/epv": "dev-master"
+	},
+	"extra": {
+		"display-name": "CleanTalk. Spam protection.",
+		"soft-require": {
+			"phpbb/phpbb": ">=3.1.0-RC2,<3.2.*@dev"
+		}
+	}
+}
