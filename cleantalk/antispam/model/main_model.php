@@ -6,8 +6,8 @@ class main_model {
 
     const JS_FIELD_NAME = 'ct_checkjs';
 
-    public function checkSpam($spam_check) {
-	global $config, $user, $request;
+    static public function checkSpam($spam_check) {
+	global $config, $user, $request, $phpbb_root_path;
 	require_once 'cleantalk.class.php';
 
 	$ct_checkjs_val = request_var(self::JS_FIELD_NAME, '', false, true);
@@ -39,9 +39,11 @@ class main_model {
 	    )
 	);
 
+        $composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
+
 	$ct_request = new \CleantalkRequest();
 	$ct_request->auth_key = $config['cleantalk_antispam_apikey'];
-	$ct_request->agent = 'ct-phpbb-42';	// TODO - брать из composer.json
+	$ct_request->agent = 'ct-phpbb-' . preg_replace("/(\d)\.(\w+)/", "$1$2", $composer_json->version);
 	$ct_request->js_on = $checkjs;
 	$ct_request->sender_info = $sender_info;
 	$ct_request->sender_email = array_key_exists('sender_email', $spam_check) ? $spam_check['sender_email'] : '';
@@ -111,7 +113,7 @@ class main_model {
 	return $ret_val;
     }
 
-    public function filterResponse($ct_response) {
+    static public function filterResponse($ct_response) {
 	if (preg_match('//u', $ct_response)) {
 	    $err_str = preg_replace('/\*\*\*/iu', '', $ct_response);
 	}
@@ -121,7 +123,7 @@ class main_model {
 	return $err_str;
     }
 
-    public function setSubmitTime() {
+    static public function setSubmitTime() {
 	global $db, $user;
 
 	$sql = "UPDATE " . SESSIONS_TABLE . "
@@ -130,12 +132,12 @@ class main_model {
 	$db->sql_query($sql);
     }
 
-    public function getCheckJSValue() {
+    static public function getCheckJSValue() {
 	global $user;
 	return md5($user->data['user_form_salt'] . $user->session_id);
     }
 
-    public function checkJSScript() {
+    static public function checkJSScript() {
 	    $ct_check_def = '0';
 	    if (!isset($_COOKIE[self::JS_FIELD_NAME])) setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
 	    $ct_check_value = self::GetCheckJSValue();

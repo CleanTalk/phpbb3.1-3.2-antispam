@@ -54,6 +54,10 @@ class main_listener implements EventSubscriberInterface
 
 	public function add_js_to_head($event)
 	{
+		global $config;
+
+		if(empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
+
                 $this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::checkJSScript());
 	}
 
@@ -61,10 +65,10 @@ class main_listener implements EventSubscriberInterface
 	{
 		global $config;
 
-            	$data = $event->get_data();
+		if(empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
+
+		$data = $event->get_data();
 		$form_id = $data['form_name'];
-		// 'ucp_register' - регистрация
-		// 'posting' - комменты
 		if($config['cleantalk_antispam_guests'] && $form_id == 'posting' || $config['cleantalk_antispam_regs'] && $form_id == 'ucp_register') {
 		    \cleantalk\antispam\model\main_model::setSubmitTime();
 		}
@@ -72,9 +76,29 @@ class main_listener implements EventSubscriberInterface
 
         public function check_comment($event)
 	{
-		global $config;
+		global $config, $user, $db;
 
-		if($config['cleantalk_antispam_guests']){
+		if(empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
+
+                $moderate = false;
+                if($config['cleantalk_antispam_guests'] && $user->data['is_registered'] == 0) {
+                    $moderate = true;
+                } else if($config['cleantalk_antispam_nusers'] && $user->data['is_registered'] == 1) {
+                    $sql = 'SELECT g.group_name FROM ' . USER_GROUP_TABLE
+                        . ' ug JOIN ' . GROUPS_TABLE
+                        . ' g ON (ug.group_id = g.group_id) WHERE ug.user_id = '
+                        . (int) $user->data['user_id'] . ' AND '
+                        . 'g.group_name = \'NEWLY_REGISTERED\'';
+                    $result = $db->sql_query($sql);
+                    $row = $db->sql_fetchrow($result);
+                    if ($row !== false && isset($row['group_name']))
+                    {
+                        $moderate = true;
+                    }
+                    $db->sql_freeresult($result);
+                }
+
+		if($moderate){
             		$data = $event->get_data();
                         if(
                                 array_key_exists('post_data', $data) &&
@@ -102,6 +126,8 @@ class main_listener implements EventSubscriberInterface
 	public function check_newuser($event)
 	{
 		global $config;
+
+		if(empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
 
 		if($config['cleantalk_antispam_regs']){
             		$data = $event->get_data();
