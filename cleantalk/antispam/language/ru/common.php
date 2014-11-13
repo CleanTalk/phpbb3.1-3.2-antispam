@@ -11,7 +11,7 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
-	'ACP_CLEANTALK_TITLE'			=> 'CleanTalk',
+	'ACP_CLEANTALK_TITLE'			=> 'Антиспам от CleanTalk',
 
 	'ACP_CLEANTALK_SETTINGS'		=> 'Настройки защиты от спама',
 	'ACP_CLEANTALK_SETTINGS_SAVED'		=> 'Настройки защиты от спама сохранены!',

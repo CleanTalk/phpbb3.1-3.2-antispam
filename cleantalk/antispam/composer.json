@@ -1,10 +1,10 @@
 {
 	"name": "cleantalk/antispam",
 	"type": "phpbb-extension",
-	"description": "CleanTalk. Spam protection.",
+	"description": "Antispam by CleanTalk",
 	"homepage": "https://cleantalk.org",
 	"version": "4.2",
-	"time": "2014-11-07",
+	"time": "2014-11-13",
 	"license": "GPL-2.0",
 	"authors": [{
 			"name": "Alexey Znaev",
@@ -19,7 +19,7 @@
 		"phpbb/epv": "dev-master"
 	},
 	"extra": {
-		"display-name": "CleanTalk. Spam protection.",
+		"display-name": "Antispam by CleanTalk",
 		"soft-require": {
 			"phpbb/phpbb": ">=3.1.0-RC2,<3.2.*@dev"
 		}
