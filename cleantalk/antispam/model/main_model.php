@@ -47,7 +47,7 @@ class main_model
 
 	$ct_request = new \CleantalkRequest();
 	$ct_request->auth_key = $config['cleantalk_antispam_apikey'];
-	$ct_request->agent = 'ct-phpbb-' . preg_replace("/(\d)\.(\w+)/", "$1$2", $composer_json->version);
+	$ct_request->agent = 'phpbb3-' . preg_replace("/(\d)\.(\w+)/", "$1$2", $composer_json->version);
 	$ct_request->js_on = $checkjs;
 	$ct_request->sender_info = $sender_info;
 	$ct_request->sender_email = array_key_exists('sender_email', $spam_check) ? $spam_check['sender_email'] : '';
