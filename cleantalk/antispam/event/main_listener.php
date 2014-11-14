@@ -14,12 +14,12 @@ class main_listener implements EventSubscriberInterface
 {
 	static public function getSubscribedEvents()
 	{
-            $a = 1;
 		return array(
 			'core.user_setup'				=> 'load_language_on_setup',
 			'core.page_header_after'            		=> 'add_js_to_head',
 			'core.add_form_key'				=> 'form_set_time',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
+			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                     => 'check_newuser',
 		);
 	}
@@ -29,6 +29,9 @@ class main_listener implements EventSubscriberInterface
 
 	/* @var \phpbb\template\template */
 	protected $template;
+
+	/* @var array */
+	private $ct_comment_result;
 
 	/**
 	* Constructor
@@ -81,6 +84,8 @@ class main_listener implements EventSubscriberInterface
 		if (empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
 
                 $moderate = false;
+		$this->ct_comment_result = null;
+
                 if ($config['cleantalk_antispam_guests'] && $user->data['is_registered'] == 0) {
                     $moderate = true;
                 } else if ($config['cleantalk_antispam_nusers'] && $user->data['is_registered'] == 1) {
@@ -115,11 +120,37 @@ class main_listener implements EventSubscriberInterface
 
                                 $result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
 
-                                if ($result['errno'] === 0 && $result['allow'] === 0) { // Spammer exactly.
-                                    array_push($data['error'], $result['ct_result_comment']);
-                                    $event->set_data($data);
+                                if ($result['errno'] == 0 && $result['allow'] == 0) { // Spammer exactly.
+				    if ($result['stop_queue'] == 1)
+				    {
+                                	// Output error
+					array_push($data['error'], $result['ct_result_comment']);
+                                	$event->set_data($data);
+				    }
+				    else
+				    {
+                                	// No error output but send comment to manual approvement
+					$this->ct_comment_result = $result;
+				    }
                                 }
                         }
+		}
+	}
+
+        public function change_comment_approve($event)
+	{
+		global $config, $user, $db;
+
+		if (empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
+
+		// 'stop_queue' = 0 means to manual approvement
+		if (isset($this->ct_comment_result) && is_array($this->ct_comment_result) && $this->ct_comment_result['stop_queue'] == 0)
+		{
+		    $data = $event->get_data();
+                    $data['data']['post_visibility'] = ITEM_UNAPPROVED;
+                    $data['data']['topic_visibility'] = ITEM_UNAPPROVED;
+                    $data['data']['force_approved_state'] = 0;
+                    $event->set_data($data);
 		}
 	}
 
@@ -145,7 +176,7 @@ class main_listener implements EventSubscriberInterface
                                 if (array_key_exists('username', $data['user_row'])) $spam_check['sender_nickname'] = $data['user_row']['username'];
                                 if (array_key_exists('user_timezone', $data['user_row'])) $spam_check['timezone'] = $data['user_row']['user_timezone'];
                                 $result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
-                        	if ($result['errno'] === 0 && $result['allow'] === 0) { // Spammer exactly.
+                        	if ($result['errno'] == 0 && $result['allow'] == 0) { // Spammer exactly.
 ?>
 <html>
           <head>
