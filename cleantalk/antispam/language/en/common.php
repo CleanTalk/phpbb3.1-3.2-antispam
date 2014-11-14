@@ -29,4 +29,6 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_APIKEY_DESCR1'		=> 'To get an access key please register at site ',
 	'ACP_CLEANTALK_APIKEY_DESCR2'		=> '',
 
+	'MAIL_CLEANTALK_ERROR'			=> 'Error while connecting to CleanTalk service',
+	'LOG_CLEANTALK_ERROR'			=> '<strong>Error while connecting to CleanTalk service</strong><br />%s',
 ));

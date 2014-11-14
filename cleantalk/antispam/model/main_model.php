@@ -2,22 +2,26 @@
 
 namespace cleantalk\antispam\model;
 
-class main_model {
-
+class main_model
+{
     const JS_FIELD_NAME = 'ct_checkjs';
 
-    static public function checkSpam($spam_check) {
-	global $config, $user, $request, $phpbb_root_path;
+    static public function check_spam( $spam_check )
+    {
+	global $config, $user, $request, $phpbb_root_path, $phpEx, $phpbb_log;
 	require_once 'cleantalk.class.php';
 
 	$ct_checkjs_val = request_var(self::JS_FIELD_NAME, '', false, true);
-	if ($ct_checkjs_val === '') {
+	if ($ct_checkjs_val === '')
+	{
 	    $checkjs = NULL;
 	}
-	elseif ($ct_checkjs_val == self::getCheckJSValue()) {
+	elseif ($ct_checkjs_val == self::get_check_js_value())
+	{
 	    $checkjs = 1;
 	}
-	else {
+	else
+	{
 	    $checkjs = 0;
 	}
 
@@ -51,7 +55,8 @@ class main_model {
 	$ct_request->sender_ip = $ct->ct_session_ip($user->data['session_ip']);
 	$ct_request->submit_time = (!empty($user->data['ct_submit_time'])) ? time() - $user->data['ct_submit_time'] : null;
 
-	switch ($spam_check['type']) {
+	switch ($spam_check['type'])
+	{
 		case 'comment':
 		      $ct_request->message = (array_key_exists('message_title', $spam_check) ? $spam_check['message_title'] : '' ).
 			 " \n\n" .
@@ -66,40 +71,73 @@ class main_model {
 		      $ct_result = $ct->isAllowUser($ct_request);
 		      break;
 
-	  }
-	  $ret_val = array();
-          $ret_val['errno'] = 0;
-          $ret_val['allow'] = 1;
-	  $ret_val['ct_request_id'] = $ct_result->id;
+	}
+	$ret_val = array();
+        $ret_val['errno'] = 0;
+        $ret_val['allow'] = 1;
+	$ret_val['ct_request_id'] = $ct_result->id;
 
-	  if ($ct->server_change) {
+	if ($ct->server_change)
+	{
 		$config->set('cleantalk_antispam_work_url',       $ct->work_url);
 		$config->set('cleantalk_antispam_server_url',     $ct->server_url);
 		$config->set('cleantalk_antispam_server_ttl',     $ct->server_ttl);
 		$config->set('cleantalk_antispam_server_changed', time());
-	  }
+	 }
 
 	// First check errstr flag.
 	if (!empty($ct_result->errstr)
 	      || (!empty($ct_result->inactive) && $ct_result->inactive == 1)
-	) {
+	)
+	{
 	    // Cleantalk error so we go default way (no action at all).
 	    $ret_val['errno'] = 1;
 	    if (!empty($ct_result->errstr)) {
-	      $ret_val['errstr'] = self::filterResponse($ct_result->errstr);
+	      $ret_val['errstr'] = self::filter_response($ct_result->errstr);
             }
             else {
-	      $ret_val['errstr'] = self::filterResponse($ct_result->comment);
+	      $ret_val['errstr'] = self::filter_response($ct_result->comment);
 	    }
-	    // TODO - слать письмо админу об ошибке раз в 15 минут
+
+	    add_log('admin', 'LOG_CLEANTALK_ERROR', $ret_val['errstr']);
+
+	    // Email to admin once per 15 min
+	    if (time() - 900 > $config['cleantalk_antispam_error_time'])
+	    {
+		$config->set('cleantalk_antispam_error_time', time());
+
+		if (!function_exists('phpbb_mail'))
+	        {
+	        	include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx);
+	        }
+
+                $hr_url = str_replace(array('http://', 'https://'), array('', ''), generate_board_url());
+	        $err_title = $hr_url. ' - ' . $user->lang['MAIL_CLEANTALK_ERROR'];
+	        $err_message = $hr_url. ' - ' . $user->lang['MAIL_CLEANTALK_ERROR'] . " :\n" . $ret_val['errstr'];
+
+	        $headers = array();
+	        $headers[] = 'Reply-To: ' . $config['board_email'];
+	        $headers[] = 'Return-Path: <' . $config['board_email'] . '>';
+	        $headers[] = 'Sender: <' . $config['board_email'] . '>';
+	        $headers[] = 'MIME-Version: 1.0';
+	        $headers[] = 'X-Mailer: phpBB3';
+	        $headers[] = 'X-MimeOLE: phpBB3';
+	        $headers[] = 'X-phpBB-Origin: phpbb://' . $hr_url;
+	        $headers[] = 'Content-Type: text/plain; charset=UTF-8'; // format=flowed
+	        $headers[] = 'Content-Transfer-Encoding: 8bit'; // 7bit
+
+	        $dummy = '';
+	        phpbb_mail($config['board_email'], $err_title, $err_message, $headers, "\n", $dummy);
+	    }
 
 	    return $ret_val;
 	}
 
-	if ($ct_result->allow == 0) {
+	if ($ct_result->allow == 0)
+	{
 	    // Spammer.
 	    $ret_val['allow'] = 0;
-	    $ret_val['ct_result_comment'] = self::filterResponse($ct_result->comment);
+	    $ret_val['ct_result_comment'] = self::filter_response($ct_result->comment);
 
 	    // Check stop_queue flag.
 	    if ($spam_check['type'] == 'comment' && $ct_result->stop_queue == 0) {
@@ -113,17 +151,21 @@ class main_model {
 	return $ret_val;
     }
 
-    static public function filterResponse($ct_response) {
-	if (preg_match('//u', $ct_response)) {
+    static public function filter_response( $ct_response )
+    {
+	if (preg_match('//u', $ct_response))
+	{
 	    $err_str = preg_replace('/\*\*\*/iu', '', $ct_response);
 	}
-	else {
+	else
+	{
 	    $err_str = preg_replace('/\*\*\*/i', '', $ct_response);
 	}
 	return $err_str;
     }
 
-    static public function setSubmitTime() {
+    static public function set_submit_time()
+    {
 	global $db, $user;
 
 	$sql = "UPDATE " . SESSIONS_TABLE . "
@@ -132,17 +174,19 @@ class main_model {
 	$db->sql_query($sql);
     }
 
-    static public function getCheckJSValue() {
+    static public function get_check_js_value()
+    {
 	global $user;
 	return md5($user->data['user_form_salt'] . $user->session_id);
     }
 
-    static public function checkJSScript() {
-	    $ct_check_def = '0';
-	    if (!isset($_COOKIE[self::JS_FIELD_NAME])) setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
-	    $ct_check_value = self::GetCheckJSValue();
-	    $js_template = '<script type="text/javascript">function ctSetCookie(c_name,value){document.cookie=c_name+"="+escape(value)+"; path=/";} setTimeout("ctSetCookie(\"%s\", \"%s\");",1000);</script>';
-	    $ct_addon_body = sprintf($js_template, self::JS_FIELD_NAME, $ct_check_value);
-	    return $ct_addon_body;
+    static public function get_check_js_script()
+    {
+	$ct_check_def = '0';
+	if (!isset($_COOKIE[self::JS_FIELD_NAME])) setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
+	$ct_check_value = self::get_check_js_value();
+	$js_template = '<script type="text/javascript">function ctSetCookie(c_name,value){document.cookie=c_name+"="+escape(value)+"; path=/";} setTimeout("ctSetCookie(\"%s\", \"%s\");",1000);</script>';
+	$ct_addon_body = sprintf($js_template, self::JS_FIELD_NAME, $ct_check_value);
+	return $ct_addon_body;
     }
 }

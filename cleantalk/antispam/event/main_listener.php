@@ -56,21 +56,21 @@ class main_listener implements EventSubscriberInterface
 	{
 		global $config;
 
-		if(empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
+		if (empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
 
-                $this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::checkJSScript());
+                $this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::get_check_js_script());
 	}
 
 	public function form_set_time($event)
 	{
 		global $config;
 
-		if(empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
+		if (empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
 
 		$data = $event->get_data();
 		$form_id = $data['form_name'];
-		if($config['cleantalk_antispam_guests'] && $form_id == 'posting' || $config['cleantalk_antispam_regs'] && $form_id == 'ucp_register') {
-		    \cleantalk\antispam\model\main_model::setSubmitTime();
+		if ($config['cleantalk_antispam_guests'] && $form_id == 'posting' || $config['cleantalk_antispam_regs'] && $form_id == 'ucp_register') {
+		    \cleantalk\antispam\model\main_model::set_submit_time();
 		}
 	}
 
@@ -78,12 +78,12 @@ class main_listener implements EventSubscriberInterface
 	{
 		global $config, $user, $db;
 
-		if(empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
+		if (empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
 
                 $moderate = false;
-                if($config['cleantalk_antispam_guests'] && $user->data['is_registered'] == 0) {
+                if ($config['cleantalk_antispam_guests'] && $user->data['is_registered'] == 0) {
                     $moderate = true;
-                } else if($config['cleantalk_antispam_nusers'] && $user->data['is_registered'] == 1) {
+                } else if ($config['cleantalk_antispam_nusers'] && $user->data['is_registered'] == 1) {
                     $sql = 'SELECT g.group_name FROM ' . USER_GROUP_TABLE
                         . ' ug JOIN ' . GROUPS_TABLE
                         . ' g ON (ug.group_id = g.group_id) WHERE ug.user_id = '
@@ -98,9 +98,9 @@ class main_listener implements EventSubscriberInterface
                     $db->sql_freeresult($result);
                 }
 
-		if($moderate){
+		if ($moderate){
             		$data = $event->get_data();
-                        if(
+                        if (
                                 array_key_exists('post_data', $data) &&
                                 is_array($data['post_data']) &&
                                 array_key_exists('username', $data['post_data']) &&
@@ -108,12 +108,12 @@ class main_listener implements EventSubscriberInterface
                         ){
                                 $spam_check = array();
                                 $spam_check['type'] = 'comment';
-                                if(array_key_exists('user_email', $data['post_data'])) $spam_check['sender_email'] = $data['post_data']['user_email'];
-                                if(array_key_exists('username', $data['post_data'])) $spam_check['sender_nickname'] = $data['post_data']['username'];
-                                if(array_key_exists('post_subject', $data['post_data'])) $spam_check['message_title'] = $data['post_data']['post_subject'];
+                                if (array_key_exists('user_email', $data['post_data'])) $spam_check['sender_email'] = $data['post_data']['user_email'];
+                                if (array_key_exists('username', $data['post_data'])) $spam_check['sender_nickname'] = $data['post_data']['username'];
+                                if (array_key_exists('post_subject', $data['post_data'])) $spam_check['message_title'] = $data['post_data']['post_subject'];
 				$spam_check['message_body'] = utf8_normalize_nfc(request_var('message', '', true));
 
-                                $result = \cleantalk\antispam\model\main_model::checkSpam($spam_check);
+                                $result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
 
                                 if ($result['errno'] === 0 && $result['allow'] === 0) { // Spammer exactly.
                                     array_push($data['error'], $result['ct_result_comment']);
@@ -127,22 +127,24 @@ class main_listener implements EventSubscriberInterface
 	{
 		global $config;
 
-		if(empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
+		if (empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
 
-		if($config['cleantalk_antispam_regs']){
+		if ($config['cleantalk_antispam_regs'])
+		{
             		$data = $event->get_data();
-                        if(
+                        if (
                                 array_key_exists('user_row', $data) &&
                                 is_array($data['user_row']) &&
                                 array_key_exists('user_new', $data['user_row']) &&
                                 $data['user_row']['user_new'] == 1
-                        ){
+                        )
+			{
                                 $spam_check = array();
 				$spam_check['type'] = 'register';
-                                if(array_key_exists('user_email', $data['user_row'])) $spam_check['sender_email'] = $data['user_row']['user_email'];
-                                if(array_key_exists('username', $data['user_row'])) $spam_check['sender_nickname'] = $data['user_row']['username'];
-                                if(array_key_exists('user_timezone', $data['user_row'])) $spam_check['timezone'] = $data['user_row']['user_timezone'];
-                                $result = \cleantalk\antispam\model\main_model::checkSpam($spam_check);
+                                if (array_key_exists('user_email', $data['user_row'])) $spam_check['sender_email'] = $data['user_row']['user_email'];
+                                if (array_key_exists('username', $data['user_row'])) $spam_check['sender_nickname'] = $data['user_row']['username'];
+                                if (array_key_exists('user_timezone', $data['user_row'])) $spam_check['timezone'] = $data['user_row']['user_timezone'];
+                                $result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
                         	if ($result['errno'] === 0 && $result['allow'] === 0) { // Spammer exactly.
 ?>
 <html>
