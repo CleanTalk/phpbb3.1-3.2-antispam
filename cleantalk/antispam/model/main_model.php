@@ -25,7 +25,7 @@ class main_model
 		global $config, $user, $request, $phpbb_root_path, $phpEx, $phpbb_log;
 		require_once 'cleantalk.class.php';
 
-		$ct_checkjs_val = request_var(self::JS_FIELD_NAME, '', false, true);
+		$ct_checkjs_val = $request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
 		if ($ct_checkjs_val === '')
 		{
 			$checkjs = NULL;
@@ -46,8 +46,8 @@ class main_model
 		$ct->server_ttl     = $config['cleantalk_antispam_server_ttl'];
 		$ct->server_changed = $config['cleantalk_antispam_server_changed'];
 
-		$user_agent = htmlspecialchars((string)$request->server('HTTP_USER_AGENT'));
-		$refferrer = htmlspecialchars((string)$request->server('HTTP_REFERER'));
+		$user_agent = $request->server('HTTP_USER_AGENT');
+		$refferrer = $request->server('HTTP_REFERER');
 		$sender_info = json_encode(
 			array(
 			'cms_lang' => $config['default_lang'],
@@ -111,7 +111,7 @@ class main_model
 				$ret_val['errstr'] = self::filter_response($ct_result->comment);
 			}
 
-			add_log('admin', 'LOG_CLEANTALK_ERROR', $ret_val['errstr']);
+			$phpbb_log->add('admin', ANONYMOUS, '127.0.0.1', 'LOG_CLEANTALK_ERROR', time(), array($ret_val['errstr']));
 
 			// Email to admin once per 15 min
 			if (time() - 900 > $config['cleantalk_antispam_error_time'])

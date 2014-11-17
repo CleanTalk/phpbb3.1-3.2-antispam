@@ -92,7 +92,8 @@ class main_listener implements EventSubscriberInterface
 
 		$data = $event->get_data();
 		$form_id = $data['form_name'];
-		if ($config['cleantalk_antispam_guests'] && $form_id == 'posting' || $config['cleantalk_antispam_regs'] && $form_id == 'ucp_register') {
+		if ($config['cleantalk_antispam_guests'] && $form_id == 'posting' || $config['cleantalk_antispam_regs'] && $form_id == 'ucp_register')
+		{
 			\cleantalk\antispam\model\main_model::set_submit_time();
 		}
 	}
@@ -104,16 +105,19 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function check_comment($event)
 	{
-		global $config, $user, $db;
+		global $config, $user, $db, $request;
 
 		if (empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
 
 		$moderate = false;
 		$this->ct_comment_result = null;
 
-		if ($config['cleantalk_antispam_guests'] && $user->data['is_registered'] == 0) {
+		if ($config['cleantalk_antispam_guests'] && $user->data['is_registered'] == 0)
+		{
 			$moderate = true;
-		} else if ($config['cleantalk_antispam_nusers'] && $user->data['is_registered'] == 1) {
+		}
+		else if ($config['cleantalk_antispam_nusers'] && $user->data['is_registered'] == 1)
+		{
 			$sql = 'SELECT g.group_name FROM ' . USER_GROUP_TABLE
 			. ' ug JOIN ' . GROUPS_TABLE
 			. ' g ON (ug.group_id = g.group_id) WHERE ug.user_id = '
@@ -128,7 +132,8 @@ class main_listener implements EventSubscriberInterface
 			$db->sql_freeresult($result);
 		}
 
-		if ($moderate){
+		if ($moderate)
+		{
 			$data = $event->get_data();
 			if (
 				array_key_exists('post_data', $data) &&
@@ -142,9 +147,10 @@ class main_listener implements EventSubscriberInterface
 				if (array_key_exists('user_email', $data['post_data'])) $spam_check['sender_email'] = $data['post_data']['user_email'];
 				if (array_key_exists('username', $data['post_data'])) $spam_check['sender_nickname'] = $data['post_data']['username'];
 				if (array_key_exists('post_subject', $data['post_data'])) $spam_check['message_title'] = $data['post_data']['post_subject'];
-				$spam_check['message_body'] = utf8_normalize_nfc(request_var('message', '', true));
+				$spam_check['message_body'] = utf8_normalize_nfc($request->variable('message', '', true));
 				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
-				if ($result['errno'] == 0 && $result['allow'] == 0) { // Spammer exactly.
+				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
+				{ 
 					if ($result['stop_queue'] == 1)
 					{
 						// Output error
@@ -210,7 +216,8 @@ class main_listener implements EventSubscriberInterface
 				if (array_key_exists('username', $data['user_row'])) $spam_check['sender_nickname'] = $data['user_row']['username'];
 				if (array_key_exists('user_timezone', $data['user_row'])) $spam_check['timezone'] = $data['user_row']['user_timezone'];
 				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
-				if ($result['errno'] == 0 && $result['allow'] == 0) { // Spammer exactly.
+				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
+				{
 					trigger_error($result['ct_result_comment']);
 				}
 			}
