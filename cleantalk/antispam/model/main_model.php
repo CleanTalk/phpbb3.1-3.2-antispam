@@ -66,7 +66,7 @@ class main_model
 		$ct_request->sender_info = $sender_info;
 		$ct_request->sender_email = array_key_exists('sender_email', $spam_check) ? $spam_check['sender_email'] : '';
 		$ct_request->sender_nickname = array_key_exists('sender_nickname', $spam_check) ? $spam_check['sender_nickname'] : '';
-		$ct_request->sender_ip = $ct->ct_session_ip($user->data['session_ip']);
+		$ct_request->sender_ip = $user->ip;
 		$ct_request->submit_time = (!empty($user->data['ct_submit_time'])) ? time() - $user->data['ct_submit_time'] : null;
 
 		switch ($spam_check['type'])
