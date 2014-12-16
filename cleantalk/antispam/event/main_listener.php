@@ -206,14 +206,14 @@ class main_listener implements EventSubscriberInterface
 			if (
 				array_key_exists('user_row', $data) &&
 				is_array($data['user_row']) &&
-				array_key_exists('user_new', $data['user_row']) &&
-				$data['user_row']['user_new'] == 1
+				array_key_exists('username', $data['user_row']) &&
+				array_key_exists('user_email', $data['user_row'])
 			)
 			{
 				$spam_check = array();
 				$spam_check['type'] = 'register';
-				if (array_key_exists('user_email', $data['user_row'])) $spam_check['sender_email'] = $data['user_row']['user_email'];
-				if (array_key_exists('username', $data['user_row'])) $spam_check['sender_nickname'] = $data['user_row']['username'];
+				$spam_check['sender_email'] = $data['user_row']['user_email'];
+				$spam_check['sender_nickname'] = $data['user_row']['username'];
 				if (array_key_exists('user_timezone', $data['user_row'])) $spam_check['timezone'] = $data['user_row']['user_timezone'];
 				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
