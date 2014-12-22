@@ -17,6 +17,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class main_listener implements EventSubscriberInterface
 {
+        const MIN_APPROVED_POSTS = 5;
+
 	static public function getSubscribedEvents()
 	{
 		return array(
@@ -105,7 +107,7 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function check_comment($event)
 	{
-		global $config, $user, $db, $request;
+		global $config, $user, $db, $request, $auth;
 
 		if (empty($config['cleantalk_antispam_apikey']) || $config['cleantalk_antispam_apikey'] == 'enter key') return;
 
@@ -116,20 +118,37 @@ class main_listener implements EventSubscriberInterface
 		{
 			$moderate = true;
 		}
-		else if ($config['cleantalk_antispam_nusers'] && $user->data['is_registered'] == 1)
+		else if ($config['cleantalk_antispam_nusers'] && $user->data['is_registered'] == 1 && !$auth->acl_gets('a_', 'm_') && !$auth->acl_getf_global('m_'))
 		{
-			$sql = 'SELECT g.group_name FROM ' . USER_GROUP_TABLE
-			. ' ug JOIN ' . GROUPS_TABLE
-			. ' g ON (ug.group_id = g.group_id) WHERE ug.user_id = '
-			. (int) $user->data['user_id'] . ' AND '
-			. 'g.group_name = \'NEWLY_REGISTERED\'';
-			$result = $db->sql_query($sql);
-			$row = $db->sql_fetchrow($result);
-			if ($row !== false && isset($row['group_name']))
-			{
+			if ($config['new_member_post_limit']) // NEWLY_REGISTERED group is enabled
+                        {
+                            $sql = 'SELECT g.group_name FROM ' . USER_GROUP_TABLE
+                            . ' ug JOIN ' . GROUPS_TABLE
+                            . ' g ON (ug.group_id = g.group_id) WHERE ug.user_id = '
+                            . (int) $user->data['user_id'] . ' AND '
+                            . 'g.group_name = \'NEWLY_REGISTERED\'';
+                            $result = $db->sql_query($sql);
+                            $row = $db->sql_fetchrow($result);
+                            if ($row !== false && isset($row['group_name']))
+                            {
 				$moderate = true;
-			}
-			$db->sql_freeresult($result);
+                            }
+                            $db->sql_freeresult($result);
+                        }
+                        else // NEWLY_REGISTERED group is disabled
+                        {
+                            $sql = 'SELECT count(*) AS c FROM ' . POSTS_TABLE
+                            . ' WHERE poster_id = '
+                            . (int) $user->data['user_id'] . ' AND '
+                            . 'post_visibility = ' . ITEM_APPROVED;
+                            $result = $db->sql_query($sql);
+                            $row = $db->sql_fetchrow($result);
+                            if ($row !== false && isset($row['c']) && (int) $row['c'] <= self::MIN_APPROVED_POSTS)
+                            {
+				$moderate = true;
+                            }
+                            $db->sql_freeresult($result);
+                        }
 		}
 
 		if ($moderate)
