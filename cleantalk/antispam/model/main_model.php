@@ -30,7 +30,8 @@ class main_model
 		{
 			$checkjs = NULL;
 		}
-		elseif ($ct_checkjs_val == self::get_check_js_value())
+		//elseif ($ct_checkjs_val == self::get_check_js_value())
+		elseif (in_array($ct_checkjs_val, self::get_check_js_array()))
 		{
 			$checkjs = 1;
 		}
@@ -199,12 +200,27 @@ class main_model
 	/**
 	* Gets session-unique hash for JS-enabled checking
 	*
-	* @return string			Session-unique hash
+	* @return string			Hash from access key and date
 	*/
 	static public function get_check_js_value()
 	{
-		global $user;
-		return md5($user->data['user_form_salt'] . $user->session_id);
+		global $config;
+		return md5($config['cleantalk_antispam_apikey'] . date("Ymd"));
+	}
+	
+	/** Return Array of JS-keys for checking
+	*
+	* @return Array
+	*/
+	static public function get_check_js_array()
+	{
+		global $config;
+		$result=Array();
+		for($i=-5;$i<=1;$i++)
+		{
+			$result[]=md5($config['cleantalk_antispam_apikey'] . date("Ymd",time()+86400*$i));
+		}
+		return $result;
 	}
 
 	/**
