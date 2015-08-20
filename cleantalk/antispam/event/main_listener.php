@@ -26,6 +26,7 @@ class main_listener implements EventSubscriberInterface
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                     => 'check_newuser',
+			'core.common'                     => 'check_users_spam',
 		);
 	}
 
@@ -222,5 +223,101 @@ class main_listener implements EventSubscriberInterface
 				}
 			}
 		}
+	}
+	
+	public function check_users_spam($event)
+	{
+		if(isset($_GET['check_users_spam']))
+		{
+			global $db, $config;
+			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where user_password<>""';
+			$result = $db->sql_query($sql);
+			$users=Array();
+			$users[0]=Array();
+			$data=Array();
+			$data[0]=Array();
+			$cnt=0;
+			while($row = $db->sql_fetchrow($result))
+			{
+				$users[$cnt][] = Array('name' => $row[username],
+									'id' => $row[user_id],
+									'email' => $row[user_email],
+									'ip' => $row[user_ip],
+									'joined' => $row[user_regdate],
+									'visit' => $row[user_lastvisit],
+							);
+				$data[$cnt][]=$row[user_email];
+				$data[$cnt][]=$row[user_ip];
+				if(sizeof($users[$cnt])>900)
+				{
+					$cnt++;
+					$users[$cnt]=Array();
+					$data[$cnt]=Array();
+				}
+			}
+			$html='<center><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
+	<thead>
+	<tr>
+		<th>Check</th>
+		<th>Username</th>
+		<th>Joined</th>
+		<th>E-mail</th>
+		<th>IP</th>
+		<th>Last visit</th>
+	</tr>
+	</thead>
+	<tbody>';
+			$error="";
+			for($i=0;$i<sizeof($users);$i++)
+			{
+				$send=implode(',',$data[$i]);
+				$request="data=$send";
+				$opts = array(
+				    'http'=>array(
+				        'method'=>"POST",
+				        'content'=>$request,
+				    )
+				);
+				$context = stream_context_create($opts);
+				$result = @file_get_contents("https://api.cleantalk.org/?method_name=spam_check&auth_key=".$config['cleantalk_antispam_apikey'], 0, $context);
+				$result=json_decode($result);
+				if(isset($result->error_message))
+				{
+					$error=$result->error_message;
+				}
+				else
+				{
+					for($j=0;$j<sizeof($users[$i]);$j++)
+					{
+						$uip=$users[$i][$j]['ip'];
+						if(empty($uip))continue;
+						$uim=$users[$i][$j]['email'];
+						if(empty($uim))continue;
+						if($result->data->$uip->appears==1||$result->data->$uim->appears==1)
+						{
+							$html.="<tr>
+			<td><input type='checkbox' /></td>
+			<td>".$users[$i][$j]['name']."</td>
+			<td>".date("Y-m-d H:i:s",$users[$i][$j]['joined'])."</td>
+			<td>".$users[$i][$j]['email']."</td>
+			<td>".$users[$i][$j]['ip']."</td>
+			<td>".date("Y-m-d H:i:s",$users[$i][$j]['visit'])."</td>
+		</tr>";
+						}
+					}
+				}
+				
+			}
+			$html.="</tbody></table><br /><button id='delete_selected'>Delete checked</button> <button id='delete_all'>Delete all</button></center>";
+			if($error!='')
+			{
+				$this->template->assign_var('CT_TABLE_USERS_SPAM', $error);
+			}
+			else
+			{
+				$this->template->assign_var('CT_TABLE_USERS_SPAM', $html);
+			}
+		}
+		
 	}
 }
