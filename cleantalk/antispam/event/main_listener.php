@@ -227,9 +227,19 @@ class main_listener implements EventSubscriberInterface
 	
 	public function check_users_spam($event)
 	{
+		global $db, $config, $request;
+		$ct_del_user=$request->variable('ct_del_user',Array(), false, \phpbb\request\request_interface::POST);
+		$ct_delete_all=$request->variable('ct_delete_all', false, false, \phpbb\request\request_interface::POST);
+		if(sizeof($ct_del_user)>0 || $ct_delete_all!='')
+		{
+			//print_r($_POST);
+			//print_r($ct_del_user);
+			//print $ct_delete_all;
+		}
 		if(isset($_GET['check_users_spam']))
 		{
-			global $db, $config;
+			$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=0';
+			$result = $db->sql_query($sql);
 			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where user_password<>""';
 			$result = $db->sql_query($sql);
 			$users=Array();
@@ -255,18 +265,7 @@ class main_listener implements EventSubscriberInterface
 					$data[$cnt]=Array();
 				}
 			}
-			$html='<center><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
-	<thead>
-	<tr>
-		<th>Check</th>
-		<th>Username</th>
-		<th>Joined</th>
-		<th>E-mail</th>
-		<th>IP</th>
-		<th>Last visit</th>
-	</tr>
-	</thead>
-	<tbody>';
+			
 			$error="";
 			for($i=0;$i<sizeof($users);$i++)
 			{
@@ -295,29 +294,58 @@ class main_listener implements EventSubscriberInterface
 						if(empty($uim))continue;
 						if($result->data->$uip->appears==1||$result->data->$uim->appears==1)
 						{
-							$html.="<tr>
-			<td><input type='checkbox' /></td>
-			<td>".$users[$i][$j]['name']."</td>
-			<td>".date("Y-m-d H:i:s",$users[$i][$j]['joined'])."</td>
-			<td>".$users[$i][$j]['email']."</td>
-			<td>".$users[$i][$j]['ip']."</td>
-			<td>".date("Y-m-d H:i:s",$users[$i][$j]['visit'])."</td>
-		</tr>";
+							$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=1 where user_id='.$users[$i][$j]['id'];
+							$result = $db->sql_query($sql);
 						}
 					}
 				}
 				
 			}
-			$html.="</tbody></table><br /><button id='delete_selected'>Delete checked</button> <button id='delete_all'>Delete all</button></center>";
+			
 			if($error!='')
 			{
 				$this->template->assign_var('CT_TABLE_USERS_SPAM', $error);
 			}
 			else
 			{
+				@header("Location: ".str_replace('&check_users_spam=1', '', str_replace('&check_users_spam=1', '', html_entity_decode($request->server('REQUEST_URI')))));
+			}
+		}
+		if(strpos(__FILE__, 'cleantalk')!==false)
+		{
+			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where ct_marked=1';
+			$result = $db->sql_query($sql);
+			$html='<form method="post"><center><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
+	<thead>
+	<tr>
+		<th>Check</th>
+		<th>Username</th>
+		<th>Joined</th>
+		<th>E-mail</th>
+		<th>IP</th>
+		<th>Last visit</th>
+	</tr>
+	</thead>
+	<tbody>';
+			$found=false;
+			while($row = $db->sql_fetchrow($result))
+			{
+				$found=true;
+				$html.="<tr>
+				<td><input type='checkbox' name=ct_del_user[".$row['user_id']."] value='1' /></td>
+				<td>".$row['username']."</td>
+				<td>".date("Y-m-d H:i:s",$row['user_regdate'])."</td>
+				<td>".$row['user_email']."</td>
+				<td>".$row['user_ip']."</td>
+				<td>".date("Y-m-d H:i:s",$row[user_lastvisit])."</td>
+				</tr>";
+				
+			}
+			$html.="</tbody></table><br /><input type=submit name='ct_delete_checked' value='Delete checked'> <input type=submit name='ct_delete_all' value='Delete all'></center></form>";
+			if($found)
+			{
 				$this->template->assign_var('CT_TABLE_USERS_SPAM', $html);
 			}
 		}
-		
 	}
 }
