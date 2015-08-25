@@ -227,14 +227,29 @@ class main_listener implements EventSubscriberInterface
 	
 	public function check_users_spam($event)
 	{
-		global $db, $config, $request;
-		$ct_del_user=$request->variable('ct_del_user',Array(), false, \phpbb\request\request_interface::POST);
-		$ct_delete_all=$request->variable('ct_delete_all', false, false, \phpbb\request\request_interface::POST);
-		if(sizeof($ct_del_user)>0 || $ct_delete_all!='')
+		global $db, $config, $request, $phpbb_root_path, $phpEx;
+		$ct_del_user=request_var('ct_del_user', Array(0));
+		$ct_del_all=$request->variable('ct_delete_all', '', false, \phpbb\request\request_interface::POST);
+		if (!function_exists('user_delete'))
 		{
-			//print_r($_POST);
-			//print_r($ct_del_user);
-			//print $ct_delete_all;
+			include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
+		}
+		if($ct_del_all!='')
+		{
+			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where ct_marked=1';
+			$result = $db->sql_query($sql);
+			while($row = $db->sql_fetchrow($result))
+			{
+				user_delete('retain', $row['user_id']);
+			}
+		}
+		if(sizeof($ct_del_user)>0)
+		{
+			foreach($ct_del_user as $key=>$value)
+			{
+			
+				user_delete('retain', $key);
+			}
 		}
 		if(isset($_GET['check_users_spam']))
 		{
@@ -270,11 +285,11 @@ class main_listener implements EventSubscriberInterface
 			for($i=0;$i<sizeof($users);$i++)
 			{
 				$send=implode(',',$data[$i]);
-				$request="data=$send";
+				$req="data=$send";
 				$opts = array(
 				    'http'=>array(
 				        'method'=>"POST",
-				        'content'=>$request,
+				        'content'=>$req,
 				    )
 				);
 				$context = stream_context_create($opts);
@@ -302,20 +317,24 @@ class main_listener implements EventSubscriberInterface
 				
 			}
 			
+			
+			
 			if($error!='')
 			{
+				
 				$this->template->assign_var('CT_TABLE_USERS_SPAM', $error);
 			}
 			else
 			{
 				@header("Location: ".str_replace('&check_users_spam=1', '', str_replace('&check_users_spam=1', '', html_entity_decode($request->server('REQUEST_URI')))));
+				
 			}
 		}
 		if(strpos(__FILE__, 'cleantalk')!==false)
 		{
 			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where ct_marked=1';
 			$result = $db->sql_query($sql);
-			$html='<form method="post"><center><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
+			$html='Done. All users tested via blacklists database, please see result bellow.<br /><br /><form method="post"><center><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
 	<thead>
 	<tr>
 		<th>Check</th>
