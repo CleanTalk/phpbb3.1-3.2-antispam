@@ -264,15 +264,15 @@ class main_listener implements EventSubscriberInterface
 			$cnt=0;
 			while($row = $db->sql_fetchrow($result))
 			{
-				$users[$cnt][] = Array('name' => $row[username],
-									'id' => $row[user_id],
-									'email' => $row[user_email],
-									'ip' => $row[user_ip],
-									'joined' => $row[user_regdate],
-									'visit' => $row[user_lastvisit],
+				$users[$cnt][] = Array('name' => $row['username'],
+									'id' => $row['user_id'],
+									'email' => $row['user_email'],
+									'ip' => $row['user_ip'],
+									'joined' => $row['user_regdate'],
+									'visit' => $row['user_lastvisit'],
 							);
-				$data[$cnt][]=$row[user_email];
-				$data[$cnt][]=$row[user_ip];
+				$data[$cnt][]=$row['user_email'];
+				$data[$cnt][]=$row['user_ip'];
 				if(sizeof($users[$cnt])>900)
 				{
 					$cnt++;
@@ -334,7 +334,8 @@ class main_listener implements EventSubscriberInterface
 		{
 			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where ct_marked=1';
 			$result = $db->sql_query($sql);
-			$html='Done. All users tested via blacklists database, please see result bellow.<br /><br /><form method="post"><center><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
+			//$html='Done. All users tested via blacklists database, please see result bellow.<br /><br />';
+			$html='<form method="post"><center><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
 	<thead>
 	<tr>
 		<th>Check</th>
