@@ -230,12 +230,12 @@ class main_listener implements EventSubscriberInterface
 		global $db, $config, $request, $phpbb_root_path, $phpEx;
 		$ct_del_user=request_var('ct_del_user', Array(0));
 		$ct_del_all=$request->variable('ct_delete_all', '', false, \phpbb\request\request_interface::POST);
-		if (!function_exists('user_delete'))
-		{
-			include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
-		}
 		if($ct_del_all!='')
 		{
+			if (!function_exists('user_delete'))
+			{
+				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
+			}
 			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where ct_marked=1';
 			$result = $db->sql_query($sql);
 			while($row = $db->sql_fetchrow($result))
@@ -245,9 +245,12 @@ class main_listener implements EventSubscriberInterface
 		}
 		if(sizeof($ct_del_user)>0)
 		{
+			if (!function_exists('user_delete'))
+			{
+				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
+			}
 			foreach($ct_del_user as $key=>$value)
 			{
-			
 				user_delete('retain', $key);
 			}
 		}
