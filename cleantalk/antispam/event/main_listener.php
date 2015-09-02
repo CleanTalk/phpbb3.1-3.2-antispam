@@ -324,7 +324,7 @@ class main_listener implements EventSubscriberInterface
 			
 			if($error!='')
 			{
-				
+				$error='<center><div style="border:2px solid red;color:red;font-size:16px;width:300px;padding:5px;"><b>'.$error.'</b></div></center>';
 				$this->template->assign_var('CT_TABLE_USERS_SPAM', $error);
 			}
 			else
@@ -341,7 +341,7 @@ class main_listener implements EventSubscriberInterface
 			$html='<form method="post"><center><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
 	<thead>
 	<tr>
-		<th>Check</th>
+		<th>Select</th>
 		<th>Username</th>
 		<th>Joined</th>
 		<th>E-mail</th>
@@ -360,11 +360,11 @@ class main_listener implements EventSubscriberInterface
 				<td>".date("Y-m-d H:i:s",$row['user_regdate'])."</td>
 				<td>".$row['user_email']."</td>
 				<td>".$row['user_ip']."</td>
-				<td>".date("Y-m-d H:i:s",$row[user_lastvisit])."</td>
+				<td>".date("Y-m-d H:i:s",$row['user_lastvisit'])."</td>
 				</tr>";
 				
 			}
-			$html.="</tbody></table><br /><input type=submit name='ct_delete_checked' value='Delete checked'> <input type=submit name='ct_delete_all' value='Delete all'></center></form>";
+			$html.="</tbody></table><br /><input type=submit name='ct_delete_checked' value='Delete selected'> <input type=submit name='ct_delete_all' value='Delete all'></center></form>";
 			if($found)
 			{
 				$this->template->assign_var('CT_TABLE_USERS_SPAM', $html);
