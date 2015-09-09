@@ -7,24 +7,24 @@
 		<dl>
 			<dt><label for="cleantalk_antispam_regs">{L_ACP_CLEANTALK_REGS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_REGS_DESCR}</span></dt>
 			<dd>
-			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="1" <!-- IF CLEANTALK_ANTISPAM_REGS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="0" <!-- IF not CLEANTALK_ANTISPAM_REGS -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="1" <!-- IF CLEANTALK_ANTISPAM_REGS || CLEANTALK_ANTISPAM_APIKEY == '' -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="0" <!-- IF not CLEANTALK_ANTISPAM_REGS && CLEANTALK_ANTISPAM_APIKEY != '' -->checked="checked"<!-- ENDIF --> /> {L_NO}
 			</dd>
 		</dl>
 
 		<dl>
 			<dt><label for="cleantalk_antispam_guests">{L_ACP_CLEANTALK_GUESTS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_GUESTS_DESCR}</span></dt>
 			<dd>
-			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="1" <!-- IF CLEANTALK_ANTISPAM_GUESTS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="0" <!-- IF not CLEANTALK_ANTISPAM_GUESTS -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="1" <!-- IF CLEANTALK_ANTISPAM_GUESTS || CLEANTALK_ANTISPAM_APIKEY == ''  -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="0" <!-- IF not CLEANTALK_ANTISPAM_GUESTS && CLEANTALK_ANTISPAM_APIKEY != '' -->checked="checked"<!-- ENDIF --> /> {L_NO}
 			</dd>
 		</dl>
 
 		<dl>
 			<dt><label for="cleantalk_antispam_nusers">{L_ACP_CLEANTALK_NUSERS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_NUSERS_DESCR}</span></dt>
 			<dd>
-			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="1" <!-- IF CLEANTALK_ANTISPAM_NUSERS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="0" <!-- IF not CLEANTALK_ANTISPAM_NUSERS -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="1" <!-- IF CLEANTALK_ANTISPAM_NUSERS || CLEANTALK_ANTISPAM_APIKEY == ''  -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="0" <!-- IF not CLEANTALK_ANTISPAM_NUSERS && CLEANTALK_ANTISPAM_APIKEY != ''  -->checked="checked"<!-- ENDIF --> /> {L_NO}
 			</dd>
 		</dl>
 
