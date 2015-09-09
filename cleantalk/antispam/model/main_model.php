@@ -204,8 +204,8 @@ class main_model
 	*/
 	static public function get_check_js_value()
 	{
-		global $user;
-		return md5($user->data['user_form_salt'] . $user->session_id);
+		global $config;
+		return md5($config['cleantalk_antispam_apikey'] . date("Ymd",time()));
 	}
 	
 	/** Return Array of JS-keys for checking
