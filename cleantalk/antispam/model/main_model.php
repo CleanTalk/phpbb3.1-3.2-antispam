@@ -41,6 +41,14 @@ class main_model
 		}
 
 		$ct = new \Cleantalk();
+		
+		$root_dir= realpath(dirname(__FILE__).'/../../../../');
+		
+		if(file_exists($root_dir."/cleantalk.csr"))
+		{
+			$ct->ssl_on = true;
+			$ct->ssl_path = $root_dir."/cleantalk.csr";
+		}
 
 		$ct->work_url       = $config['cleantalk_antispam_work_url'];
 		$ct->server_url     = $config['cleantalk_antispam_server_url'];
