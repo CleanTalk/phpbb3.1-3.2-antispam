@@ -338,7 +338,7 @@ class main_listener implements EventSubscriberInterface
 			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where ct_marked=1';
 			$result = $db->sql_query($sql);
 			//$html='Done. All users tested via blacklists database, please see result bellow.<br /><br />';
-			$html='<form method="post"><center><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
+			$html='<form method="post"><center>All posts of deleted users will be deleted, too.<br /><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
 	<thead>
 	<tr>
 		<th>Select</th>
@@ -364,7 +364,7 @@ class main_listener implements EventSubscriberInterface
 				</tr>";
 				
 			}
-			$html.="</tbody></table><br /><input type=submit name='ct_delete_checked' value='Delete selected'> <input type=submit name='ct_delete_all' value='Delete all'><br />All posts of deleted users will be deleted, too.</center></form>";
+			$html.="</tbody></table><br /><input type=submit name='ct_delete_checked' value='Delete selected'> <input type=submit name='ct_delete_all' value='Delete all'><br /></center></form>";
 			if($found)
 			{
 				$this->template->assign_var('CT_TABLE_USERS_SPAM', $html);
