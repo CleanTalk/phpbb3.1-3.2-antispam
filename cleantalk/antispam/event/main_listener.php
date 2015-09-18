@@ -240,7 +240,7 @@ class main_listener implements EventSubscriberInterface
 			$result = $db->sql_query($sql);
 			while($row = $db->sql_fetchrow($result))
 			{
-				user_delete('retain', $row['user_id']);
+				user_delete('remove', $row['user_id']);
 			}
 		}
 		if(sizeof($ct_del_user)>0)
@@ -358,13 +358,13 @@ class main_listener implements EventSubscriberInterface
 				<td><input type='checkbox' name=ct_del_user[".$row['user_id']."] value='1' /></td>
 				<td>".$row['username']."</td>
 				<td>".date("Y-m-d H:i:s",$row['user_regdate'])."</td>
-				<td>".$row['user_email']."</td>
-				<td>".$row['user_ip']."</td>
+				<td><a target='_blank' href='https://cleantalk.org/blacklists/".$row['user_email']."'>".$row['user_email']."</a></td>
+				<td><a target='_blank' href='https://cleantalk.org/blacklists/".$row['user_ip']."'>".$row['user_ip']."</a></td>
 				<td>".date("Y-m-d H:i:s",$row['user_lastvisit'])."</td>
 				</tr>";
 				
 			}
-			$html.="</tbody></table><br /><input type=submit name='ct_delete_checked' value='Delete selected'> <input type=submit name='ct_delete_all' value='Delete all'></center></form>";
+			$html.="</tbody></table><br /><input type=submit name='ct_delete_checked' value='Delete selected'> <input type=submit name='ct_delete_all' value='Delete all'><br />All posts of deleted users will be deleted, too.</center></form>";
 			if($found)
 			{
 				$this->template->assign_var('CT_TABLE_USERS_SPAM', $html);
