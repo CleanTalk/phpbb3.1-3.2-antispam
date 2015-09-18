@@ -44,10 +44,10 @@ class main_model
 		
 		$root_dir= realpath(dirname(__FILE__).'/../../../../');
 		
-		if(file_exists($root_dir."/cleantalk.csr"))
+		if(file_exists($root_dir."/cleantalk.pem"))
 		{
 			$ct->ssl_on = true;
-			$ct->ssl_path = $root_dir."/cleantalk.csr";
+			$ct->ssl_path = $root_dir."/cleantalk.pem";
 		}
 
 		$ct->work_url       = $config['cleantalk_antispam_work_url'];
