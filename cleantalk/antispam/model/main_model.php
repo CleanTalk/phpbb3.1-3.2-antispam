@@ -43,7 +43,6 @@ class main_model
 		$ct = new \Cleantalk();
 		
 		$root_dir= realpath(dirname(__FILE__).'/../../../../');
-		
 		if(file_exists($root_dir."/cleantalk.pem"))
 		{
 			$ct->ssl_on = true;
