@@ -228,6 +228,7 @@ class main_listener implements EventSubscriberInterface
 	public function check_users_spam($event)
 	{
 		global $db, $config, $request, $phpbb_root_path, $phpEx;
+		
 		$ct_del_user=request_var('ct_del_user', Array(0));
 		$ct_del_all=$request->variable('ct_delete_all', '', false, \phpbb\request\request_interface::POST);
 		if($ct_del_all!='')
@@ -236,7 +237,7 @@ class main_listener implements EventSubscriberInterface
 			{
 				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
-			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where ct_marked=1';
+			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where =1';
 			$result = $db->sql_query($sql);
 			while($row = $db->sql_fetchrow($result))
 			{
@@ -256,6 +257,17 @@ class main_listener implements EventSubscriberInterface
 		}
 		if(isset($_GET['check_users_spam']))
 		{
+			$sql = "SELECT table_name 
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE table_name =  '".USERS_TABLE."'
+AND column_name =  'ct_marked'";
+			$result = $db->sql_query($sql);
+			if($result->num_rows==0)
+			{
+				$sql = 'ALTER TABLE  ' . USERS_TABLE . ' ADD  `ct_marked` INT NOT NULL ';
+				$result = $db->sql_query($sql);
+			}
+		
 			$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=0';
 			$result = $db->sql_query($sql);
 			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where user_password<>""';
