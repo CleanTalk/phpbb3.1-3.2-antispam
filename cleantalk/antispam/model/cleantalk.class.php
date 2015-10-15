@@ -2,7 +2,7 @@
 /**
  * Cleantalk base class
  *
- * @version 2.0.1
+ * @version 2.1.0
  * @package Cleantalk
  * @subpackage Base
  * @author Cleantalk team (welcome@cleantalk.org)
@@ -295,6 +295,9 @@ class CleantalkRequest {
      * @var int
      */
     public $submit_time = null;
+    
+    public $x_forwarded_for = '';
+    public $x_real_ip = '';
 
     /**
      * Is enable Java Script,
@@ -665,8 +668,8 @@ class Cleantalk {
                 $result = @file_get_contents($url, false, $context);
             }
         }
-
-        if (!$result) {
+        
+        if (!$result || !cleantalk_is_JSON($result)) {
             $response = null;
             $response['errno'] = 1;
             if ($curl_error) {
@@ -715,11 +718,15 @@ class Cleantalk {
         	if(method_exists($request,'server'))
         	{
         		$si['remote_addr']=$request->server('REMOTE_ADDR');
+        		$msg->x_forwarded_for=$request->server('X_FORWARDED_FOR');
+        		$msg->x_real_ip=$request->server('X_REAL_IP');
         	}
         }
         else
         {
         	$si['remote_addr']=$_SERVER['REMOTE_ADDR'];
+        	$msg->x_forwarded_for=@$_SERVER['X_FORWARDED_FOR'];
+        	$msg->x_real_ip=@$_SERVER['X_REAL_IP'];
         }
         $msg->sender_info=json_encode($si);
         if (((isset($this->work_url) && $this->work_url !== '') && ($this->server_changed + $this->server_ttl > time()))
@@ -1017,6 +1024,21 @@ class Cleantalk {
         
         return $str;
     }
+    
+    /**
+     * Function gets information about spam active networks 
+     *
+     * @param string api_key
+     * @return JSON/array 
+     */
+    public function get_2s_blacklists_db ($api_key) {
+        $request=Array();
+        $request['method_name'] = '2s_blacklists_db'; 
+        $request['auth_key'] = $api_key;
+        $url='https://api.cleantalk.org';
+        $result=sendRawRequest($url,$request);
+        return $result;
+    }
 }
 
 /**
@@ -1151,17 +1173,24 @@ function cleantalk_get_real_ip()
 	{
 		$headers = $_SERVER;
 	}
-	if ( array_key_exists( 'X-Forwarded-For', $headers ) && filter_var( $headers['X-Forwarded-For'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) )
+	if ( array_key_exists( 'X-Forwarded-For', $headers ) )
 	{
-		$the_ip = $headers['X-Forwarded-For'];
+		$the_ip=explode(",", trim($headers['X-Forwarded-For']));
+		$the_ip = trim($the_ip[0]);
 	}
-	elseif ( array_key_exists( 'HTTP_X_FORWARDED_FOR', $headers ) && filter_var( $headers['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ))
+	elseif ( array_key_exists( 'HTTP_X_FORWARDED_FOR', $headers ))
 	{
-		$the_ip = $headers['HTTP_X_FORWARDED_FOR'];
+		$the_ip=explode(",", trim($headers['HTTP_X_FORWARDED_FOR']));
+		$the_ip = trim($the_ip[0]);
 	}
 	else
 	{
 		$the_ip = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 	}
 	return $the_ip;
+}
+
+function cleantalk_is_JSON($string)
+{
+    return ((is_string($string) && (is_object(json_decode($string)) || is_array(json_decode($string))))) ? true : false;
 }
