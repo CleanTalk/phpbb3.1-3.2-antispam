@@ -104,7 +104,7 @@ class main_model
 		}
 
 		// First check errstr flag.
-		if (!empty($ct_result->errstr)
+		if (!empty($ct_result->errstr) && $checkjs = 1
 			|| (!empty($ct_result->inactive) && $ct_result->inactive == 1)
 		)
 		{
@@ -150,6 +150,10 @@ class main_model
 			}
 
 			return $ret_val;
+		}
+		else if (!empty($ct_result->errstr) && $checkjs = 0)
+		{
+			$ct_result->allow = 0;
 		}
 
 		if ($ct_result->allow == 0)
