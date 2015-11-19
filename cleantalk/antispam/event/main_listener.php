@@ -237,7 +237,7 @@ class main_listener implements EventSubscriberInterface
 			{
 				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
-			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where =1';
+			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where ct_marked=1';
 			$result = $db->sql_query($sql);
 			while($row = $db->sql_fetchrow($result))
 			{
@@ -270,7 +270,7 @@ AND column_name =  'ct_marked'";
 		
 			$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=0';
 			$result = $db->sql_query($sql);
-			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where user_password<>""';
+			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where user_password<>"" and ct_marked<>1 limit 900;';
 			$result = $db->sql_query($sql);
 			$users=Array();
 			$users[0]=Array();
