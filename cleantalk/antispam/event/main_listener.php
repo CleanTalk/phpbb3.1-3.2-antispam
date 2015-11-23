@@ -270,7 +270,7 @@ AND column_name =  'ct_marked'";
 		
 			$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=0';
 			$result = $db->sql_query($sql);
-			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where user_password<>"" and ct_marked<>1 limit 900;';
+			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where user_password<>"";';
 			$result = $db->sql_query($sql);
 			$users=Array();
 			$users[0]=Array();
@@ -288,7 +288,7 @@ AND column_name =  'ct_marked'";
 							);
 				$data[$cnt][]=$row['user_email'];
 				$data[$cnt][]=$row['user_ip'];
-				if(sizeof($users[$cnt])>900)
+				if(sizeof($users[$cnt])>450)
 				{
 					$cnt++;
 					$users[$cnt]=Array();
