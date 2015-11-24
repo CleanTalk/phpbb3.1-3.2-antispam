@@ -145,10 +145,21 @@ class main_listener implements EventSubscriberInterface
 			{
 				$spam_check = array();
 				$spam_check['type'] = 'comment';
+				$spam_check['sender_email'] = '';
+				$spam_check['sender_nickname'] = '';
 				if (array_key_exists('user_email', $data['post_data'])) $spam_check['sender_email'] = $data['post_data']['user_email'];
 				if (array_key_exists('username', $data['post_data'])) $spam_check['sender_nickname'] = $data['post_data']['username'];
 				if (array_key_exists('post_subject', $data['post_data'])) $spam_check['message_title'] = $data['post_data']['post_subject'];
 				$spam_check['message_body'] = utf8_normalize_nfc($request->variable('message', '', true));
+				if($spam_check['sender_email'] == '' && isset($user->data))
+				{
+					$spam_check['sender_email'] = $user->data['user_email'];
+				}
+				if($spam_check['sender_nickname'] == '' && isset($user->data))
+				{
+					$spam_check['sender_nickname'] = $user->data['username'];
+				}
+				
 				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{ 
@@ -228,7 +239,6 @@ class main_listener implements EventSubscriberInterface
 	public function check_users_spam($event)
 	{
 		global $db, $config, $request, $phpbb_root_path, $phpEx;
-		
 		$ct_del_user=request_var('ct_del_user', Array(0));
 		$ct_del_all=$request->variable('ct_delete_all', '', false, \phpbb\request\request_interface::POST);
 		if($ct_del_all!='')
@@ -257,12 +267,10 @@ class main_listener implements EventSubscriberInterface
 		}
 		if(isset($_GET['check_users_spam']))
 		{
-			$sql = "SELECT table_name 
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE table_name =  '".USERS_TABLE."'
-AND column_name =  'ct_marked'";
+			$sql = 'select * from '.USERS_TABLE.' limit 1;';
 			$result = $db->sql_query($sql);
-			if($result->num_rows==0)
+			$row = $db->sql_fetchrow($result);
+			if(!isset($row['ct_marked']))
 			{
 				$sql = 'ALTER TABLE  ' . USERS_TABLE . ' ADD  `ct_marked` INT NOT NULL ';
 				$result = $db->sql_query($sql);
@@ -341,16 +349,29 @@ AND column_name =  'ct_marked'";
 			}
 			else
 			{
-				@header("Location: ".str_replace('&check_users_spam=1', '', str_replace('&check_users_spam=1', '', html_entity_decode($request->server('REQUEST_URI')))));
+				@header("Location: ".str_replace('&check_users_spam=1', '&finish_check=1', html_entity_decode($request->server('REQUEST_URI'))));
 				
 			}
 		}
 		if(strpos(__FILE__, 'cleantalk')!==false)
 		{
+			$sql = 'select * from '.USERS_TABLE.' limit 1;';
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			if(!isset($row['ct_marked']))
+			{
+				$sql = 'ALTER TABLE  ' . USERS_TABLE . ' ADD  `ct_marked` INT NOT NULL ';
+				$result = $db->sql_query($sql);
+			}
+			
 			$sql = 'SELECT * FROM ' . USERS_TABLE . ' where ct_marked=1';
 			$result = $db->sql_query($sql);
-			//$html='Done. All users tested via blacklists database, please see result bellow.<br /><br />';
-			$html='<form method="post"><center>All posts of deleted users will be deleted, too.<br /><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
+			$html='';
+			if($request->variable('finish_check', '', false, \phpbb\request\request_interface::GET)!='')
+			{
+				$html.='<h3>Done. All users tested via blacklists database, please see result below.</h3><br /><br />';
+			}
+			$html.='<form method="post"><center>All posts of deleted users will be deleted, too.<br /><h2>Spam checking results</h2><br /><br /><table class="table1 zebra-table">
 	<thead>
 	<tr>
 		<th>Select</th>
