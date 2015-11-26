@@ -241,6 +241,17 @@ class main_listener implements EventSubscriberInterface
 		global $db, $config, $request, $phpbb_root_path, $phpEx;
 		$ct_del_user=request_var('ct_del_user', Array(0));
 		$ct_del_all=$request->variable('ct_delete_all', '', false, \phpbb\request\request_interface::POST);
+		$savekey=$request->variable('cleantalk_antispam_apikey', '', false, \phpbb\request\request_interface::POST);
+		if($savekey!='')
+		{
+			$spam_check = array();
+			$spam_check['auth_key'] = $savekey;
+			$spam_check['type'] = 'comment';
+			$spam_check['sender_email'] = 'good@cleantalk.org';
+			$spam_check['sender_nickname'] = 'CleanTalk';
+			$spam_check['message'] = 'This message is a test to check the connection to the CleanTalk servers.';
+			$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
+		}
 		if($ct_del_all!='')
 		{
 			if (!function_exists('user_delete'))
