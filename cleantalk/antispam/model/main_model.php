@@ -110,6 +110,7 @@ class main_model
 		{
 			// Cleantalk error so we go default way (no action at all).
 			$ret_val['errno'] = 1;
+			$ct_result->allow = 1;
 			if (!empty($ct_result->errstr))
 			{
 				$ret_val['errstr'] = self::filter_response($ct_result->errstr);
