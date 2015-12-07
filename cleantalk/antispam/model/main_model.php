@@ -68,7 +68,14 @@ class main_model
 		$composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
 
 		$ct_request = new \CleantalkRequest();
-		$ct_request->auth_key = $config['cleantalk_antispam_apikey'];
+		if(isset($spam_check['auth_key']))
+		{
+			$ct_request->auth_key = $spam_check['auth_key'];
+		}
+		else
+		{
+			$ct_request->auth_key = $config['cleantalk_antispam_apikey'];
+		}
 		$ct_request->agent = 'phpbb3-' . preg_replace("/(\d)\.(\w+)/", "$1$2", $composer_json->version);
 		$ct_request->js_on = $checkjs;
 		$ct_request->sender_info = $sender_info;
