@@ -40,7 +40,7 @@ class main_model
 			$checkjs = 0;
 		}
 
-		$ct = new \Cleantalk();
+		$ct = new \CleanTalkBase\Cleantalk();
 		
 		$root_dir= realpath(dirname(__FILE__).'/../../../../');
 		if(file_exists($root_dir."/cleantalk.pem"))
@@ -67,7 +67,7 @@ class main_model
 
 		$composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
 
-		$ct_request = new \CleantalkRequest();
+		$ct_request = new \CleanTalkBase\CleantalkRequest();
 		if(isset($spam_check['auth_key']))
 		{
 			$ct_request->auth_key = $spam_check['auth_key'];

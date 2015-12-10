@@ -1,4 +1,6 @@
 <?php
+
+namespace CleanTalkJSON;
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 /**
@@ -55,11 +57,6 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php
  * @link        http://pear.php.net/pepr/pepr-proposal-show.php?id=198
  */
-
-if (!defined('IN_PHPBB'))
-{
-	exit;
-}
 
 /**
  * Marker constant for Services_JSON::decode(), used to flag stack state
