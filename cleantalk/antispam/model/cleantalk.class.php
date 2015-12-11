@@ -709,6 +709,7 @@ class Cleantalk {
      * @return boolean|\CleantalkResponse
      */
     private function httpRequest($msg) {
+    	global $request;
         $result = false;
         $msg->all_headers=json_encode(apache_request_headers());
         //$msg->remote_addr=$_SERVER['REMOTE_ADDR'];
