@@ -409,10 +409,11 @@ class main_listener implements EventSubscriberInterface
 				
 			}
 			$html.="</tbody></table><br /><input type=submit name='ct_delete_checked' value='Delete selected'> <input type=submit name='ct_delete_all' value='Delete all'><br />All posts of deleted users will be deleted, too.</center></form>";
-			if($found)
+			if(!$found && $request->variable('finish_check', '', false, \phpbb\request\request_interface::GET)!='')
 			{
-				$this->template->assign_var('CT_TABLE_USERS_SPAM', $html);
+				$html='<h3>Done. All users tested via blacklists database, found 0 spam users.</h3><br /><br />';
 			}
+			$this->template->assign_var('CT_TABLE_USERS_SPAM', $html);
 		}
 	}
 }
