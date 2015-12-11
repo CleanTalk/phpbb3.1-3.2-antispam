@@ -714,22 +714,9 @@ class Cleantalk {
         //$msg->remote_addr=$_SERVER['REMOTE_ADDR'];
         //$msg->sender_info['remote_addr']=$_SERVER['REMOTE_ADDR'];
         $si=(array)json_decode($msg->sender_info,true);
-        if(defined('IN_PHPBB'))
-        {
-        	global $request;
-        	if(method_exists($request,'server'))
-        	{
-        		$si['remote_addr']=$request->server('REMOTE_ADDR');
-        		$msg->x_forwarded_for=$request->server('X_FORWARDED_FOR');
-        		$msg->x_real_ip=$request->server('X_REAL_IP');
-        	}
-        }
-        else
-        {
-        	$si['remote_addr']=$_SERVER['REMOTE_ADDR'];
-        	$msg->x_forwarded_for=@$_SERVER['X_FORWARDED_FOR'];
-        	$msg->x_real_ip=@$_SERVER['X_REAL_IP'];
-        }
+        $si['remote_addr']=$request->server('REMOTE_ADDR');
+		$msg->x_forwarded_for=$request->server('X_FORWARDED_FOR');
+		$msg->x_real_ip=$request->server('X_REAL_IP');
         $msg->sender_info=json_encode($si);
         if (((isset($this->work_url) && $this->work_url !== '') && ($this->server_changed + $this->server_ttl > time()))
 				|| $this->stay_on_server == true) {
@@ -1149,11 +1136,8 @@ if( !function_exists('apache_request_headers') )
 	{
 		$arh = array();
 		$rx_http = '/\AHTTP_/';
-		if(defined('IN_PHPBB'))
-		{
-			global $request;
-			$request->enable_super_globals();
-		}
+		global $request;
+		$request->enable_super_globals();
 		foreach($_SERVER as $key => $val)
 		{
 			if( preg_match($rx_http, $key) )
@@ -1169,29 +1153,21 @@ if( !function_exists('apache_request_headers') )
 				$arh[$arh_key] = $val;
 			}
 		}
-		if(defined('IN_PHPBB'))
-		{
-			global $request;
-			$request->disable_super_globals();
-		}
+		$request->disable_super_globals();
 		return( $arh );
 	}
 }
 
 function cleantalk_get_real_ip()
 {
-	if(defined('IN_PHPBB'))
-	{
-		global $request;
-		$request->enable_super_globals();
-	}
+	global $request;
+	$request->enable_super_globals();
 	if ( function_exists( 'apache_request_headers' ) )
 	{
 		$headers = apache_request_headers();
 	}
 	else
 	{
-		
 		$headers = $_SERVER;
 	}
 	if ( array_key_exists( 'X-Forwarded-For', $headers ) )
@@ -1208,11 +1184,7 @@ function cleantalk_get_real_ip()
 	{
 		$the_ip = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 	}
-	if(defined('IN_PHPBB'))
-	{
-		global $request;
-		$request->disable_super_globals();
-	}
+	$request->disable_super_globals();
 	return $the_ip;
 }
 

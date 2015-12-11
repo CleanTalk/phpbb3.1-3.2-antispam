@@ -239,7 +239,7 @@ class main_listener implements EventSubscriberInterface
 	public function check_users_spam($event)
 	{
 		global $db, $config, $request, $phpbb_root_path, $phpEx;
-		$ct_del_user=request_var('ct_del_user', Array(0));
+		$ct_del_user=$request->variable('ct_del_user', Array(0), false, \phpbb\request\request_interface::POST);
 		$ct_del_all=$request->variable('ct_delete_all', '', false, \phpbb\request\request_interface::POST);
 		$savekey=$request->variable('cleantalk_antispam_apikey', '', false, \phpbb\request\request_interface::POST);
 		if($savekey!='')
