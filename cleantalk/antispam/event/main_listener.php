@@ -341,7 +341,7 @@ class main_listener implements EventSubscriberInterface
 						if(empty($uip))continue;
 						$uim=$users[$i][$j]['email'];
 						if(empty($uim))continue;
-						if($result->data->$uip->appears==1||$result->data->$uim->appears==1)
+						if(isset($result->data) && isset($result->data->$uip) && $result->data->$uip->appears==1 || isset($result->data) && isset($result->data->$uip) && $result->data->$uim->appears==1)
 						{
 							$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=1 where user_id='.$users[$i][$j]['id'];
 							$result = $db->sql_query($sql);
