@@ -335,16 +335,38 @@ class main_listener implements EventSubscriberInterface
 				}
 				else
 				{
-					for($j=0;$j<sizeof($users[$i]);$j++)
+					/*for($j=0;$j<sizeof($users[$i]);$j++)
 					{
 						$uip=$users[$i][$j]['ip'];
 						if(empty($uip))continue;
 						$uim=$users[$i][$j]['email'];
 						if(empty($uim))continue;
-						if(isset($result->data) && isset($result->data->$uip) && $result->data->$uip->appears==1 || isset($result->data) && isset($result->data->$uip) && $result->data->$uim->appears==1)
+						if(isset($result->data) && isset($result->data->$uip) && $result->data->$uip->appears==1 || isset($result->data) && isset($result->data->$uim) && $result->data->$uim->appears==1)
 						{
 							$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=1 where user_id='.$users[$i][$j]['id'];
 							$result = $db->sql_query($sql);
+						}
+					}*/
+					if(isset($result->data))
+					{
+						foreach($result->data as $key=>$value)
+						{
+							if($key === filter_var($key, FILTER_VALIDATE_IP))
+							{
+								if($value->appears==1)
+								{
+									$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=1 where user_ip="'.$key.'"';
+									$result = $db->sql_query($sql);
+								}
+							}
+							else
+							{
+								if($value->appears==1)
+								{
+									$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=1 where user_email="'.$key.'"';
+									$result = $db->sql_query($sql);
+								}
+							}
 						}
 					}
 				}
