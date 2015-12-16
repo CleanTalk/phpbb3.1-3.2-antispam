@@ -409,6 +409,7 @@ class main_listener implements EventSubscriberInterface
 	<tr>
 		<th>Select</th>
 		<th>Username</th>
+		<th>Posts</th>
 		<th>Joined</th>
 		<th>E-mail</th>
 		<th>IP</th>
@@ -423,6 +424,7 @@ class main_listener implements EventSubscriberInterface
 				$html.="<tr>
 				<td><input type='checkbox' name=ct_del_user[".$row['user_id']."] value='1' /></td>
 				<td>".$row['username']."</td>
+				<td><a target='_blank' href='/search.php?author_id=" . $row['user_id'] . "&sr=posts' >" . $row['user_posts'] . "</a></td>
 				<td>".date("Y-m-d H:i:s",$row['user_regdate'])."</td>
 				<td><a target='_blank' href='https://cleantalk.org/blacklists/".$row['user_email']."'>".$row['user_email']."</a></td>
 				<td><a target='_blank' href='https://cleantalk.org/blacklists/".$row['user_ip']."'>".$row['user_ip']."</a></td>
