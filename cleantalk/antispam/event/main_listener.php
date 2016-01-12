@@ -283,7 +283,7 @@ class main_listener implements EventSubscriberInterface
 			$row = $db->sql_fetchrow($result);
 			if(!isset($row['ct_marked']))
 			{
-				$sql = 'ALTER TABLE  ' . USERS_TABLE . ' ADD  `ct_marked` INT NOT NULL ';
+				$sql = 'ALTER TABLE  ' . USERS_TABLE . ' ADD  `ct_marked` INT DEFAULT 0 ';
 				$result = $db->sql_query($sql);
 			}
 		
