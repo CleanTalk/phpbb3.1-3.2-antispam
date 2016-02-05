@@ -59,9 +59,6 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 				SESSIONS_TABLE			=> array(
 					'ct_submit_time'	=> array('INT:11', '0'),
 				),
-				USERS_TABLE			=> array(
-					'ct_marked'	=> array('INT:11', '0'),
-				),
 			),
 		);
 	}
