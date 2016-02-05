@@ -286,6 +286,13 @@ class main_listener implements EventSubscriberInterface
 				$sql = 'ALTER TABLE  ' . USERS_TABLE . ' ADD  `ct_marked` INT DEFAULT 0 ';
 				$result = $db->sql_query($sql);
 			}
+			else
+			{
+				$sql = 'ALTER TABLE  ' . USERS_TABLE . ' DROP COLUMN  `ct_marked`';
+				$result = $db->sql_query($sql);
+				$sql = 'ALTER TABLE  ' . USERS_TABLE . ' ADD  `ct_marked` INT DEFAULT 0 ';
+				$result = $db->sql_query($sql);
+			}
 		
 			$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=0';
 			$result = $db->sql_query($sql);
