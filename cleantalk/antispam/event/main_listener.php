@@ -342,18 +342,6 @@ class main_listener implements EventSubscriberInterface
 				}
 				else
 				{
-					/*for($j=0;$j<sizeof($users[$i]);$j++)
-					{
-						$uip=$users[$i][$j]['ip'];
-						if(empty($uip))continue;
-						$uim=$users[$i][$j]['email'];
-						if(empty($uim))continue;
-						if(isset($result->data) && isset($result->data->$uip) && $result->data->$uip->appears==1 || isset($result->data) && isset($result->data->$uim) && $result->data->$uim->appears==1)
-						{
-							$sql = 'UPDATE ' . USERS_TABLE . ' set ct_marked=1 where user_id='.$users[$i][$j]['id'];
-							$result = $db->sql_query($sql);
-						}
-					}*/
 					if(isset($result->data))
 					{
 						foreach($result->data as $key=>$value)
@@ -389,8 +377,7 @@ class main_listener implements EventSubscriberInterface
 			}
 			else
 			{
-				@header("Location: ".str_replace('&check_users_spam=1', '&finish_check=1', html_entity_decode($request->server('REQUEST_URI'))));
-				
+				@header("Location: ".str_replace('&check_users_spam=1', '&finish_check=1', html_entity_decode($request->server('REQUEST_URI'))));				
 			}
 		}
 		if(strpos(__FILE__, 'cleantalk')!==false)
