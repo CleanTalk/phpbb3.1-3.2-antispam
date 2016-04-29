@@ -1,27 +1,35 @@
 {
-	"name": "cleantalk/antispam",
-	"type": "phpbb-extension",
-	"description": "Antispam by CleanTalk",
-	"homepage": "https://cleantalk.org",
-	"version": "4.6",
-	"time": "2016-01-27",
-	"license": "GPL-2.0",
-	"authors": [{
-			"name": "Alexey Znaev",
-			"email": "welcome@cleantalk.org",
-			"homepage": "https://cleantalk.org",
-			"role": "Developer"
-		}],
-	"require": {
-		"php": ">=5.3.3"
-	},
-	"require-dev": {
-		"phpbb/epv": "dev-master"
-	},
-	"extra": {
-		"display-name": "Antispam by CleanTalk",
-		"soft-require": {
-			"phpbb/phpbb": ">=3.1.0-RC2,<3.2.*@dev"
-		}
-	}
+    "name": "cleantalk/antispam",
+    "type": "phpbb-extension",
+    "description": "Antispam by CleanTalk",
+    "homepage": "https://cleantalk.org",
+    "version": "4.6",
+    "time": "2016-04-29",
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "Alexey Znaev",
+            "email": "welcome@cleantalk.org",
+            "homepage": "https://cleantalk.org",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "phpbb/phpbb": ">=3.1.0-RC2,<3.2.0@dev"
+    },
+    "require-dev": {
+        "phpbb/epv": "dev-master"
+    },
+    "extra": {
+        "display-name": "Antispam by CleanTalk",
+        "soft-require": {
+            "phpbb/phpbb": ">=3.1.0-RC2,<3.2.0@dev"
+        },
+        "version-check": {
+            "host": "www.phpbb.com",
+            "directory": "/customise/db/extension/antispam_by_cleantalk",
+            "filename": "version_check"
+        }
+    }
 }
