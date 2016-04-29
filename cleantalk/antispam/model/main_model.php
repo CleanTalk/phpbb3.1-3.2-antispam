@@ -76,7 +76,7 @@ class main_model
 		{
 			$ct_request->auth_key = $config['cleantalk_antispam_apikey'];
 		}
-		$ct_request->agent = 'phpbb3-' . preg_replace("/(\d)\.(\w+)/", "$1$2", $composer_json->version);
+		$ct_request->agent = 'phpbb31-' . preg_replace("/(\d)\.(\w+)/", "$1$2", $composer_json->version);
 		$ct_request->js_on = $checkjs;
 		$ct_request->sender_info = $sender_info;
 		$ct_request->sender_email = array_key_exists('sender_email', $spam_check) ? $spam_check['sender_email'] : '';
@@ -250,7 +250,10 @@ class main_model
 	static public function get_check_js_script()
 	{
 		$ct_check_def = '0';
-		if (!isset($_COOKIE[self::JS_FIELD_NAME])) setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
+		if (!isset($_COOKIE[self::JS_FIELD_NAME]))
+		{
+			setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
+		}
 		$ct_check_value = self::get_check_js_value();
 		$js_template = '<script type="text/javascript">function ctSetCookie(c_name,value){document.cookie=c_name+"="+escape(value)+"; path=/";} setTimeout("ctSetCookie(\"%s\", \"%s\");",1000);</script>';
 		$ct_addon_body = sprintf($js_template, self::JS_FIELD_NAME, $ct_check_value);
