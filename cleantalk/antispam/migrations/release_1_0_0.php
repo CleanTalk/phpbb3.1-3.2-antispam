@@ -65,4 +65,15 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 			),
 		);
 	}
+
+	public function revert_schema()
+	{
+		return array(
+    			'drop_columns'        => array(
+        			SESSIONS_TABLE			=> array('ct_submit_time'),
+        			USERS_TABLE			=> array('ct_marked'),
+        		),
+		);
+	}
+
 }
