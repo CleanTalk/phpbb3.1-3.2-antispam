@@ -95,7 +95,7 @@ class main_module
 			$data[0]=Array();
 			$cnt=0;
 			while($row = $db->sql_fetchrow($result))
-			{
+			{ 
 				$users[$cnt][] = Array('name' => $row['username'],
 									'id' => $row['user_id'],
 									'email' => $row['user_email'],
@@ -178,6 +178,7 @@ class main_module
 			$found = true;
 			$template->assign_block_vars('CT_SPAMMERS', array(
 			    'USER_ID'		=> $row['user_id'],
+			    'USER_POSTS'	=> $row['user_posts'],
 			    'USERNAME'		=> get_username_string('username', $row['user_id'], $row['username'], $row['user_colour']),
 			    'JOINED'		=> (!$row['user_regdate']) ? ' - ' : $user->format_date(intval($row['user_regdate'])),
 			    'USER_EMAIL'	=> $row['user_email'],
