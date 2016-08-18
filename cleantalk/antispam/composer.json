@@ -3,8 +3,8 @@
     "type": "phpbb-extension",
     "description": "Antispam by CleanTalk",
     "homepage": "https://cleantalk.org",
-    "version": "4.6",
-    "time": "2016-04-29",
+    "version": "4.7",
+    "time": "2016-08-18",
     "license": "GPL-2.0",
     "authors": [
         {
