@@ -55,6 +55,15 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 	public function update_schema()
 	{
 		return array(
+			
+			//* Fix for ct_marked in USERS_TABLE without defaul value
+			global $db;		
+			$sql = 'ALTER TABLE  ' . USERS_TABLE . ' DROP COLUMN  `ct_marked`';
+			$result = $db->sql_query($sql);
+			$sql = 'ALTER TABLE  ' . USERS_TABLE . ' ADD  `ct_marked` INT DEFAULT 0 ';
+			$result = $db->sql_query($sql);
+			//*/
+			
 			'add_columns'	=> array(
 				SESSIONS_TABLE			=> array(
 					'ct_submit_time'	=> array('INT:11', '0'),
