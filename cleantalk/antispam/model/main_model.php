@@ -74,6 +74,8 @@ class main_model
 			'REFFERRER' => $refferrer,
 			'post_url' => $refferrer,
 			'USER_AGENT' => $user_agent,
+			'js_timezone' => $js_timezone,
+			'mouse_cursor_positions' => $pointer_data
 			)
 		);
 
