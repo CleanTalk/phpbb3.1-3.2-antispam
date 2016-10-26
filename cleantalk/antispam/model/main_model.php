@@ -13,6 +13,8 @@ namespace cleantalk\antispam\model;
 class main_model
 {
 	const JS_FIELD_NAME = 'ct_checkjs';
+	const JS_TIME_ZONE_FIELD_NAME = 'ct_time_zone';
+	const JS_POINTER_DATA_FIELD_NAME = 'ct_pointer_data';
 
 	/**
 	* Checks user registration to spam
@@ -54,6 +56,16 @@ class main_model
 		$ct->server_ttl     = $config['cleantalk_antispam_server_ttl'];
 		$ct->server_changed = $config['cleantalk_antispam_server_changed'];
 
+		//Pointer data
+		$pointer_data = request_var(self::JS_POINTER_DATA_FIELD_NAME, 'none', false, true);
+		$pointer_data = ($pointer_data === 'none' ? 'none' : json_decode ($pointer_data));
+		setcookie(self::JS_POINTER_DATA_FIELD_NAME, 0, 0, '/');
+				
+		//Timezone from JS
+		$js_timezone = request_var(self::JS_TIME_ZONE_FIELD_NAME, 0, false, true);
+		$js_timezone = ($js_timezone === 0 ? 'none' : $js_timezone);
+		setcookie(self::JS_TIME_ZONE_FIELD_NAME, 0, 0, '/');
+		
 		$user_agent = $request->server('HTTP_USER_AGENT');
 		$refferrer = $request->server('HTTP_REFERER');
 		$sender_info = json_encode(
@@ -62,6 +74,8 @@ class main_model
 			'REFFERRER' => $refferrer,
 			'post_url' => $refferrer,
 			'USER_AGENT' => $user_agent,
+			'js_timezone' => $js_timezone,
+			'mouse_cursor_positions' => $pointer_data
 			)
 		);
 
@@ -251,12 +265,74 @@ class main_model
 	{
 		$ct_check_def = '0';
 		if (!isset($_COOKIE[self::JS_FIELD_NAME]))
-		{
 			setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
-		}
+		
+		if(!isset($_COOKIE[self::JS_POINTER_DATA_FIELD_NAME]))
+			setcookie(self::JS_POINTER_DATA_FIELD_NAME, '0', 0, '/');
+		
+		if(!isset($_COOKIE[self::JS_TIME_ZONE_FIELD_NAME]))
+			setcookie(self::JS_TIME_ZONE_FIELD_NAME, '0', 0, '/');
+				
 		$ct_check_value = self::get_check_js_value();
-		$js_template = '<script type="text/javascript">function ctSetCookie(c_name,value){document.cookie=c_name+"="+escape(value)+"; path=/";} setTimeout("ctSetCookie(\"%s\", \"%s\");",1000);</script>';
-		$ct_addon_body = sprintf($js_template, self::JS_FIELD_NAME, $ct_check_value);
+		$js_template = '<script type="text/javascript">
+		
+		function ctSetCookie(c_name,value){
+			document.cookie = c_name + "=" + escape(value) + "; path=/";
+		}
+		
+		setTimeout(function(){
+			ctSetCookie("%s", "%s");
+			ctSetCookie("%s", d.getTimezoneOffset()/60);
+		},1000);
+		
+		//Stop observing function
+		function ctMouseStopData(){
+			window.removeEventListener("mousemove", func);
+			clearInterval(ctMouseReadInterval);
+			clearInterval(ctMouseWriteDataInterval);				
+			console.log("stopObserving");
+		}
+		
+		//Sopt observing timer (300s)
+		setTimeout(function(){
+			ctMouseStopData();
+		}, 300000);
+		
+		var d = new Date(), 
+			ctTimeMs = new Date().getTime(),
+			ctMouseEventTimerFlag = true, //Reading interval flag
+			ctMouseData = "[",
+			ctMouseDataCounter = 0;
+			
+		//Reading interval
+		var ctMouseReadInterval = setInterval(function(){
+				ctMouseEventTimerFlag = true;
+			}, 300);
+			
+		//Writting interval
+		var ctMouseWriteDataInterval = setInterval(function(){ 
+				var ctMouseDataToSend = ctMouseData.slice(0,-1).concat("]");
+				//console.log(ctMouseData);
+				console.log(ctMouseDataToSend.length);
+				ctSetCookie("%s", ctMouseDataToSend);
+			}, 3000);
+
+		//Logging mouse position each 300 ms
+		var func = function output(){
+			if(ctMouseEventTimerFlag == true){
+				var mouseDate = new Date();
+				ctMouseData += "[" + event.pageY + "," + event.pageX + "," + (mouseDate.getTime() - ctTimeMs) + "],";
+				ctMouseDataCounter++;
+				ctMouseEventTimerFlag = false;
+				if(ctMouseDataCounter >= 100)
+					ctMouseStopData();
+			}
+		}
+		
+		window.addEventListener("mousemove", func);
+	
+		</script>';
+		$ct_addon_body = sprintf($js_template, self::JS_FIELD_NAME, $ct_check_value, self::JS_TIME_ZONE_FIELD_NAME, self::JS_POINTER_DATA_FIELD_NAME, self::JS_POINTER_DATA_FIELD_NAME);
 		return $ct_addon_body;
 	}
 }
