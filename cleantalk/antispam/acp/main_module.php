@@ -39,8 +39,7 @@ class main_module
 		
 		
 		$template->assign_vars(array(
-			'U_PHPBB_ROOT_PATH'				=> $phpbb_root_path,
-			'U_ACTION'						=> $this->u_action,
+			'U_ACTION'				=> $this->u_action,
 			'CLEANTALK_ANTISPAM_REGS'		=> $config['cleantalk_antispam_regs'],
 			'CLEANTALK_ANTISPAM_GUESTS'		=> $config['cleantalk_antispam_guests'],
 			'CLEANTALK_ANTISPAM_NUSERS'		=> $config['cleantalk_antispam_nusers'],
