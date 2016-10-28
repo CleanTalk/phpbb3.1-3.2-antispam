@@ -15,7 +15,7 @@ class main_module
 	function main($id, $mode)
 	{
 		global $user, $template, $request, $config, $db, $phpbb_root_path, $phpEx;
-
+		
 		$user->add_lang('acp/common');
 		$this->tpl_name = 'settings_body';
 		$this->page_title = $user->lang('ACP_CLEANTALK_TITLE');
@@ -36,8 +36,11 @@ class main_module
 			trigger_error($user->lang('ACP_CLEANTALK_SETTINGS_SAVED') . adm_back_link($this->u_action));
 		}
 
+		
+		
 		$template->assign_vars(array(
-			'U_ACTION'				=> $this->u_action,
+			'U_PHPBB_ROOT_PATH'				=> $phpbb_root_path,
+			'U_ACTION'						=> $this->u_action,
 			'CLEANTALK_ANTISPAM_REGS'		=> $config['cleantalk_antispam_regs'],
 			'CLEANTALK_ANTISPAM_GUESTS'		=> $config['cleantalk_antispam_guests'],
 			'CLEANTALK_ANTISPAM_NUSERS'		=> $config['cleantalk_antispam_nusers'],
@@ -127,9 +130,14 @@ class main_module
 				$context = stream_context_create($opts);
 				$result = @file_get_contents("https://api.cleantalk.org/?method_name=spam_check&auth_key=".$config['cleantalk_antispam_apikey'], 0, $context);
 				$result=json_decode($result);
+				
 				if(isset($result->error_message))
 				{
-					$error=$result->error_message;
+					$error = $result->error_message;
+				}
+				elseif($result == false)
+				{
+					$error = $user->lang('ACP_CHECKUSERS_DONE_3');
 				}
 				else
 				{
@@ -174,16 +182,17 @@ class main_module
 		}
 		$found = false;
 		while($row = $db->sql_fetchrow($result))
-		{
+		{			
 			$found = true;
 			$template->assign_block_vars('CT_SPAMMERS', array(
-			    'USER_ID'		=> $row['user_id'],
-			    'USER_POSTS'	=> $row['user_posts'],
-			    'USERNAME'		=> get_username_string('username', $row['user_id'], $row['username'], $row['user_colour']),
-			    'JOINED'		=> (!$row['user_regdate']) ? ' - ' : $user->format_date(intval($row['user_regdate'])),
-			    'USER_EMAIL'	=> $row['user_email'],
-			    'USER_IP'		=> $row['user_ip'],
-			    'LAST_VISIT'	=> (!$row['user_lastvisit']) ? ' - ' : $user->format_date(intval($row['user_lastvisit'])),
+				'USER_POSTS_LINK'	=> append_sid($phpbb_root_path.'search.'.$phpEx, array('author_id' => $row['user_id'], 'sr' => 'posts'), false),
+			    'USER_ID'			=> $row['user_id'],
+			    'USER_POSTS'		=> $row['user_posts'],
+			    'USERNAME'			=> get_username_string('username', $row['user_id'], $row['username'], $row['user_colour']),
+			    'JOINED'			=> (!$row['user_regdate']) ? ' - ' : $user->format_date(intval($row['user_regdate'])),
+			    'USER_EMAIL'		=> $row['user_email'],
+			    'USER_IP'			=> $row['user_ip'],
+			    'LAST_VISIT'		=> (!$row['user_lastvisit']) ? ' - ' : $user->format_date(intval($row['user_lastvisit'])),
 			));
 		}
 		if ($found)

@@ -26,11 +26,11 @@ class main_listener implements EventSubscriberInterface
 	{
 		return array(
 			'core.user_setup'				=> 'load_language_on_setup',
-			'core.page_header_after'            		=> 'add_js_to_head',
+			'core.page_header_after'        => 'add_js_to_head',
 			'core.add_form_key'				=> 'form_set_time',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
-			'core.user_add_modify_data'                     => 'check_newuser',
+			'core.user_add_modify_data'                 => 'check_newuser',
 		);
 	}
 

@@ -43,6 +43,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'Check users for spam',
 	'ACP_CHECKUSERS_DONE_1'                     => 'Done. All users tested via blacklists database, please see result below.',
 	'ACP_CHECKUSERS_DONE_2'                     => 'Done. All users tested via blacklists database, found 0 spam users.',
+	'ACP_CHECKUSERS_DONE_3'						=> 'Error. No connection with blacklist databse.',
 	'ACP_CHECKUSERS_SELECT'                     => 'Select',
 	'ACP_CHECKUSERS_USERNAME'                   => 'Username',
 	'ACP_CHECKUSERS_MESSAGES'                   => 'Messages',
