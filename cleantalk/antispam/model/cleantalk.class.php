@@ -1032,7 +1032,7 @@ class Cleantalk {
      * @return JSON/array 
      */
     public function get_2s_blacklists_db ($api_key) {
-        $request=Array();
+        $request=array();
         $request['method_name'] = '2s_blacklists_db'; 
         $request['auth_key'] = $api_key;
         $url='https://api.cleantalk.org';
@@ -1054,7 +1054,7 @@ if(!function_exists('getAutoKey'))
 {
 	function getAutoKey($email, $host, $platform)
 	{
-		$request=Array();
+		$request=array();
 		$request['method_name'] = 'get_api_key'; 
 		$request['email'] = $email;
 		$request['website'] = $host;
@@ -1074,7 +1074,7 @@ if(!function_exists('getAutoKey'))
 
 function noticePaidTill($api_key)
 {
-	$request=Array();
+	$request=array();
 	$request['method_name'] = 'notice_paid_till'; 
 	$request['auth_key'] = $api_key;
 	$url='https://api.cleantalk.org';

@@ -43,6 +43,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			 => 'Проверить на спам',
 	'ACP_CHECKUSERS_DONE_1'                      => 'Готово. Все пользователи проверены на спам, результат в таблице ниже',
 	'ACP_CHECKUSERS_DONE_2'                      => 'Готово. Все пользователи проверены на спам, найдено 0 результатов',
+	'ACP_CHECKUSERS_DONE_3'						 => 'Ошибка. Нет соединения с базой данных черных списков.',
 	'ACP_CHECKUSERS_SELECT'                      => 'Выбрать',
 	'ACP_CHECKUSERS_USERNAME'                    => 'Пользователь',
 	'ACP_CHECKUSERS_MESSAGES'                    => 'Сообщений',

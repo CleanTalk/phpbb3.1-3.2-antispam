@@ -43,6 +43,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'		=> 'Comprobar usuarios de Spam',
 	'ACP_CHECKUSERS_DONE_1' => 'Hecho. Todos los usuarios de la base de datos han sido probados a través de listas negras, por favor vea el resultado a continuación.',
 	'ACP_CHECKUSERS_DONE_2' => 'Hecho. Todos los usuarios de la base de datos han sido probados a través de listas negras, se encontraron 0 usuarios de Spam.',
+	'ACP_CHECKUSERS_DONE_3'						=> 'Error. No hay conexión con la base de datos de lista negra.',
 	'ACP_CHECKUSERS_SELECT' => 'Seleccionar',
 	'ACP_CHECKUSERS_USERNAME' => 'Nombre de usuario',
 	'ACP_CHECKUSERS_JOINED' => 'Ingreso',

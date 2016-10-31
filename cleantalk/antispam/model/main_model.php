@@ -19,8 +19,8 @@ class main_model
 	/**
 	* Checks user registration to spam
 	*
-	* @param array	$spam_check		Array with values to check
-	* @return array				Array with result flags
+	* @param array	$spam_check		array with values to check
+	* @return array				array with result flags
 	*/
 	static public function check_spam( $spam_check )
 	{
@@ -241,14 +241,14 @@ class main_model
 		return md5($config['cleantalk_antispam_apikey'] . date("Ymd",time()));
 	}
 	
-	/** Return Array of JS-keys for checking
+	/** Return array of JS-keys for checking
 	*
-	* @return Array
+	* @return array
 	*/
 	static public function get_check_js_array()
 	{
 		global $config;
-		$result=Array();
+		$result=array();
 		for($i=-5;$i<=1;$i++)
 		{
 			$result[]=md5($config['cleantalk_antispam_apikey'] . date("Ymd",time()+86400*$i));
