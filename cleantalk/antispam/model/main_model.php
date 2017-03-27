@@ -13,7 +13,7 @@ namespace cleantalk\antispam\model;
 class main_model
 {
 	const JS_FIELD_NAME = 'ct_checkjs';
-	const JS_TIME_ZONE_FIELD_NAME = 'ct_time_zone';
+	const JS_TIME_ZONE_FIELD_NAME = 'ct_timezone';
 	const JS_POINTER_DATA_FIELD_NAME = 'ct_pointer_data';
 
 	/**
@@ -22,6 +22,9 @@ class main_model
 	* @param array	$spam_check		array with values to check
 	* @return array				array with result flags
 	*/
+	
+	
+	
 	static public function check_spam( $spam_check )
 	{
 		global $config, $user, $request, $phpbb_root_path, $phpEx, $phpbb_log;
@@ -56,18 +59,19 @@ class main_model
 		$ct->server_ttl     = $config['cleantalk_antispam_server_ttl'];
 		$ct->server_changed = $config['cleantalk_antispam_server_changed'];
 
-		//Pointer data
-		$pointer_data = request_var(self::JS_POINTER_DATA_FIELD_NAME, 'none', false, true);
-		$pointer_data = ($pointer_data === 'none' ? 'none' : json_decode ($pointer_data));
-		setcookie(self::JS_POINTER_DATA_FIELD_NAME, 0, 0, '/');
-				
-		//Timezone from JS
-		$js_timezone = request_var(self::JS_TIME_ZONE_FIELD_NAME, 0, false, true);
-		$js_timezone = ($js_timezone === 0 ? 'none' : $js_timezone);
-		setcookie(self::JS_TIME_ZONE_FIELD_NAME, 0, 0, '/');
+		//Pointer data, Timezone from JS, First key press timestamp, Page set timestamp
+		$pointer_data 			= $request->variable(self::JS_POINTER_DATA_FIELD_NAME, 	"none", false, \phpbb\request\request_interface::COOKIE);
+		$page_set_timestamp 	= $request->variable("ct_ps_timestamp", 				"none", false, \phpbb\request\request_interface::COOKIE);
+		$js_timezone 			= $request->variable(self::JS_TIME_ZONE_FIELD_NAME, 	"none", false, \phpbb\request\request_interface::COOKIE);
+		$first_key_timestamp 	= $request->variable("ct_fkp_timestamp", 				"none", false, \phpbb\request\request_interface::COOKIE);
 		
+		$pointer_data 			= ($pointer_data 		=== "none" ? 0 : json_decode ($pointer_data));
+		$js_timezone 			= ($js_timezone 		=== "none" ? 0 : $js_timezone);
+		$first_key_timestamp 	= ($first_key_timestamp === "none" ? 0 : intval($first_key_timestamp));
+		$page_set_timestamp 	= ($page_set_timestamp 	=== "none" ? 0 : intval($page_set_timestamp));
+				
 		$user_agent = $request->server('HTTP_USER_AGENT');
-		$refferrer = $request->server('HTTP_REFERER');
+		$refferrer = $request->server('HTTP_REFERER');		
 		$sender_info = json_encode(
 			array(
 			'cms_lang' => $config['default_lang'],
@@ -75,10 +79,12 @@ class main_model
 			'post_url' => $refferrer,
 			'USER_AGENT' => $user_agent,
 			'js_timezone' => $js_timezone,
-			'mouse_cursor_positions' => $pointer_data
+			'mouse_cursor_positions' => $pointer_data,
+			'key_press_timestamp' => $first_key_timestamp,
+			'page_set_timestamp' => $page_set_timestamp	
 			)
 		);
-
+		
 		$composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
 
 		$ct_request = new \CleanTalkBase\CleantalkRequest();
@@ -90,7 +96,7 @@ class main_model
 		{
 			$ct_request->auth_key = $config['cleantalk_antispam_apikey'];
 		}
-		$ct_request->agent = 'phpbb31-' . preg_replace("/(\d)\.(\w+)/", "$1$2", $composer_json->version);
+		$ct_request->agent = 'phpbb31-' . preg_replace("/(\d+)\.(\d*)\.?(\d*)/", "$1$2$3", $composer_json->version);
 		$ct_request->js_on = $checkjs;
 		$ct_request->sender_info = $sender_info;
 		$ct_request->sender_email = array_key_exists('sender_email', $spam_check) ? $spam_check['sender_email'] : '';
@@ -108,7 +114,11 @@ class main_model
 			 break;
 		case 'register':
 			$ct_request->tz = array_key_exists('timezone', $spam_check) ? $spam_check['timezone'] : '';
-			 $ct_result = $ct->isAllowUser($ct_request);
+			$ct_result = $ct->isAllowUser($ct_request);
+			break;
+		case 'send_feedback':
+			$ct_request->feedback = $spam_check['feedback'];
+			$ct_result = $ct->sendFeedback($ct_request);
 			break;
 		}
 		$ret_val = array();
@@ -259,80 +269,163 @@ class main_model
 	/**
 	* Gets conplete JS-code with session-unique hash to insert into template for JS-ebabled checkibg
 	*
-	* @return string			JS-code
+	* @return string JS-code
 	*/
 	static public function get_check_js_script()
-	{
+	{	
+		global $request;
+		
 		$ct_check_def = '0';
-		if (!isset($_COOKIE[self::JS_FIELD_NAME]))
+		$ct_checkjs_val = $request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
+		if ($ct_checkjs_val === '')
 			setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
-		
-		if(!isset($_COOKIE[self::JS_POINTER_DATA_FIELD_NAME]))
-			setcookie(self::JS_POINTER_DATA_FIELD_NAME, '0', 0, '/');
-		
-		if(!isset($_COOKIE[self::JS_TIME_ZONE_FIELD_NAME]))
-			setcookie(self::JS_TIME_ZONE_FIELD_NAME, '0', 0, '/');
-				
+						
 		$ct_check_value = self::get_check_js_value();
+		
 		$js_template = '<script type="text/javascript">
-		
-		function ctSetCookie(c_name,value){
-			document.cookie = c_name + "=" + escape(value) + "; path=/";
-		}
-		
-		setTimeout(function(){
-			ctSetCookie("%s", "%s");
-			ctSetCookie("%s", d.getTimezoneOffset()/60);
-		},1000);
-		
-		//Stop observing function
-		function ctMouseStopData(){
-			window.removeEventListener("mousemove", func);
-			clearInterval(ctMouseReadInterval);
-			clearInterval(ctMouseWriteDataInterval);				
-			console.log("stopObserving");
-		}
-		
-		//Sopt observing timer (300s)
-		setTimeout(function(){
-			ctMouseStopData();
-		}, 300000);
-		
-		var d = new Date(), 
-			ctTimeMs = new Date().getTime(),
-			ctMouseEventTimerFlag = true, //Reading interval flag
-			ctMouseData = "[",
-			ctMouseDataCounter = 0;
-			
-		//Reading interval
-		var ctMouseReadInterval = setInterval(function(){
-				ctMouseEventTimerFlag = true;
-			}, 300);
-			
-		//Writting interval
-		var ctMouseWriteDataInterval = setInterval(function(){ 
-				var ctMouseDataToSend = ctMouseData.slice(0,-1).concat("]");
-				//console.log(ctMouseData);
-				console.log(ctMouseDataToSend.length);
-				ctSetCookie("%s", ctMouseDataToSend);
-			}, 3000);
+			function ctSetCookie(c_name, value) {
+				document.cookie = c_name + "=" + encodeURIComponent(value) + "; path=/";
+			}
 
-		//Logging mouse position each 300 ms
-		var func = function output(){
-			if(ctMouseEventTimerFlag == true){
-				var mouseDate = new Date();
-				ctMouseData += "[" + event.pageY + "," + event.pageX + "," + (mouseDate.getTime() - ctTimeMs) + "],";
-				ctMouseDataCounter++;
-				ctMouseEventTimerFlag = false;
-				if(ctMouseDataCounter >= 100)
-					ctMouseStopData();
+			ctSetCookie("ct_ps_timestamp", Math.floor(new Date().getTime()/1000));
+			ctSetCookie("ct_fkp_timestamp", "0");
+			ctSetCookie("ct_pointer_data", "0");
+			ctSetCookie("ct_timezone", "0");
+
+			setTimeout(function(){
+				ctSetCookie("%s", "%s");
+				ctSetCookie("ct_timezone", new Date().getTimezoneOffset()/60*(-1));
+			},1000);
+
+			//Stop observing function
+			function ctMouseStopData(){
+				if(typeof window.addEventListener == "function")
+					window.removeEventListener("mousemove", ctFunctionMouseMove);
+				else
+					window.detachEvent("onmousemove", ctFunctionMouseMove);
+				clearInterval(ctMouseReadInterval);
+				clearInterval(ctMouseWriteDataInterval);				
+			}
+
+			//Stop key listening function
+			function ctKeyStopStopListening(){
+				if(typeof window.addEventListener == "function"){
+					window.removeEventListener("mousedown", ctFunctionFirstKey);
+					window.removeEventListener("keydown", ctFunctionFirstKey);
+				}else{
+					window.detachEvent("mousedown", ctFunctionFirstKey);
+					window.detachEvent("keydown", ctFunctionFirstKey);
+				}			
+			}
+
+			var d = new Date(), 
+				ctTimeMs = new Date().getTime(),
+				ctMouseEventTimerFlag = true, //Reading interval flag
+				ctMouseData = "[",
+				ctMouseDataCounter = 0;
+				
+			//Reading interval
+			var ctMouseReadInterval = setInterval(function(){
+					ctMouseEventTimerFlag = true;
+				}, 100);
+				
+			//Writting interval
+			var ctMouseWriteDataInterval = setInterval(function(){ 
+					var ctMouseDataToSend = ctMouseData.slice(0,-1).concat("]");
+					ctSetCookie("ct_pointer_data", ctMouseDataToSend);
+				}, 1000);
+
+			//Logging mouse position each 300 ms
+			var ctFunctionMouseMove = function output(event){
+				if(ctMouseEventTimerFlag == true){
+					var mouseDate = new Date();
+					ctMouseData += "[" + event.pageY + "," + event.pageX + "," + (mouseDate.getTime() - ctTimeMs) + "],";
+					ctMouseDataCounter++;
+					ctMouseEventTimerFlag = false;
+					if(ctMouseDataCounter >= 100)
+						ctMouseStopData();
+				}
+			}
+			//Writing first key press timestamp
+			var ctFunctionFirstKey = function output(event){
+				var KeyTimestamp = Math.floor(new Date().getTime()/1000);
+				ctSetCookie("ct_fkp_timestamp", KeyTimestamp);
+				ctKeyStopStopListening();
+			}
+
+			if(typeof window.addEventListener == "function"){
+				window.addEventListener("mousemove", ctFunctionMouseMove);
+				window.addEventListener("mousedown", ctFunctionFirstKey);
+				window.addEventListener("keydown", ctFunctionFirstKey);
+			}else{
+				window.attachEvent("onmousemove", ctFunctionMouseMove);
+				window.attachEvent("mousedown", ctFunctionFirstKey);
+				window.attachEvent("keydown", ctFunctionFirstKey);
+			}
+		</script>';
+		
+		$ct_addon_body = sprintf($js_template, self::JS_FIELD_NAME, $ct_check_value);
+				
+		return $ct_addon_body;
+	}
+	
+	/**
+	* Check new visitors for SFW database
+	* @return void
+	*/
+	static public function sfw_check(){
+		
+		global $config, $request;
+				
+		if($config['cleantalk_antispam_sfw_enabled'] && $config['cleantalk_antispam_key_is_ok']){
+			
+			require_once 'cleantalk-sfw.class.php';
+			
+			$is_sfw_check = true;
+			$sfw = new \CleanTalkBaseSFW\CleanTalkSFW();
+			$ip = $sfw->cleantalk_get_real_ip();
+			
+			foreach($ip as $ct_cur_ip){
+				
+				$ct_sfw_pass_key 	= $request->variable('ct_sfw_pass_key', '', false, \phpbb\request\request_interface::COOKIE);
+				$ct_sfw_passed 		= $request->variable('ct_sfw_passed', 	'', false, \phpbb\request\request_interface::COOKIE);
+				
+				if($ct_sfw_pass_key == md5($ct_cur_ip.$config['cleantalk_antispam_apikey'])){
+					$is_sfw_check=false;
+					if($ct_sfw_passed){
+						$sfw->sfw_update_logs($ct_cur_ip, 'passed');
+						@setcookie ('ct_sfw_passed', '0', 1, "/");
+					}
+				}else
+					$is_sfw_check=true;
+				
+			} unset($ct_cur_ip);
+			
+			if($is_sfw_check){
+				$sfw->check_ip();
+				if($sfw->result){
+					$sfw->sfw_update_logs($sfw->blocked_ip, 'blocked');
+					$sfw->sfw_die($config['cleantalk_antispam_apikey']);
+				}
 			}
 		}
-		
-		window.addEventListener("mousemove", func);
+	}
 	
-		</script>';
-		$ct_addon_body = sprintf($js_template, self::JS_FIELD_NAME, $ct_check_value, self::JS_TIME_ZONE_FIELD_NAME, self::JS_POINTER_DATA_FIELD_NAME, self::JS_POINTER_DATA_FIELD_NAME);
-		return $ct_addon_body;
+	/**
+	* Update SFW database
+	* @return void
+	*/
+	static public function sfw_update($api_key){
+		require_once 'cleantalk-sfw.class.php';
+		$result = \CleanTalkBaseSFW\CleanTalkSFW::sfw_update($api_key);
+	}
+	
+	/**
+	* Send SFW logs
+	* @return void
+	*/
+	static public function sfw_send_logs($api_key){
+		require_once 'cleantalk-sfw.class.php';		
+		$result = \CleanTalkBaseSFW\CleanTalkSFW::send_logs($api_key);		
 	}
 }

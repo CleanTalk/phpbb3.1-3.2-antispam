@@ -31,6 +31,7 @@ class main_listener implements EventSubscriberInterface
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                 => 'check_newuser',
+			'core.common'					=> 'sfw_check',
 		);
 	}
 
@@ -91,11 +92,9 @@ class main_listener implements EventSubscriberInterface
 	* @param array	$event		array with event variable values
 	*/
 	public function add_js_to_head($event)
-	{
+	{		
 		if (empty($this->config['cleantalk_antispam_apikey']))
-		{
 			return;
-		}
 
 		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::get_check_js_script());
 	}
@@ -259,5 +258,14 @@ class main_listener implements EventSubscriberInterface
 				}
 			}
 		}
+	}
+	
+	/**
+	* Checks user thru SFW
+	* @void
+	*/
+	public function sfw_check()
+	{
+		\cleantalk\antispam\model\main_model::sfw_check();
 	}
 }
