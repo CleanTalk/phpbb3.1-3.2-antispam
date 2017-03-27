@@ -31,6 +31,7 @@ class main_listener implements EventSubscriberInterface
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                 => 'check_newuser',
+			'core.common'					=> 'sfw_check',
 		);
 	}
 
@@ -73,7 +74,7 @@ class main_listener implements EventSubscriberInterface
 	/**
 	* Loads language
 	*
-	* @param array	$event		Array with event variable values
+	* @param array	$event		array with event variable values
 	*/
 	public function load_language_on_setup($event)
 	{
@@ -88,14 +89,12 @@ class main_listener implements EventSubscriberInterface
 	/**
 	* Fills tamplate variable by generated JS-code with unique hash
 	*
-	* @param array	$event		Array with event variable values
+	* @param array	$event		array with event variable values
 	*/
 	public function add_js_to_head($event)
-	{
+	{		
 		if (empty($this->config['cleantalk_antispam_apikey']))
-		{
 			return;
-		}
 
 		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::get_check_js_script());
 	}
@@ -103,7 +102,7 @@ class main_listener implements EventSubscriberInterface
 	/**
 	* Sets from display time in table
 	*
-	* @param array	$event		Array with event variable values
+	* @param array	$event		array with event variable values
 	*/
 	public function form_set_time($event)
 	{
@@ -123,7 +122,7 @@ class main_listener implements EventSubscriberInterface
 	/**
 	* Checks post or topic to spam
 	*
-	* @param array	$event		Array with event variable values
+	* @param array	$event		array with event variable values
 	*/
 	public function check_comment($event)
 	{
@@ -141,7 +140,8 @@ class main_listener implements EventSubscriberInterface
 		}
 		else if ($this->config['cleantalk_antispam_nusers'] && $this->user->data['is_registered'] == 1)
 		{
-			$sql = 'SELECT g.group_name FROM ' . USER_GROUP_TABLE
+			$sql = 'SELECT g.group_name 
+				FROM ' . USER_GROUP_TABLE
 			. ' ug JOIN ' . GROUPS_TABLE
 			. ' g ON (ug.group_id = g.group_id) WHERE ug.user_id = '
 			. (int) $this->user->data['user_id'] . ' AND '
@@ -204,7 +204,7 @@ class main_listener implements EventSubscriberInterface
 	/**
 	* Marks soft-spam post or comment as manual approvement needed
 	*
-	* @param array	$event		Array with event variable values
+	* @param array	$event		array with event variable values
 	*/
 	public function change_comment_approve($event)
 	{
@@ -227,7 +227,7 @@ class main_listener implements EventSubscriberInterface
 	/**
 	* Checks user registration to spam
 	*
-	* @param array	$event		Array with event variable values
+	* @param array	$event		array with event variable values
 	*/
 	public function check_newuser($event)
 	{
@@ -258,5 +258,14 @@ class main_listener implements EventSubscriberInterface
 				}
 			}
 		}
+	}
+	
+	/**
+	* Checks user thru SFW
+	* @void
+	*/
+	public function sfw_check()
+	{
+		\cleantalk\antispam\model\main_model::sfw_check();
 	}
 }

@@ -7,31 +7,56 @@
 		<dl>
 			<dt><label for="cleantalk_antispam_regs">{L_ACP_CLEANTALK_REGS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_REGS_DESCR}</span></dt>
 			<dd>
-			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="1" <!-- IF CLEANTALK_ANTISPAM_REGS || CLEANTALK_ANTISPAM_APIKEY == '' -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="0" <!-- IF not CLEANTALK_ANTISPAM_REGS && CLEANTALK_ANTISPAM_APIKEY != '' -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="1" <!-- IF CLEANTALK_ANTISPAM_REGS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_regs" value="0" <!-- IF not CLEANTALK_ANTISPAM_REGS -->checked="checked"<!-- ENDIF --> /> {L_NO}
 			</dd>
 		</dl>
 
 		<dl>
 			<dt><label for="cleantalk_antispam_guests">{L_ACP_CLEANTALK_GUESTS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_GUESTS_DESCR}</span></dt>
 			<dd>
-			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="1" <!-- IF CLEANTALK_ANTISPAM_GUESTS || CLEANTALK_ANTISPAM_APIKEY == ''  -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="0" <!-- IF not CLEANTALK_ANTISPAM_GUESTS && CLEANTALK_ANTISPAM_APIKEY != '' -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="1" <!-- IF CLEANTALK_ANTISPAM_GUESTS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_guests" value="0" <!-- IF not CLEANTALK_ANTISPAM_GUESTS -->checked="checked"<!-- ENDIF --> /> {L_NO}
 			</dd>
 		</dl>
 
 		<dl>
 			<dt><label for="cleantalk_antispam_nusers">{L_ACP_CLEANTALK_NUSERS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_NUSERS_DESCR}</span></dt>
 			<dd>
-			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="1" <!-- IF CLEANTALK_ANTISPAM_NUSERS || CLEANTALK_ANTISPAM_APIKEY == ''  -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="0" <!-- IF not CLEANTALK_ANTISPAM_NUSERS && CLEANTALK_ANTISPAM_APIKEY != ''  -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="1" <!-- IF CLEANTALK_ANTISPAM_NUSERS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_nusers" value="0" <!-- IF not CLEANTALK_ANTISPAM_NUSERS -->checked="checked"<!-- ENDIF --> /> {L_NO}
 			</dd>
 		</dl>
-
+		<dl>
+			<dt><label for="cleantalk_antispam_regs">{L_ACP_CLEANTALK_SFW_LABEL}</label><br /><span>{L_ACP_CLEANTALK_SFW_DESCR}</span></dt>
+			<dd>
+			    <input type="radio" class="radio" name="cleantalk_antispam_sfw_enabled" value="1" <!-- IF CLEANTALK_ANTISPAM_SFW_ENABLED -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			    <input type="radio" class="radio" name="cleantalk_antispam_sfw_enabled" value="0" <!-- IF not CLEANTALK_ANTISPAM_SFW_ENABLED -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			</dd>
+		</dl>
 		<dl>
 			<dt><label for="cleantalk_antispam_apikey">{L_ACP_CLEANTALK_APIKEY_LABEL}</label><br /><span>{L_ACP_CLEANTALK_APIKEY_DESCR}<a target="_blank" href="https://cleantalk.org/register?platform=phpbb31">https://cleantalk.org</a></span></dt>
 			<dd>
-			    <input type="text" size="40" maxlength="60" name="cleantalk_antispam_apikey" value="{CLEANTALK_ANTISPAM_APIKEY}"/>
+			    <input type="text" size="40" maxlength="60" name="cleantalk_antispam_apikey" placeholder="Enter the key" value="{CLEANTALK_ANTISPAM_APIKEY}"/>
+				<!-- IF not CLEANTALK_ANTISPAM_KEY_IS_OK -->
+					<span style="color: red;">{L_ACP_CLEANTALK_APIKEY_IS_BAD_LABEL}</span>
+					<br>
+					<input type="submit" name="get_key_auto" value="{L_ACP_CLEANTALK_APIKEY_GET_AUTO_BUTTON_LABEL}">
+					<a href="https://cleantalk.org/register?platform=phpbb31&email={CLEANTALK_ANTISPAM_REG_EMAIL}&website={CLEANTALK_ANTISPAM_REG_URL}&product_name=antispam'" target="_blank" style="display: inline-block;">
+						<input type="button" name="get_key_manually" value="{L_ACP_CLEANTALK_APIKEY_GET_MANUALLY_BUTTON_LABEL}">
+					</a>
+					<br>
+					<span>Board e-mail ({CLEANTALK_ANTISPAM_REG_EMAIL}) will be used for registration</span>
+					<br>
+					<span>
+						<a href="https://cleantalk.org/publicoffer'" target="__blank">License agreement</a>
+					</span>
+				<!-- ENDIF -->
+				<!-- IF CLEANTALK_ANTISPAM_KEY_IS_OK -->
+					<span style="color: green;">{L_ACP_CLEANTALK_APIKEY_IS_OK_LABEL}</span>
+					<br>
+					<a href="https://www.cleantalk.org/my?user_token={CLEANTALK_ANTISPAM_USER_TOKEN}" id="check_spam">{L_ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON}</a>
+				<!-- ENDIF -->
 			</dd>
 		</dl>
 
