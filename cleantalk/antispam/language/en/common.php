@@ -32,9 +32,17 @@ $lang = array_merge($lang, array(
 
 	'ACP_CLEANTALK_NUSERS_LABEL'		        => 'Moderate Newly Registered Users',
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'Posts and topics from new users will be test for spam. Spam will be rejected or sent to approvement.',
+	
+	'ACP_CLEANTALK_SFW_LABEL'		       		=> 'SpamFireWall',
+	'ACP_CLEANTALK_SFW_DESCR'		        	=> 'Enables SpamFireWall. Reduces webserver load and prevents bots to access the website.',
 
 	'ACP_CLEANTALK_APIKEY_LABEL'		        => 'Access key',
 	'ACP_CLEANTALK_APIKEY_DESCR'		        => 'To get an access key please register at site ',
+	'ACP_CLEANTALK_APIKEY_IS_OK_LABEL'			=> 'Key is ok!',
+	'ACP_CLEANTALK_APIKEY_IS_BAD_LABEL'			=> 'Key is not valid!',
+	'ACP_CLEANTALK_APIKEY_GET_AUTO_BUTTON_LABEL'		=> 'Get Access key automatically',
+	'ACP_CLEANTALK_APIKEY_GET_MANUALLY_BUTTON_LABEL'	=> 'Get Access manually',
+	'ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON'		=> 'Click here to get anti-spam statistics',
 
 	'MAIL_CLEANTALK_ERROR'			            => 'Error while connecting to CleanTalk service',
 	'LOG_CLEANTALK_ERROR'			            => '<strong>Error while connecting to CleanTalk service</strong><br />%s',
