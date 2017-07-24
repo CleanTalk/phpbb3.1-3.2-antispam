@@ -239,6 +239,7 @@ class main_module
 					}
 				}
 			}
+
 			if($error!='')
 			{
 				$template->assign_var('CT_ERROR', $error);
@@ -248,9 +249,21 @@ class main_module
 				@header("Location: ".str_replace('&check_users_spam=1', '&finish_check=1', html_entity_decode($request->server('REQUEST_URI'))));
 			}
 		}
-		$sql = 'SELECT * 
+		$start_entry = '0';		
+		if(isset($_GET['start_entry']) && intval($request->variable('start_entry',1)))
+			$start_entry = strval(intval($request->variable('start_entry',1)));
+		$on_page = '20';
+		$end_entry = strval(intval($start_entry) + intval($on_page));
+		$sql = 'SELECT COUNT(user_id) AS user_count
 			FROM ' . USERS_TABLE . '
 			where ct_marked = 1';
+		$result = $db->sql_query($sql);
+		$spam_users_count = (int)$db->sql_fetchfield('user_count');
+
+		$sql = 'SELECT * 
+			FROM ' . USERS_TABLE . '
+			where ct_marked = 1
+			LIMIT '.$start_entry.','.$end_entry.'';
 		$result = $db->sql_query($sql);
 		if($request->variable('finish_check', '', false, \phpbb\request\request_interface::GET)!='')
 		{
@@ -272,7 +285,20 @@ class main_module
 			));
 		}
 		$db->sql_freeresult($result);
-		
+		$pages = ceil(intval($spam_users_count) / $on_page);
+		$server_uri = 'index.php?sid='.$request->variable('sid','1').'&i='.$request->variable('i','1');
+		if ($pages>1)
+		{
+			$pages_str = "<ul><li style='display: inline-block; margin: 10px 5px;'>Pages:</li>";
+			for($i=1; $pages >= $i; $i++){
+				$pages_str  .= "					
+					<li style='display: inline-block; padding: 3px 5px; background: rgba(23,96,147,".((isset($_GET['curr_page']) && $request->variable('start_entry',1) == $i) || (!isset($_GET['curr_page']) && $i == 1) ? "0.6" : "0.3")."); border-radius: 3px;'>
+								<a href=".$server_uri."&start_entry=".($i-1)*$on_page."&curr_page=$i>$i</a>
+					</li>";
+				}
+			$page_str.="</ul>";
+			$template->assign_var('CT_CHECKUSERS_PAGES', $pages_str);
+		}
 		if ($found)
 		{
 			$template->assign_var('CT_TABLE_USERS_SPAM', '1');
