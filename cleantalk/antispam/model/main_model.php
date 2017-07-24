@@ -268,7 +268,7 @@ class main_model
 				$js_key = $js_keys['keys'][max($keys_times)];
 			}
 		
-	}
+			}
 					$config_text->set_array(array(
 					'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
 				));
