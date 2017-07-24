@@ -27,18 +27,7 @@ class main_model
 	{
 		global $config, $user, $request, $phpbb_root_path, $phpEx, $phpbb_log;
 		
-		$ct_checkjs_val = $request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
-		if ($ct_checkjs_val === ''){
-			$checkjs = NULL;
-		}
-		elseif (in_array($ct_checkjs_val, self::get_check_js_array()))
-		{
-			$checkjs = 1;
-		}
-		else
-		{
-			$checkjs = 0;
-		}
+		$checkjs = self::cleantalk_is_valid_js() ? 1 : 0;
 
 		$ct = new \cleantalk\antispam\model\Cleantalk();
 		
@@ -237,33 +226,83 @@ class main_model
 			' WHERE session_id = \'' . $db->sql_escape($user->session_id) . '\'';
 		$db->sql_query($sql);
 	}
-
-	/**
-	* Gets session-unique hash for JS-enabled checking
-	*
-	* @return string			Session-unique hash
-	*/
-	static public function get_check_js_value()
-	{
-		global $config;
-		return md5($config['cleantalk_antispam_apikey'] . date("Ymd",time()));
+    static public function cleantalk_get_checkjs_code()
+    {
+		global $config,$phpbb_container;
+		$config_text = $phpbb_container->get('config_text');
+		$config_text_data = $config_text->get_array(array(
+			'cleantalk_antispam_js_keys'
+		));
+		$js_keys = isset($config_text_data['cleantalk_antispam_js_keys']) ? json_decode($config_text_data['cleantalk_antispam_js_keys'], true) : null;
+    	$api_key = isset($config['cleantalk_antispam_apikey']) ? $config['cleantalk_antispam_apikey'] : null;
+    	if($js_keys == null){
+		
+		$js_key = strval(md5($api_key . time()));
+		
+		$js_keys = array(
+			'keys' => array(
+				array(
+					time() => $js_key
+				)
+			), // Keys to do JavaScript antispam test 
+			'js_keys_amount' => 24, // JavaScript keys store days - 2 days now
+			'js_key_lifetime' => 86400, // JavaScript key life time in seconds - 1 day now
+		);
+		
+		}else{
+			
+			$keys_times = array();
+			
+			foreach($js_keys['keys'] as $time => $key){
+				
+				if($time + $js_keys['js_key_lifetime'] < time())
+					unset($js_keys['keys'][$time]);
+				
+				$keys_times[] = $time;
+			}unset($time, $key);
+			
+			if(max($keys_times) + 3600 < time()){
+				$js_key =  strval(md5($api_key . time()));
+				$js_keys['keys'][time()] = $js_key;
+			}else{
+				$js_key = $js_keys['keys'][max($keys_times)];
+			}
+		
 	}
+					$config_text->set_array(array(
+					'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
+				));
+		return $js_key;	
+
+    }  
 	
 	/** Return array of JS-keys for checking
 	*
 	* @return array
 	*/
-	static public function get_check_js_array()
+	static public function cleantalk_is_valid_js()
 	{
-		global $config;
-		$result=array();
-		for($i=-5;$i<=1;$i++)
-		{
-			$result[]=md5($config['cleantalk_antispam_apikey'] . date("Ymd",time()+86400*$i));
-		}
-		return $result;
+		global $request;
+		$ct_checkjs_val = $request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
+		if(isset($ct_checkjs_val)){
+					
+			global $config,$phpbb_container;
+			
+		$config_text = $phpbb_container->get('config_text');
+		$config_text_data = $config_text->get_array(array(
+			'cleantalk_antispam_js_keys'
+		));
+		$js_keys = isset($config_text_data['cleantalk_antispam_js_keys']) ? json_decode($config_text_data['cleantalk_antispam_js_keys'], true) : null;
+			if($js_keys){
+				$result = in_array($ct_checkjs_val, $js_keys['keys']);
+			}else{
+				$result = false;
+			}
+			
+		}else
+			$result = false;
+	    return  $result;
 	}
-
 	/**
 	* Gets conplete JS-code with session-unique hash to insert into template for JS-ebabled checkibg
 	*
@@ -272,14 +311,8 @@ class main_model
 	static public function get_check_js_script()
 	{	
 		global $request;
-		
-		// $ct_check_def = '0';
-		$ct_checkjs_val = $request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
-		// if ($ct_checkjs_val === '')
-			// setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
-						
-		$ct_check_value = self::get_check_js_value();
-		
+
+		$ct_check_value = self::cleantalk_get_checkjs_code();
 		$js_template = '<script type="text/javascript">
 			function ctSetCookie(c_name, value) {
 				document.cookie = c_name + "=" + encodeURIComponent(value) + "; path=/";
