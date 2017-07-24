@@ -20,9 +20,9 @@ class main_module
 		$this->tpl_name = 'settings_body';
 		$this->page_title = $user->lang('ACP_CLEANTALK_TITLE');
 		add_form_key('cleantalk/antispam');
-				
-		if ($request->is_set_post('submit') || $request->is_set_post('get_key_auto'))
-		{
+		
+		if ($request->is_set_post('submit') || $request->is_set_post('get_key_auto')){
+			
 			if (!check_form_key('cleantalk/antispam'))
 				trigger_error('FORM_INVALID');
 
@@ -34,43 +34,42 @@ class main_module
 			$key_is_valid = false;
 			$user_token_is_valid = false;
 			
-			if($request->is_set_post('submit'))
+			if($request->is_set_post('submit')){
 				$config->set('cleantalk_antispam_apikey', $request->variable('cleantalk_antispam_apikey', ''));
+			}
 			
 			if($request->is_set_post('get_key_auto')){
-				
-				if(!function_exists('sendRawRequest'))
-					require_once(__DIR__."/../model/cleantalk.class.php");
-				
-				$req=Array();
-				$req['method_name'] = 'get_api_key'; 
-				$req['email'] = $config['board_email'];
-				$req['website'] = $request->server('SERVER_NAME');
-				$req['platform'] = 'phpbb31';
-				$req['timezone'] = $config['board_timezone'];
-				$req['product_name'] = 'antispam';
-				$url = 'https://api.cleantalk.org';
-				
-				$result = \CleanTalkBase\sendRawRequest($url,$req);
+							
+				$result = \cleantalk\antispam\acp\cleantalkHelper::getAutoKey(
+					$config['board_email'],
+					$request->server('SERVER_NAME'),
+					'phpbb31',
+					$config['board_timezone']
+				);
 				$result = ($result != false ? json_decode($result, true): false);
 				
-				if(isset($result['data']) && is_array($result['data'])){			
-					$config->set('cleantalk_antispam_user_token', $result['data']['user_token']);
+				if(isset($result['data']) && is_array($result['data'])){
+						
 					$config->set('cleantalk_antispam_apikey', $result['data']['auth_key']);
 					$savekey = $result['data']['auth_key'];
 					$key_is_valid = true;
-					$user_token_is_valid = true;					
+					if(!empty($result['data']['user_token'])){
+						$config->set('cleantalk_antispam_user_token', $result['data']['user_token']);
+						$user_token_is_valid = true;
+					}else{
+						$config->set('cleantalk_antispam_user_token', '');
+						$user_token_is_valid = false;
+					}
 				}
 			}
 			
 			$savekey = $key_is_valid ? $savekey : $request->variable('cleantalk_antispam_apikey', '');
 			
 			if($savekey != ''){
-								
+				
 				if(!$key_is_valid){
-					if(!function_exists('noticePaidTill'))
-						require_once(__DIR__."/../model/cleantalk.class.php");
-					$result = \CleanTalkBase\sendRawRequest("https://api.cleantalk.org?method_name=notice_validate_key&auth_key=$savekey", array());
+					
+					$result = \cleantalk\antispam\acp\cleantalkHelper::noticeValidateKey($savekey);
 					$result = json_decode($result, true);
 					$key_is_valid = $result['valid'] ? true : false;
 				}
@@ -86,14 +85,18 @@ class main_module
 					
 					if(!$user_token_is_valid){
 						
-						if(!function_exists('noticePaidTill'))
-							require_once(__DIR__."/../model/cleantalk.class.php");
-					
-						$result = \CleanTalkBase\noticePaidTill($savekey);
+						$result = \cleantalk\antispam\acp\cleantalkHelper::noticePaidTill($savekey);
 						$result = json_decode($result, true);
-						if(isset($result['data']) && isset($result['data']['user_token']))
-						$config->set('cleantalk_antispam_user_token', $result['data']['user_token']);
-					
+						if(!empty($result['data'])){
+							$config->set('cleantalk_antispam_show_notice', $result['data']['show_notice']);
+							$config->set('cleantalk_antispam_renew',       $result['data']['renew']);
+							$config->set('cleantalk_antispam_trial',       $result['data']['trial']);
+							$config->set('cleantalk_antispam_user_token',  $result['data']['user_token']);
+							$config->set('cleantalk_antispam_spam_count',  $result['data']['spam_count']);
+							$config->set('cleantalk_antispam_moderate_ip', $result['data']['moderate_ip']);
+							$config->set('cleantalk_antispam_show_review', $result['data']['show_review']);
+							$config->set('cleantalk_antispam_ip_license',  $result['data']['ip_license']);
+						}
 					}	
 					$composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
 					
@@ -116,6 +119,7 @@ class main_module
 		
 		$template->assign_vars(array(
 			'U_ACTION'				=> $this->u_action,
+			'CLEANTALK_SHOW_REVIEW_BANNER'  => $config['cleantalk_antispam_show_review'] ? true : false,
 			'CLEANTALK_ANTISPAM_REGS'		=> $config['cleantalk_antispam_regs'] ? true : false,
 			'CLEANTALK_ANTISPAM_GUESTS'		=> $config['cleantalk_antispam_guests'] ? true : false,
 			'CLEANTALK_ANTISPAM_NUSERS'		=> $config['cleantalk_antispam_nusers'] ? true : false,
@@ -129,40 +133,36 @@ class main_module
 
 		$user->add_lang_ext('cleantalk/antispam', 'common');
 
-		$ct_del_user = $request->variable('ct_del_user', array(0), 		false, \phpbb\request\request_interface::POST);
-		$ct_del_all = $request->variable('ct_delete_all', 			'', false, \phpbb\request\request_interface::POST);
+		$ct_del_user = $request->variable('ct_del_user',   array(0), false, \phpbb\request\request_interface::POST);
+		$ct_del_all  = $request->variable('ct_delete_all', '',       false, \phpbb\request\request_interface::POST);
 				
-		if($ct_del_all!='')
-		{
-			if (!function_exists('user_delete'))
-			{
+		if($ct_del_all!=''){
+			
+			if (!function_exists('user_delete')){
 				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
 			$sql = 'SELECT * 
 				FROM ' . USERS_TABLE . ' 
 				WHERE ct_marked=1';
 			$result = $db->sql_query($sql);
-			while($row = $db->sql_fetchrow($result))
-			{
+			while($row = $db->sql_fetchrow($result)){
 				user_delete('remove', $row['user_id']);
 			}
 			$db->sql_freeresult($result);
 		}
 		
-		if(sizeof($ct_del_user)>0)
-		{
-			if (!function_exists('user_delete'))
-			{
+		if(sizeof($ct_del_user)>0){
+			
+			if (!function_exists('user_delete')){
 				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
-			foreach($ct_del_user as $key=>$value)
-			{
+			foreach($ct_del_user as $key=>$value){
 				user_delete('retain', $key);
 			}
 		}
 		
-		if(isset($_GET['check_users_spam']))
-		{
+		if(isset($_GET['check_users_spam'])){
+			
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
 				SET ct_marked=0';
 			$result = $db->sql_query($sql);
@@ -170,9 +170,9 @@ class main_module
 				FROM " . USERS_TABLE . " 
 				WHERE user_password<>'';";
 			$result = $db->sql_query($sql);
-			$users = array(0 => array());
-			$data=array(0 => array());
-			$cnt=0;
+			$users  = array(0 => array());
+			$data   = array(0 => array());
+			$cnt    = 0;
 			while($row = $db->sql_fetchrow($result))
 			{
 				$users[$cnt][] = array('name' => $row['username'],
@@ -196,16 +196,8 @@ class main_module
 			$error="";
 			for($i=0;$i<sizeof($users);$i++)
 			{
-				$send=implode(',',$data[$i]);
-				$req="data=$send";
-				$opts = array(
-				    'http'=>array(
-				        'method'=>"POST",
-				        'content'=>$req,
-				    )
-				);
-				$context = stream_context_create($opts);
-				$result = @file_get_contents("https://api.cleantalk.org/?method_name=spam_check_cms&auth_key=".$config['cleantalk_antispam_apikey'], 0, $context);
+				
+				$result = \cleantalk\antispam\acp\cleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], implode(',',$data[$i]));
 								
 				$result=json_decode($result);
 				

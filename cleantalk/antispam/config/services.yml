@@ -25,3 +25,12 @@ services:
             - [set_name, [cron.task.cleantalk_antispam_sfw_update]]
         tags:
             - { name: cron.task }
+    cleantalk.antispam.cron.task.cleantalk_antispam_check_payment_status:
+        class: cleantalk\antispam\cron\task\cleantalk_antispam_check_payment_status
+        arguments:
+            - @config
+        calls:
+            - [set_name, [cron.task.cleantalk_antispam_check_payment_status]]
+        tags:
+            - { name: cron.task }
+            

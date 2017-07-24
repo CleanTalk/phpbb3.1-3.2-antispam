@@ -23,19 +23,14 @@ class main_model
 	* @return array				array with result flags
 	*/
 	
-	
-	
 	static public function check_spam( $spam_check )
 	{
 		global $config, $user, $request, $phpbb_root_path, $phpEx, $phpbb_log;
-		require_once 'cleantalk.class.php';
-
+		
 		$ct_checkjs_val = $request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
-		if ($ct_checkjs_val === '')
-		{
+		if ($ct_checkjs_val === ''){
 			$checkjs = NULL;
 		}
-		//elseif ($ct_checkjs_val == self::get_check_js_value())
 		elseif (in_array($ct_checkjs_val, self::get_check_js_array()))
 		{
 			$checkjs = 1;
@@ -45,11 +40,10 @@ class main_model
 			$checkjs = 0;
 		}
 
-		$ct = new \CleanTalkBase\Cleantalk();
+		$ct = new \cleantalk\antispam\model\Cleantalk();
 		
 		$root_dir= realpath(dirname(__FILE__).'/../../../../');
-		if(file_exists($root_dir."/cleantalk.pem"))
-		{
+		if(file_exists($root_dir."/cleantalk.pem")){
 			$ct->ssl_on = true;
 			$ct->ssl_path = $root_dir."/cleantalk.pem";
 		}
@@ -87,15 +81,13 @@ class main_model
 		
 		$composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
 
-		$ct_request = new \CleanTalkBase\CleantalkRequest();
-		if(isset($spam_check['auth_key']))
-		{
+		$ct_request = new \cleantalk\antispam\model\CleantalkRequest();
+		if(isset($spam_check['auth_key'])){
 			$ct_request->auth_key = $spam_check['auth_key'];
-		}
-		else
-		{
+		}else{
 			$ct_request->auth_key = $config['cleantalk_antispam_apikey'];
 		}
+		
 		$ct_request->agent = 'phpbb31-' . preg_replace("/(\d+)\.(\d*)\.?(\d*)/", "$1$2$3", $composer_json->version);
 		$ct_request->js_on = $checkjs;
 		$ct_request->sender_info = $sender_info;
@@ -133,7 +125,7 @@ class main_model
 			$config->set('cleantalk_antispam_server_ttl',     $ct->server_ttl);
 			$config->set('cleantalk_antispam_server_changed', time());
 		}
-
+		
 		// First check errstr flag.
 		if (!empty($ct_result->errstr) && $checkjs = 1
 			|| (!empty($ct_result->inactive) && $ct_result->inactive == 1)
@@ -142,16 +134,22 @@ class main_model
 			// Cleantalk error so we go default way (no action at all).
 			$ret_val['errno'] = 1;
 			$ct_result->allow = 1;
-			if (!empty($ct_result->errstr))
-			{
+			
+			if (!empty($ct_result->errstr)){
+				
+				if($ct_result->curl_err){
+					$ct_result->errstr = $user->lang('CLEANTALK_ERROR_CURL', $ct_result->curl_err);
+				}else{
+					$ct_result->errstr = $user->lang('CLEANTALK_ERROR_NO_CURL');
+				}
+				$ct_result->errstr .= $user->lang('CLEANTALK_ERROR_ADDON');
+							
 				$ret_val['errstr'] = self::filter_response($ct_result->errstr);
-			}
-			else
-			{
+			}else{
 				$ret_val['errstr'] = self::filter_response($ct_result->comment);
 			}
 
-			$phpbb_log->add('admin', ANONYMOUS, '127.0.0.1', 'LOG_CLEANTALK_ERROR', time(), array($ret_val['errstr']));
+			$phpbb_log->add('admin', ANONYMOUS, '127.0.0.1', 'CLEANTALK_ERROR_LOG', time(), array($ret_val['errstr']));
 
 			// Email to admin once per 15 min
 			if (time() - 900 > $config['cleantalk_antispam_error_time'])
@@ -163,8 +161,8 @@ class main_model
 				}
 
 				$hr_url = str_replace(array('http://', 'https://'), array('', ''), generate_board_url());
-				$err_title = $hr_url. ' - ' . $user->lang['MAIL_CLEANTALK_ERROR'];
-				$err_message = $hr_url. ' - ' . $user->lang['MAIL_CLEANTALK_ERROR'] . " :\n" . $ret_val['errstr'];
+				$err_title = $hr_url. ' - ' . $user->lang['CLEANTALK_ERROR_MAIL'];
+				$err_message = $hr_url. ' - ' . $user->lang['CLEANTALK_ERROR_MAIL'] . " :\n" . $ret_val['errstr'];
 
 				$headers = array();
 				$headers[] = 'Reply-To: ' . $config['board_email'];
@@ -275,10 +273,10 @@ class main_model
 	{	
 		global $request;
 		
-		$ct_check_def = '0';
+		// $ct_check_def = '0';
 		$ct_checkjs_val = $request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
-		if ($ct_checkjs_val === '')
-			setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
+		// if ($ct_checkjs_val === '')
+			// setcookie(self::JS_FIELD_NAME, $ct_check_def, 0, '/');
 						
 		$ct_check_value = self::get_check_js_value();
 		
@@ -299,10 +297,11 @@ class main_model
 
 			//Stop observing function
 			function ctMouseStopData(){
-				if(typeof window.addEventListener == "function")
+				if(typeof window.addEventListener == "function"){
 					window.removeEventListener("mousemove", ctFunctionMouseMove);
-				else
+				}else{
 					window.detachEvent("onmousemove", ctFunctionMouseMove);
+				}
 				clearInterval(ctMouseReadInterval);
 				clearInterval(ctMouseWriteDataInterval);				
 			}
@@ -342,8 +341,9 @@ class main_model
 					ctMouseData += "[" + event.pageY + "," + event.pageX + "," + (mouseDate.getTime() - ctTimeMs) + "],";
 					ctMouseDataCounter++;
 					ctMouseEventTimerFlag = false;
-					if(ctMouseDataCounter >= 100)
+					if(ctMouseDataCounter >= 100){
 						ctMouseStopData();
+					}
 				}
 			}
 			//Writing first key press timestamp
@@ -375,29 +375,32 @@ class main_model
 	*/
 	static public function sfw_check(){
 		
-		global $config, $request;
-				
+		global $config, $request, $user;
+		
 		if($config['cleantalk_antispam_sfw_enabled'] && $config['cleantalk_antispam_key_is_ok']){
 			
-			require_once 'cleantalk-sfw.class.php';
-			
 			$is_sfw_check = true;
-			$sfw = new \CleanTalkBaseSFW\CleanTalkSFW();
+			$sfw = new \cleantalk\antispam\model\CleantalkSFW();
+			
 			$ip = $sfw->cleantalk_get_real_ip();
 			
+			$cookie_prefix = $config['cookie_name']   ? $config['cookie_name'].'_'           : '';
+			$cookie_domain = $config['cookie_domain'] ? " domain={$config['cookie_domain']};" : ''; 
+			
+			$ct_sfw_pass_key 	= $request->variable($cookie_prefix.'ct_sfw_pass_key', '', false, \phpbb\request\request_interface::COOKIE);
+			$ct_sfw_passed 		= $request->variable($cookie_prefix.'ct_sfw_passed',   '', false, \phpbb\request\request_interface::COOKIE);
+			
 			foreach($ip as $ct_cur_ip){
-				
-				$ct_sfw_pass_key 	= $request->variable('ct_sfw_pass_key', '', false, \phpbb\request\request_interface::COOKIE);
-				$ct_sfw_passed 		= $request->variable('ct_sfw_passed', 	'', false, \phpbb\request\request_interface::COOKIE);
-				
+								
 				if($ct_sfw_pass_key == md5($ct_cur_ip.$config['cleantalk_antispam_apikey'])){
-					$is_sfw_check=false;
+					
+					$is_sfw_check = false;
 					if($ct_sfw_passed){
 						$sfw->sfw_update_logs($ct_cur_ip, 'passed');
-						@setcookie ('ct_sfw_passed', '0', 1, "/");
+						$user->set_cookie('ct_sfw_passed', '0', 1);
 					}
 				}else
-					$is_sfw_check=true;
+					$is_sfw_check = true;
 				
 			} unset($ct_cur_ip);
 			
@@ -405,9 +408,11 @@ class main_model
 				$sfw->check_ip();
 				if($sfw->result){
 					$sfw->sfw_update_logs($sfw->blocked_ip, 'blocked');
-					$sfw->sfw_die($config['cleantalk_antispam_apikey']);
+					$sfw->sfw_die($config['cleantalk_antispam_apikey'], $cookie_prefix, $cookie_domain);
+				}else{
+					$user->set_cookie('ct_sfw_pass_key', md5($sfw->passed_ip.$config['cleantalk_antispam_apikey']), 0, false);
 				}
-			}
+			}			
 		}
 	}
 	
@@ -416,8 +421,8 @@ class main_model
 	* @return void
 	*/
 	static public function sfw_update($api_key){
-		require_once 'cleantalk-sfw.class.php';
-		$result = \CleanTalkBaseSFW\CleanTalkSFW::sfw_update($api_key);
+		$sfw = new \cleantalk\antispam\model\CleantalkSFW();
+		$result = $sfw->sfw_update($api_key);
 	}
 	
 	/**
@@ -425,7 +430,26 @@ class main_model
 	* @return void
 	*/
 	static public function sfw_send_logs($api_key){
-		require_once 'cleantalk-sfw.class.php';		
-		$result = \CleanTalkBaseSFW\CleanTalkSFW::send_logs($api_key);		
+		$sfw = new \cleantalk\antispam\model\CleantalkSFW();
+		$result = $sfw->send_logs($api_key);
 	}
+	
+	static public function check_payment_status($api_key){
+		
+		global $config;
+		
+		$result = \cleantalk\antispam\acp\cleantalkHelper::noticePaidTill($api_key);
+		$result = json_decode($result, true);
+		if(!empty($result['data'])){
+			$config->set('cleantalk_antispam_show_notice', $result['data']['show_notice']);
+			$config->set('cleantalk_antispam_renew',       $result['data']['renew']);
+			$config->set('cleantalk_antispam_trial',       $result['data']['trial']);
+			$config->set('cleantalk_antispam_user_token',  $result['data']['user_token']);
+			$config->set('cleantalk_antispam_spam_count',  $result['data']['spam_count']);
+			$config->set('cleantalk_antispam_moderate_ip', $result['data']['moderate_ip']);
+			$config->set('cleantalk_antispam_show_review', $result['data']['show_review']);
+			$config->set('cleantalk_antispam_ip_license',  $result['data']['ip_license']);
+		}
+	}
+	
 }
