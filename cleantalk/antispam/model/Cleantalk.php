@@ -390,7 +390,12 @@ class Cleantalk {
         $result = false;
 		
 		if($msg->method_name != 'send_feedback'){
-			$tmp = apache_request_headers();
+			
+			if(function_exists( 'apache_request_headers' )){
+				$headers = apache_request_headers();
+			}else{
+				$headers = self::apache_request_headers();
+			}
 			
 			if(isset($tmp['Cookie'])){
 				$cookie_name = 'Cookie';
@@ -660,7 +665,8 @@ class Cleantalk {
     * @return string
     */
     public function stringToUTF8($str, $data_codepage = null){
-        if (!preg_match('//u', $str) && function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding')) {
+        if (!preg_match('//u', $str) && function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding'))
+		{
             
             if ($data_codepage !== null)
                 return mb_convert_encoding($str, 'UTF-8', $data_codepage);
@@ -680,7 +686,8 @@ class Cleantalk {
     * @return string
     */
     public function stringFromUTF8($str, $data_codepage = null){
-        if (preg_match('//u', $str) && function_exists('mb_convert_encoding') && $data_codepage !== null) {
+        if (preg_match('//u', $str) && function_exists('mb_convert_encoding') && $data_codepage !== null)
+		{
             return mb_convert_encoding($str, $data_codepage, 'UTF-8');
         }
         
@@ -696,7 +703,7 @@ class Cleantalk {
 		if(function_exists( 'apache_request_headers' )){
 			$headers = apache_request_headers();
 		}else{
-			$headers = $_SERVER;
+			$headers = self::apache_request_headers();
 		}
 		
 		if(array_key_exists( 'X-Forwarded-For', $headers )){
@@ -713,5 +720,31 @@ class Cleantalk {
 	
 	public function cleantalk_is_JSON($string){
 		return ((is_string($string) && (is_object(json_decode($string)) || is_array(json_decode($string))))) ? true : false;
+	}
+	
+	static function apache_request_headers(){
+		
+		if(defined('IN_PHPBB')){
+			global $request;
+			$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
+		}
+		
+		$to_return = array();
+		foreach($_SERVER as $key => $val){
+			if(preg_match('/\AHTTP_/', $key)){
+				$arh_key = preg_replace('/\AHTTP_/', '', $key);
+				$rx_matches = array();
+				$rx_matches = explode('_', $arh_key);
+				if(count($rx_matches) > 0 and strlen($arh_key) > 2){
+					foreach($rx_matches as $ak_key => $ak_val){
+						$ak_val = strtolower($ak_val);
+						$rx_matches[$ak_key] = ucfirst($ak_val);
+					}
+					$arh_key = implode('-', $rx_matches);
+				}
+				$to_return[$arh_key] = $val;
+			}
+		}
+		return $to_return;
 	}
 }

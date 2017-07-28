@@ -26,19 +26,9 @@ class release_5_4_0 extends \phpbb\db\migration\migration
 	{
 		return array(
 		
-			// Result of notice_paid_till method
-			array('config.add', array('cleantalk_antispam_show_notice', 0)),
-			array('config.add', array('cleantalk_antispam_renew',       0)),
-			array('config.add', array('cleantalk_antispam_trial',       0)),
-			array('config.add', array('cleantalk_antispam_spam_count',  0)),
-			array('config.add', array('cleantalk_antispam_moderate_ip', 0)),
-			array('config.add', array('cleantalk_antispam_show_review', 0)),
-			array('config.add', array('cleantalk_antispam_ip_license',  0)),
+			// Variable JS check field
 			array('config_text.add', array('cleantalk_antispam_js_keys','')),
-		
-			// Checks if the key is paid
-			array('config.add', array('cleantalk_antispam_check_payment_status_last_gc', 0)),
-			array('config.add', array('cleantalk_antispam_check_payment_status_gc', (86400)))
+			
 		);
 	}
 
@@ -49,13 +39,13 @@ class release_5_4_0 extends \phpbb\db\migration\migration
 
 	public function revert_schema()
 	{	
-		  return array(
-		   'drop_columns' => array(
-			phpbb_config_text => array(
-			 'cleantalk_antispam_js_keys'
+		return array(
+			'drop_columns' => array(
+				phpbb_config_text => array(
+					'cleantalk_antispam_js_keys'
+				)
 			)
-		   )
-		  );
+		);
 	}
 
 }

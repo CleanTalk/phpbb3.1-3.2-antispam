@@ -73,35 +73,25 @@ class cleantalkSFW
 	*	Compatible with any CMS
 	*/
 	public function cleantalk_get_real_ip(){
+				
+		if(function_exists('apache_request_headers'))
+			$headers = apache_request_headers();
+		else
+			$headers = self::apache_request_headers();
+				
+		$headers['X-Forwarded-For'] = isset($headers['X-Forwarded-For']) ? $headers['X-Forwarded-For'] : null;
+		$headers['HTTP_X_FORWARDED_FOR'] = isset($headers['HTTP_X_FORWARDED_FOR']) ? $headers['HTTP_X_FORWARDED_FOR'] : null;
+		
+		if(defined("IN_PHPBB")){
+			global $request;
+			$headers['REMOTE_ADDR'] = $request->server('REMOTE_ADDR');
+			$sfw_test_ip = $request->variable('sfw_test_ip', '');
+		}else{
+			$headers['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
+			$sfw_test_ip = isset($_GET['sfw_test_ip']) ? $_GET['sfw_test_ip'] : null;
+		}
 		
 		$result=Array();
-		if(function_exists('apache_request_headers')){
-			$headers = apache_request_headers();
-			$headers['X-Forwarded-For'] = isset($headers['X-Forwarded-For']) ? $headers['X-Forwarded-For'] : null;
-			$headers['HTTP_X_FORWARDED_FOR'] = isset($headers['HTTP_X_FORWARDED_FOR']) ? $headers['HTTP_X_FORWARDED_FOR'] : null;
-			if(defined("IN_PHPBB")){
-				global $request;
-				$headers['REMOTE_ADDR'] = $request->server('REMOTE_ADDR');
-				$sfw_test_ip = $request->variable('sfw_test_ip', '');
-			}else{
-				$headers['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
-				$sfw_test_ip = isset($_GET['sfw_test_ip']) ? $_GET['sfw_test_ip'] : null;
-			}
-		}else{
-			if(defined("IN_PHPBB")){
-				global $request;
-				$headers['REMOTE_ADDR'] = $request->server('REMOTE_ADDR');
-				$headers['X-Forwarded-For'] = $request->server('X-Forwarded-For');
-				$headers['HTTP_X_FORWARDED_FOR'] = $request->server('HTTP_X_FORWARDED_FOR');
-				$sfw_test_ip = $request->variable('sfw_test_ip', '');
-			}else{
-				$headers = $_SERVER;
-				$headers['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
-				$headers['X-Forwarded-For'] = isset($headers['X-Forwarded-For']) ? $headers['X-Forwarded-For'] : null;
-				$headers['HTTP_X_FORWARDED_FOR'] = isset($headers['HTTP_X_FORWARDED_FOR']) ? $headers['HTTP_X_FORWARDED_FOR'] : null;
-				$sfw_test_ip = isset($_GET['sfw_test_ip']) ? $_GET['sfw_test_ip'] : null;
-			}
-		}
 		
 		if( $headers['X-Forwarded-For'] ){
 			$the_ip = explode(",", trim($headers['X-Forwarded-For']));
@@ -406,5 +396,31 @@ class cleantalkSFW
 			$result = @file_get_contents($url, 0, $context);
 		}
 		return $result;
+	}
+	
+	static function apache_request_headers(){
+		
+		if(defined('IN_PHPBB')){
+			global $request;
+			$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
+		}
+		
+		$to_return = array();
+		foreach($_SERVER as $key => $val){
+			if(preg_match('/\AHTTP_/', $key)){
+				$arh_key = preg_replace('/\AHTTP_/', '', $key);
+				$rx_matches = array();
+				$rx_matches = explode('_', $arh_key);
+				if(count($rx_matches) > 0 and strlen($arh_key) > 2){
+					foreach($rx_matches as $ak_key => $ak_val){
+						$ak_val = strtolower($ak_val);
+						$rx_matches[$ak_key] = ucfirst($ak_val);
+					}
+					$arh_key = implode('-', $rx_matches);
+				}
+				$to_return[$arh_key] = $val;
+			}
+		}
+		return $to_return;
 	}
 }
