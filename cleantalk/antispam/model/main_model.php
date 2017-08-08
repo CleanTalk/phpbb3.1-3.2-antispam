@@ -480,7 +480,6 @@ class main_model
 			$config->set('cleantalk_antispam_user_token',  $result['data']['user_token']);
 			$config->set('cleantalk_antispam_spam_count',  $result['data']['spam_count']);
 			$config->set('cleantalk_antispam_moderate_ip', $result['data']['moderate_ip']);
-			$config->set('cleantalk_antispam_show_review', $result['data']['show_review']);
 			$config->set('cleantalk_antispam_ip_license',  $result['data']['ip_license']);
 		}
 	}

@@ -94,7 +94,6 @@ class main_module
 							$config->set('cleantalk_antispam_user_token',  $result['data']['user_token']);
 							$config->set('cleantalk_antispam_spam_count',  $result['data']['spam_count']);
 							$config->set('cleantalk_antispam_moderate_ip', $result['data']['moderate_ip']);
-							$config->set('cleantalk_antispam_show_review', $result['data']['show_review']);
 							$config->set('cleantalk_antispam_ip_license',  $result['data']['ip_license']);
 						}
 					}	
@@ -119,7 +118,6 @@ class main_module
 		
 		$template->assign_vars(array(
 			'U_ACTION'				=> $this->u_action,
-			'CLEANTALK_SHOW_REVIEW_BANNER'  => $config['cleantalk_antispam_show_review'] ? true : false,
 			'CLEANTALK_ANTISPAM_REGS'		=> $config['cleantalk_antispam_regs'] ? true : false,
 			'CLEANTALK_ANTISPAM_GUESTS'		=> $config['cleantalk_antispam_guests'] ? true : false,
 			'CLEANTALK_ANTISPAM_NUSERS'		=> $config['cleantalk_antispam_nusers'] ? true : false,

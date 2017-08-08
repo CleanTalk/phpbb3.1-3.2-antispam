@@ -96,7 +96,7 @@ class cleantalkSFW
 		if( $headers['X-Forwarded-For'] ){
 			$the_ip = explode(",", trim($headers['X-Forwarded-For']));
 			$the_ip = trim($the_ip[0]);
-			$result[] = $the_ip;
+			$result[] = mysql_escape_string($the_ip);
 			$this->ip_str_array[]=$the_ip;
 			$this->ip_array[]=sprintf("%u", ip2long($the_ip));
 		}
@@ -104,18 +104,18 @@ class cleantalkSFW
 		if( $headers['HTTP_X_FORWARDED_FOR'] ){
 			$the_ip = explode(",", trim($headers['HTTP_X_FORWARDED_FOR']));
 			$the_ip = trim($the_ip[0]);
-			$result[] = $the_ip;
+			$result[] = mysql_escape_string($the_ip);
 			$this->ip_str_array[]=$the_ip;
 			$this->ip_array[]=sprintf("%u", ip2long($the_ip));
 		}
 		
 		$the_ip = filter_var( $headers['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
-		$result[] = $the_ip;
+		$result[] = mysql_escape_string($the_ip);
 		$this->ip_str_array[]=$the_ip;
 		$this->ip_array[]=sprintf("%u", ip2long($the_ip));
 
 		if($sfw_test_ip){
-			$result[] = $sfw_test_ip;
+			$result[] = mysql_escape_string($sfw_test_ip);
 			$this->ip_str_array[]=$sfw_test_ip;
 			$this->ip_array[]=sprintf("%u", ip2long($sfw_test_ip));
 		}
@@ -163,7 +163,7 @@ class cleantalkSFW
 				
 		$blocked = ($result == 'blocked' ? ' + 1' : '');
 		$time = time();
-
+		$ip = mysql_escape_string($ip);
 		$query = "INSERT INTO ".$this->table_prefix."cleantalk_sfw_logs
 		SET 
 			ip = '$ip',
@@ -277,7 +277,7 @@ class cleantalkSFW
 		if(file_exists(dirname(__FILE__)."/sfw_die_page.html")){
 			$sfw_die_page = file_get_contents(dirname(__FILE__)."/sfw_die_page.html");
 		}else{
-			die($user->lang('SFW_DIE_NO_FILE'));
+			trigger_error($user->lang('SFW_DIE_NO_FILE'));
 		}
 		
 		// Translation
