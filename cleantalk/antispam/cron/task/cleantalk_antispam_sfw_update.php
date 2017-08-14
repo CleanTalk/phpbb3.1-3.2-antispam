@@ -29,7 +29,7 @@ class cleantalk_antispam_sfw_update extends \phpbb\cron\task\base
 	// Next run
 	public function should_run()
 	{
-		return $this->config['cleantalk_antispam_sfw_update_last_gc'] < time() - $this->config['cleantalk_antispam_sfw_update_gc'];
+		return (int)$this->config['cleantalk_antispam_sfw_update_last_gc'] < time() - (int)$this->config['cleantalk_antispam_sfw_update_gc'];
 	}
 	
 }
