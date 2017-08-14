@@ -1,10 +1,9 @@
 <?php
 /**
- * Cleantalk base class for PHPBB 3.1
- *
- * @version 2.1.4-phpbb
- * @package Cleantalk
- * @subpackage Base
+ * Cleantalk Base class
+ * Compatible only with phpBB 3.1+
+ * @version 2.3-phpbb
+ * @subpackage Request
  * @author Cleantalk team (welcome@cleantalk.org)
  * @copyright (C) 2014 CleanTalk team (http://cleantalk.org)
  * @license GNU/GPL: http://www.gnu.org/copyleft/gpl.html
@@ -14,10 +13,8 @@
 
 namespace cleantalk\antispam\model;
 
-/**
- * Request class
- */
-class CleantalkRequest {
+class CleantalkRequest
+{
 
      /**
      *  All http request headers
