@@ -140,7 +140,7 @@ class main_listener implements EventSubscriberInterface
 		}
 		else if ($this->config['cleantalk_antispam_nusers'] && $this->user->data['is_registered'] == 1)
 		{
-			$user_table = USER_GROUP_TABLE;
+			$user_group_table = USER_GROUP_TABLE;
 			$group_table = GROUPS_TABLE;
 			$user_id = (int) $this->user->data['user_id'];
 			$sql = "SELECT g.group_name 
