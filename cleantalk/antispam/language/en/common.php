@@ -21,9 +21,6 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_TITLE'			            => 'Antispam by CleanTalk',
 	
-	'ACP_CLEANTALK_REVIEW_BANNER'               => 'Help others know about CleanTalk!',
-	'ACP_CLEANTALK_REVIEW_BANNER_LINK'          => 'Rate it!',
-
 	'ACP_CLEANTALK_SETTINGS'		            => 'Spam protection settings',
 	'ACP_CLEANTALK_SETTINGS_SAVED'		        => 'Spam protection settings have been saved successfully!',
 
@@ -71,7 +68,7 @@ $lang = array_merge($lang, array(
 	'SFW_DIE_MAKE_SURE_JS_ENABLED'              => 'To continue working with web site, please make sure that you have enabled JavaScript.',
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Please click bellow to pass protection,',
 	'SFW_DIE_YOU_WILL_BE_REDIRECTED'            => 'Or you will be automatically redirected to the requested page after 3 seconds.',
-	'SFW_DIE_NO_FILE'                           => 'You IP looks like spammer\'s IP',
+	'SFW_DIE_NO_FILE'                           => 'You IP looks like spammer`s IP',
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'Error while connecting to CleanTalk service',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>Error while connecting to CleanTalk service</strong><br />%s',

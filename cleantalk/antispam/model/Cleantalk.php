@@ -1,8 +1,8 @@
 <?php
 /**
- * Cleantalk base class for PHPBB 3.1
- *
- * @version 2.1.4-phpbb
+ * Cleantalk Base class
+ * Compatible only with phpBB 3.1+
+ * @version 2.3-phpbb
  * @package Cleantalk
  * @subpackage Base
  * @author Cleantalk team (welcome@cleantalk.org)
@@ -14,10 +14,8 @@
 
 namespace cleantalk\antispam\model;
 
-/**
- * Cleantalk class create request
- */
-class Cleantalk {
+class Cleantalk
+{
 
     /**
      * Debug level
@@ -254,7 +252,7 @@ class Cleantalk {
         // Removing non UTF8 characters from request, because non UTF8 or malformed characters break json_encode().
         //
         foreach ($request as $param => $value) {
-            if (!preg_match("//u", $value))
+            if (!preg_match('//u', $value))
                 $request->{$param} = 'Nulled. Not UTF8 encoded or malformed.'; 
         }
         
@@ -313,12 +311,12 @@ class Cleantalk {
             // Disabling CA cert verivication
             // Disabling common name verification
             if ($this->ssl_on && $this->ssl_path=='') {
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
             }
             else if ($this->ssl_on && $this->ssl_path!='') {
             	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
                 curl_setopt($ch, CURLOPT_CAINFO, $this->ssl_path);
             }
 
@@ -390,7 +388,9 @@ class Cleantalk {
         $result = false;
 		
 		if($msg->method_name != 'send_feedback'){
-			$tmp = apache_request_headers();
+			$tmp = function_exists('apache_request_headers')
+				? apache_request_headers()
+				: self::apache_request_headers();
 			
 			if(isset($tmp['Cookie'])){
 				$cookie_name = 'Cookie';
@@ -413,18 +413,14 @@ class Cleantalk {
 		}
 		
         $si=(array)json_decode($msg->sender_info,true);
-        if(defined('IN_PHPBB')){
-        	global $request;
-        	if(method_exists($request,'server')){
-        		$si['remote_addr']=$request->server('REMOTE_ADDR');
-        		$msg->x_forwarded_for=$request->server('X_FORWARDED_FOR');
-        		$msg->x_real_ip=$request->server('X_REAL_IP');
-        	}
-        }else{
-        	$si['remote_addr']=$_SERVER['REMOTE_ADDR'];
-        	$msg->x_forwarded_for=@$_SERVER['X_FORWARDED_FOR'];
-        	$msg->x_real_ip=@$_SERVER['X_REAL_IP'];
-        }
+
+		global $request;
+		if(method_exists($request,'server')){
+			$si['remote_addr']=$request->server('REMOTE_ADDR');
+			$msg->x_forwarded_for=$request->server('X_FORWARDED_FOR');
+			$msg->x_real_ip=$request->server('X_REAL_IP');
+		}
+        
         $msg->sender_info=json_encode($si);
         if (((isset($this->work_url) && $this->work_url !== '') && ($this->server_changed + $this->server_ttl > time()))
 				|| $this->stay_on_server == true) {
@@ -482,7 +478,8 @@ class Cleantalk {
 		
         $response = new CleantalkResponse(null, $result);
 		
-        if (!empty($this->data_codepage) && $this->data_codepage !== 'UTF-8') {
+        if (!empty($this->data_codepage) && $this->data_codepage !== 'UTF-8') 
+		{
             if (!empty($response->comment))
             $response->comment = $this->stringFromUTF8($response->comment, $this->data_codepage);
             if (!empty($response->errstr))
@@ -499,7 +496,8 @@ class Cleantalk {
      * @param $host
      * @return array
      */
-    public function get_servers_ip($host) {
+    public function get_servers_ip($host)
+	{
         $response = null;
         if (!isset($host))
             return $response;
@@ -519,7 +517,8 @@ class Cleantalk {
 
             if ($records !== FALSE) {
                 foreach ($records as $server) {
-                    $response[] = array("ip" => $server,
+                    $response[] = array(
+						"ip" => $server,
                         "host" => $host,
                         "ttl" => $this->server_ttl
                     );
@@ -660,7 +659,8 @@ class Cleantalk {
     * @return string
     */
     public function stringToUTF8($str, $data_codepage = null){
-        if (!preg_match('//u', $str) && function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding')) {
+        if (!preg_match('//u', $str) && function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding'))
+		{
             
             if ($data_codepage !== null)
                 return mb_convert_encoding($str, 'UTF-8', $data_codepage);
@@ -680,7 +680,8 @@ class Cleantalk {
     * @return string
     */
     public function stringFromUTF8($str, $data_codepage = null){
-        if (preg_match('//u', $str) && function_exists('mb_convert_encoding') && $data_codepage !== null) {
+        if (preg_match('//u', $str) && function_exists('mb_convert_encoding') && $data_codepage !== null)
+		{
             return mb_convert_encoding($str, $data_codepage, 'UTF-8');
         }
         
@@ -688,22 +689,17 @@ class Cleantalk {
     }
     
 	static public function cleantalk_get_real_ip(){
-		if(defined('IN_PHPBB')){
-			global $request;
-			$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
-		}
+
+		global $request;
+
+		$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
 		
-		if(function_exists( 'apache_request_headers' )){
-			$headers = apache_request_headers();
-		}else{
-			$headers = $_SERVER;
-		}
+		$headers = function_exists('apache_request_headers')
+			? apache_request_headers()
+			: self::apache_request_headers();
 		
 		if(array_key_exists( 'X-Forwarded-For', $headers )){
 			$the_ip=explode(",", trim($headers['X-Forwarded-For']));
-			$the_ip = trim($the_ip[0]);
-		}elseif ( array_key_exists( 'HTTP_X_FORWARDED_FOR', $headers )){
-			$the_ip=explode(",", trim($headers['HTTP_X_FORWARDED_FOR']));
 			$the_ip = trim($the_ip[0]);
 		}else{
 			$the_ip = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
@@ -711,7 +707,35 @@ class Cleantalk {
 		return $the_ip;
 	}
 	
-	public function cleantalk_is_JSON($string){
+	static public function cleantalk_is_JSON($string){
 		return ((is_string($string) && (is_object(json_decode($string)) || is_array(json_decode($string))))) ? true : false;
+	}
+	
+	/* 
+	 * If Apache web server is missing then making
+	 * Patch for apache_request_headers() 
+	 */
+	static function apache_request_headers(){
+		
+		global $request;
+
+		$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
+		
+		$to_return = array();
+		foreach($_SERVER as $key => $val){
+			if(preg_match('/\AHTTP_/', $key)){
+				$server_key = preg_replace('/\AHTTP_/', '', $key);
+				$key_parts = explode('_', $server_key);
+				if(count($key_parts) > 0 and strlen($server_key) > 2){
+					foreach($key_parts as $part_index => $part){
+						$key_parts[$part_index] = mb_strtolower($part);
+						$key_parts[$part_index][0] = strtoupper($key_parts[$part_index][0]);					
+					}
+					$server_key = implode('-', $key_parts);
+				}
+				$headers[$server_key] = $val;
+			}
+		}
+		return $headers;
 	}
 }

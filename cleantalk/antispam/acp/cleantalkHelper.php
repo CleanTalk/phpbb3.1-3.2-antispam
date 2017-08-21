@@ -1,10 +1,13 @@
 <?php
 /**
- * Cleantalk base class for PHPBB 3.1
+ * Cleantalk's hepler class
+ * Compatible only with phpBB 3.1+
  *
- * @version 2.1.3-phpbb
+ * Mostly contains request's wrappers.
+ *
+ * @version 2.4
  * @package Cleantalk
- * @subpackage Base
+ * @subpackage Helper
  * @author Cleantalk team (welcome@cleantalk.org)
  * @copyright (C) 2014 CleanTalk team (http://cleantalk.org)
  * @license GNU/GPL: http://www.gnu.org/copyleft/gpl.html
@@ -14,38 +17,55 @@
 
 namespace cleantalk\antispam\acp;
 
-/**
- * Cleantalk class with differernt functions
- */
-class cleantalkHelper{
+class cleantalkHelper
+{
+	
+	const URL = 'https://api.cleantalk.org'; // CleanTalk's API url
+	
+	/**
+	 * Function checks api key status
+	 *
+	 * @param string api key
+	 * @param string perform check flag
+	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
+	 */
+	static public function noticeValidateKey($api_key, $do_check = true)
+	{
+		$request = array(
+			'method_name' => 'notice_validate_key',
+			'auth_key' => $api_key
+		);
 		
-	static public function noticeValidateKey($api_key){
-		$request = array();
-		$request['method_name'] = 'notice_validate_key'; 
-		$request['auth_key'] = $api_key;
-		$url='https://api.cleantalk.org';
-		$result = self::sendRawRequest($url, $request);
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? self::checkRequestResult($result, 'notice_validate_key') : $result;
+		
 		return $result;
 	}
 	
 	/**
 	 * Function gets access key automatically
 	 *
-	 * @param string website admin email
-	 * @param string website host
-	 * @param string website platform
-	 * @return type
+	 * @param string admin's email
+	 * @param string website's host
+	 * @param string website's platform
+	 * @param string website's timezone
+	 * @param string perform check flag
+	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	static public function getAutoKey($email, $host, $platform, $timezone = null){
-		$request = array();
-		$request['method_name'] = 'get_api_key'; 
-		$request['email'] = $email;
-		$request['website'] = $host;
-		$request['platform'] = $platform;
-		$request['timezone'] = $timezone;
-		$request['product_name'] = 'antispam';
-		$url='https://api.cleantalk.org';
-		$result = self::sendRawRequest($url, $request);
+	static public function getApiKey($email, $host, $platform, $timezone = null, $do_check = true)
+	{
+		$request = array(
+			'method_name' => 'get_api_key',
+			'email' => $email,
+			'website' => $host,
+			'platform' => $platform,
+			'timezone' => $timezone,
+			'product_name' => 'antispam'
+		);
+		
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? self::checkRequestResult($result, 'get_api_key') : $result;
+		
 		return $result;
 	}
 
@@ -53,53 +73,122 @@ class cleantalkHelper{
 	 * Function gets information about renew notice
 	 *
 	 * @param string api_key
-	 * @return type
+	 * @param string perform check flag
+	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-
-	static public function noticePaidTill($api_key)
+	static public function noticePaidTill($api_key, $do_check = true)
 	{
-		$request = array();
-		$request['method_name'] = 'notice_paid_till'; 
-		$request['auth_key'] = $api_key;
-		$url='https://api.cleantalk.org';
-		$result = self::sendRawRequest($url, $request);
+		$request = array(
+			'method_name' => 'notice_paid_till',
+			'auth_key' => $api_key
+		);
+		
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? self::checkRequestResult($result, 'notice_paid_till') : $result;
+		
 		return $result;
 	}
-
+	
+	/**
+	 * Function gets information about account
+	 *
+	 * @param string api_key
+	 * @param string perform check flag
+	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
+	 */
+	static public function getAccountStatus($api_key, $do_check = true)
+	{
+		$request = array(
+			'method_name' => 'get_account_status',
+			'auth_key' => $api_key
+		);
+		
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? self::checkRequestResult($result, 'get_account_status') : $result;
+		
+		return $result;
+	}
+	
+	/**
+	 * Function gets information about renew notice
+	 *
+	 * @param string api_key
+	 * @param string data "ip1,ip2,ip3..."
+	 * @param string perform check flag
+	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
+	 */
+	static public function spamCheckCms($api_key, $data, $do_check = true){
+		
+		$request = array(
+			'method_name' => 'spam_check_cms',
+			'auth_key' => $api_key,
+			'data' => $data
+		);
+		
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? $result = self::checkRequestResult($result, 'spam_check_cms') : $result;
+		
+		return $result;
+	}
+	
+	/**
+	 * Function sends empty feedback for version comparison in Dashboard
+	 *
+	 * @param string api_key
+	 * @param string agent-version
+	 * @param string perform check flag
+	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
+	 */
+	static public function sendEmptyFeedback($api_key, $agent_version, $do_check = true){
+		
+		$request = array(
+			'method_name' => 'send_feedback',
+			'auth_key' => $api_key,
+			'feedback' => 0 . ':' . $agent_version
+		);
+		
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? $result = self::checkRequestResult($result, 'send_feedback') : $result;
+		
+		return $result;
+	}
+	
+	
 	/**
 	 * Function gets spam report
 	 *
 	 * @param string website host
 	 * @param integer report days
-	 * @return type
+	 * @param string perform check flag
+	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	static public function getAntispamReport($host, $period = 1){
-		$url='https://api.cleantalk.org';
+	static public function getAntispamReport($host, $period = 1, $do_check = true)
+	{
 		$request = array(
 			'method_name' => 'get_antispam_report',
 			'hostname' => $host,
 			'period' => $period
 		);
-		$result = self::sendRawRequest($url, $request);
+		
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? $result = self::checkRequestResult($result, 'get_antispam_report') : $result;
+		
 		return $result;
-	}	
-	
+	}
 	
 	/**
 	 * Function gets spam statistics
 	 *
-	 * @param string website host
-	 * @param integer report days
-	 * @return type
+	 * @param string api key
+	 * @return array
 	 */
-
-	function getAntispamReportBreif($key=''){
-		
-		$url="https://api.cleantalk.org?auth_key=$key";
+	static function getAntispamReportBreif($api_key, $do_check = true)
+	{
 		$request=Array(
+			'auth_key' => $api_key,
 			'method_name' => 'get_antispam_report_breif'
 		);
-		$result = sendRawRequest($url,$request);
+		$result = sendRawRequest(self::URL,$request);
 						
 		if($result === false){
 			return "Network error. Please, check <a target='_blank' href='https://cleantalk.org/help/faq-setup#hosting'>this article</a>.";
@@ -118,38 +207,55 @@ class cleantalkHelper{
 		}
 	}
 	
-	static public function spamCheckCms($api_key, $data){
-		$request = array();
-		$url='https://api.cleantalk.org';
-		$request = array(
-			'method_name' => 'spam_check_cms',
-			'auth_key' => $api_key,
-			'data' => $data //string "ip1,ip2,ip3..."
-		);
-		$result = self::sendRawRequest($url, $request);
-		return $result;
-	}
-	
-	static public function apache_request_headers(){
-		$arh = array();
-		$rx_http = '/\AHTTP_/';
-		if(defined('IN_PHPBB')){
-			global $request;
-			$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
+	/**
+	 * Function checks server response
+	 *
+	 * @param string result
+	 * @param string request_method
+	 * @return mixed (array || array('error' => true, 'error_string' => STRING))
+	 */
+	static public function checkRequestResult($result, $method_name = null)
+	{		
+		// Errors handling
+		
+		// Bad connection
+		if(empty($result)){
+			return array(
+				'error' => true,
+				'error_string' => 'CONNECTION_ERROR'
+			);
 		}
-		foreach($_SERVER as $key => $val){
-			if(preg_match($rx_http, $key)){
-				$arh_key = preg_replace($rx_http, '', $key);
-				$rx_matches = array();
-				$rx_matches = explode('_', $arh_key);
-				if(count($rx_matches) > 0 and strlen($arh_key) > 2){
-					foreach($rx_matches as $ak_key => $ak_val) $rx_matches[$ak_key] = ucfirst($ak_val);
-					$arh_key = implode('-', $rx_matches);
-				}
-				$arh[$arh_key] = $val;
-			}
+		
+		// JSON decode errors
+		$result = json_decode($result, true);
+		if(empty($result)){
+			return array(
+				'error' => true,
+				'error_string' => 'JSON_DECODE_ERROR'
+			);
 		}
-		return( $arh );
+		
+		// Server errors
+		if($result && (isset($result['error_no']) || isset($result['error_message']))){
+			return array(
+				'error' => true,
+				'error_string' => "SERVER_ERROR NO: {$result['error_no']} MSG: {$result['error_message']}",
+				'error_no' => $result['error_no'],
+				'error_message' => $result['error_message']
+			);
+		}
+		
+		// Patches for different methods
+		
+		// mehod_name = notice_validate_key
+		if($method_name == 'notice_validate_key' && isset($result['valid'])){
+			return $result;
+		}
+		
+		// Other methods
+		if(isset($result['data']) && is_array($result['data'])){
+			return $result['data'];
+		}
 	}
 	
 	/**
@@ -161,7 +267,7 @@ class cleantalkHelper{
 	 * @param integer connect timeout
 	 * @return type
 	 */
-	static public function sendRawRequest($url,$data,$isJSON=false,$timeout=3){
+	static public function sendRawRequest($url, $data, $isJSON = false, $timeout = 3){
 		
 		$result=null;
 		if(!$isJSON){
@@ -172,6 +278,7 @@ class cleantalkHelper{
 		}
 		
 		$curl_exec=false;
+		
 		if (function_exists('curl_init') && function_exists('json_decode')){
 		
 			$ch = curl_init();
@@ -187,7 +294,7 @@ class cleantalkHelper{
 			
 			$result = curl_exec($ch);
 			
-			if($result!==false){
+			if($result !== false){
 				$curl_exec=true;
 			}
 			
@@ -205,6 +312,7 @@ class cleantalkHelper{
 			$context = stream_context_create($opts);
 			$result = @file_get_contents($url, 0, $context);
 		}
+		
 		return $result;
 	}
 }

@@ -140,12 +140,15 @@ class main_listener implements EventSubscriberInterface
 		}
 		else if ($this->config['cleantalk_antispam_nusers'] && $this->user->data['is_registered'] == 1)
 		{
-			$sql = 'SELECT g.group_name 
-				FROM ' . USER_GROUP_TABLE
-			. ' ug JOIN ' . GROUPS_TABLE
-			. ' g ON (ug.group_id = g.group_id) WHERE ug.user_id = '
-			. (int) $this->user->data['user_id'] . ' AND '
-			. 'g.group_name = \'NEWLY_REGISTERED\'';
+			$user_group_table = USER_GROUP_TABLE;
+			$group_table = GROUPS_TABLE;
+			$user_id = (int) $this->user->data['user_id'];
+			$sql = "SELECT g.group_name 
+				FROM $user_group_table ug 
+				JOIN $group_table g
+				ON (ug.group_id = g.group_id)
+				WHERE ug.user_id = $user_id 
+				AND	g.group_name = 'NEWLY_REGISTERED'";
 			$result = $this->db->sql_query($sql);
 			$row = $this->db->sql_fetchrow($result);
 			if ($row !== false && isset($row['group_name']))

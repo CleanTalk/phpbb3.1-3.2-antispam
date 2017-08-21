@@ -32,7 +32,6 @@ class release_5_2_0 extends \phpbb\db\migration\migration
 			array('config.add', array('cleantalk_antispam_trial',       0)),
 			array('config.add', array('cleantalk_antispam_spam_count',  0)),
 			array('config.add', array('cleantalk_antispam_moderate_ip', 0)),
-			array('config.add', array('cleantalk_antispam_show_review', 0)),
 			array('config.add', array('cleantalk_antispam_ip_license',  0)),
 		
 			// Checks if the key is paid
