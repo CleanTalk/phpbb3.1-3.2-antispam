@@ -75,18 +75,18 @@ class cleantalkSFW
 		if( isset($headers['X-Forwarded-For']) ){
 			$the_ip = explode(",", trim($headers['X-Forwarded-For']));
 			$the_ip = trim($the_ip[0]);
-			$result[] = mysql_escape_string($the_ip);
+			$result[] = $this->db->sql_escape($the_ip);
 			$this->ip_str_array[]=$the_ip;
 			$this->ip_array[]=sprintf("%u", ip2long($the_ip));
 		}
 		
 		$the_ip = filter_var( $headers['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
-		$result[] = mysql_escape_string($the_ip);
+		$result[] = $this->db->sql_escape($the_ip);
 		$this->ip_str_array[]=$the_ip;
 		$this->ip_array[]=sprintf("%u", ip2long($the_ip));
 
 		if($sfw_test_ip){
-			$result[] = mysql_escape_string($sfw_test_ip);
+			$result[] = $this->db->sql_escape($sfw_test_ip);
 			$this->ip_str_array[]=$sfw_test_ip;
 			$this->ip_array[]=sprintf("%u", ip2long($sfw_test_ip));
 		}
@@ -130,7 +130,7 @@ class cleantalkSFW
 		
 		$blocked = ($result == 'blocked' ? ' + 1' : '');
 		$time = time();
-		$ip = mysql_escape_string($ip);
+		$ip = $this->db->sql_escape($ip);
 		
 		$query = "INSERT INTO ".$this->table_prefix."cleantalk_sfw_logs
 		SET 
