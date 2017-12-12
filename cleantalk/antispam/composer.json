@@ -13,12 +13,12 @@
             "homepage": "https://cleantalk.org",
             "role": "Developer"
         },
-		{
-			"name": "Roman Safronov",
-			"email": "welcome@cleantalk.org",
-			"homepage": "https://cleantalk.org",
-			"role": "Developer"
-		}
+        {
+            "name": "Roman Safronov",
+            "email": "welcome@cleantalk.org",
+            "homepage": "https://cleantalk.org",
+            "role": "Developer"
+        }
     ],
     "require": {
         "php": ">=5.3.3",

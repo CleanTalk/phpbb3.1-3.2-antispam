@@ -137,12 +137,12 @@ class cleantalkSFW
 			ip = '$ip',
 			all_entries = 1,
 			blocked_entries = 1,
-			entries_timestamp = '".intval($time)."'
+			entries_timestamp = ".$time."
 		ON DUPLICATE KEY 
 		UPDATE 
 			all_entries = all_entries + 1,
 			blocked_entries = blocked_entries".strval($blocked).",
-			entries_timestamp = '".intval($time)."'";
+			entries_timestamp = ".$time."";
 
 		$this->unversal_query($query, true);
 	}
@@ -238,7 +238,7 @@ class cleantalkSFW
 		}else{
 			trigger_error($user->lang('SFW_DIE_NO_FILE'), E_USER_ERROR);
 		}
-		
+
 		// Translation
 		$request_uri = $request->server('REQUEST_URI');
 		$sfw_die_page = str_replace('{SFW_DIE_NOTICE_IP}',              $user->lang('SFW_DIE_NOTICE_IP'),              $sfw_die_page);
@@ -265,8 +265,7 @@ class cleantalkSFW
 		}else{
 			$sfw_die_page = str_replace('{GENERATED}', "<h2 class='second'>The page was generated at&nbsp;".date("D, d M Y H:i:s")."</h2>",$sfw_die_page);
 		}
-		
-		die($sfw_die_page);
+		trigger_error($sfw_die_page, E_USER_ERROR);
 		
 	}
 	
