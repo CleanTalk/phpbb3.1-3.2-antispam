@@ -40,7 +40,7 @@ class main_module
 			
 			if($request->is_set_post('get_key_auto')){
 							
-				$result = \cleantalk\antispam\acp\cleantalkHelper::getApiKey(
+				$result = \cleantalk\antispam\acp\CleantalkHelper::getApiKey(
 					$config['board_email'],
 					$request->server('SERVER_NAME'),
 					'phpbb31',
@@ -67,7 +67,7 @@ class main_module
 			if($savekey != ''){
 				
 				if(!$key_is_valid){
-					$result = \cleantalk\antispam\acp\cleantalkHelper::noticeValidateKey($savekey);
+					$result = \cleantalk\antispam\acp\CleantalkHelper::noticeValidateKey($savekey);
 					if(empty($result['error'])){
 						$key_is_valid = $result['valid'] ? true : false;
 					}
@@ -84,7 +84,7 @@ class main_module
 					
 					if(!$user_token_is_valid){
 						
-						$result = \cleantalk\antispam\acp\cleantalkHelper::noticePaidTill($savekey);
+						$result = \cleantalk\antispam\acp\CleantalkHelper::noticePaidTill($savekey);
 						
 						if(empty($result['error'])){
 							$config->set('cleantalk_antispam_show_notice', $result['show_notice']);
@@ -162,10 +162,11 @@ class main_module
 			
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
 				SET ct_marked=0';
-			$db->sql_query($sql);
-			$sql = "SELECT * 
+			$result = $db->sql_query($sql);
+			$sql = "SELECT user_id, username, user_regdate, user_lastvisit, user_ip, user_email
 				FROM " . USERS_TABLE . " 
-				WHERE user_password<>'';";
+				WHERE user_password<>''
+				ORDER BY user_regdate DESC;";
 			$result = $db->sql_query($sql);
 			
 			$users  = array(0 => array());
@@ -173,15 +174,17 @@ class main_module
 			$cnt    = 0;
 			while($row = $db->sql_fetchrow($result))
 			{
-				$users[$cnt][] = array('name' => $row['username'],
-									'id' => $row['user_id'],
-									'email' => $row['user_email'],
-									'ip' => $row['user_ip'],
-									'joined' => $row['user_regdate'],
-									'visit' => $row['user_lastvisit'],
-							);
+				$users[$cnt][] = array(
+					'name'   => $row['username'],
+					'id'     => $row['user_id'],
+					'email'  => $row['user_email'],
+					'ip'     => $row['user_ip'],
+					'joined' => $row['user_regdate'],
+					'visit'  => $row['user_lastvisit'],
+				);
 				$data[$cnt][]=$row['user_email'];
 				$data[$cnt][]=$row['user_ip'];
+				
 				if(sizeof($users[$cnt])>450)
 				{
 					$cnt++;
@@ -189,22 +192,24 @@ class main_module
 					$data[$cnt]=array();
 				}
 			}
+			
 			$db->sql_freeresult($result);
 			
 			$error="";
 			for($i=0;$i<sizeof($users);$i++)
 			{
 				
-				$result = \cleantalk\antispam\acp\cleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], implode(',',$data[$i]));
+				$result = \cleantalk\antispam\acp\CleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], $data[$i]);
 				
-				if(!empty($result['error'])){
-					
+				if(!empty($result['error']))
+				{					
 					if($result['error_string'] == 'CONNECTION_ERROR')
 						$error = $user->lang('ACP_CHECKUSERS_DONE_3');
 					else
 						$error = $result['error_message'];
-					
-				}else{
+				}
+				else
+				{
 					foreach($result as $key => $value)
 					{
 						if($key === filter_var($key, FILTER_VALIDATE_IP))
@@ -240,11 +245,12 @@ class main_module
 				@header("Location: ".str_replace('&check_users_spam=1', '&finish_check=1', html_entity_decode($request->server('REQUEST_URI'))));
 			}
 		}
-		$start_entry = 0;		
-		if($request->is_set('start_entry') && $request->variable('start_entry',1))
-		$start_entry = $request->variable('start_entry',1);
+		$start_entry = '0';		
+		if($request->is_set('start_entry', \phpbb\request\request_interface::GET))
+		{
+			$start_entry = $request->variable('start_entry', 1);
+		}
 		$on_page = 20;
-		$end_entry = $start_entry + $on_page;
 		$sql = 'SELECT COUNT(user_id) AS user_count
 			FROM ' . USERS_TABLE . '
 			WHERE ct_marked = 1';
@@ -253,10 +259,9 @@ class main_module
 
 		$sql = 'SELECT * 
 			FROM ' . USERS_TABLE . '
-			WHERE ct_marked = 1
-			LIMIT '.$start_entry.','.$end_entry.'';
-		$result = $db->sql_query($sql);
-		if($request->variable('finish_check', '', false, \phpbb\request\request_interface::GET)!='')
+			WHERE ct_marked = 1';
+		$result = $db->sql_query_limit($sql, $on_page, $start_entry);
+		if($request->variable('finish_check', '', false, \phpbb\request\request_interface::GET) != '')
 		{
 			$template->assign_var('CT_ACP_CHECKUSERS_DONE_1', '1');
 		}
@@ -278,17 +283,16 @@ class main_module
 		$db->sql_freeresult($result);
 		$pages = ceil($spam_users_count / $on_page);
 		$server_uri = 'index.php?sid='.$request->variable('sid','1').'&i='.$request->variable('i','1');
-		$page_str = '';
 		if ($pages>1)
 		{
 			$pages_str = "<ul><li style='display: inline-block; margin: 10px 5px;'>Pages:</li>";
 			for($i=1; $pages >= $i; $i++){
 				$pages_str  .= "					
-					<li style='display: inline-block; padding: 3px 5px; background: rgba(23,96,147,".(($request->is_set('curr_page') && $request->variable('start_entry',1) == $i) || (!$request->is_set('curr_page') && $i == 1) ? "0.6" : "0.3")."); border-radius: 3px;'>
+					<li style='display: inline-block; padding: 3px 5px; background: rgba(23,96,147,".(($request->is_set('curr_page', \phpbb\request\request_interface::GET) && $request->variable('start_entry',1) == $i) || (!$request->is_set('curr_page', \phpbb\request\request_interface::GET) && $i == 1) ? "0.6" : "0.3")."); border-radius: 3px;'>
 								<a href=".$server_uri."&start_entry=".($i-1)*$on_page."&curr_page=$i>$i</a>
 					</li>";
 				}
-			$page_str.="</ul>";
+			$pages_str.="</ul>";
 			$template->assign_var('CT_CHECKUSERS_PAGES', $pages_str);
 		}
 		if ($found)

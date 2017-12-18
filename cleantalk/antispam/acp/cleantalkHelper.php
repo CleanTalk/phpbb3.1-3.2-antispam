@@ -17,7 +17,7 @@
 
 namespace cleantalk\antispam\acp;
 
-class cleantalkHelper
+class CleantalkHelper
 {
 	
 	const URL = 'https://api.cleantalk.org'; // CleanTalk's API url
