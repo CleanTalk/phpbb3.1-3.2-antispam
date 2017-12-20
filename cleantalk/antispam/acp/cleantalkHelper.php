@@ -122,7 +122,7 @@ class CleantalkHelper
 		$request = array(
 			'method_name' => 'spam_check_cms',
 			'auth_key' => $api_key,
-			'data' => $data
+			'data' => implode(',',$data),
 		);
 		
 		$result = self::sendRawRequest(self::URL, $request);
