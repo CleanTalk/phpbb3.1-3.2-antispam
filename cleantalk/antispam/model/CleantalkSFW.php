@@ -77,10 +77,10 @@ class cleantalkSFW
 	* 
 	*	reutrns array
 	*/
-	public function get_ip($cdn = $this->cdn_cf){
+	public function get_ip(){
 		
 		global $request;
-		
+		$cdn = $this->cdn_cf;
 		$result = Array();
 		
 		// Getting IP
