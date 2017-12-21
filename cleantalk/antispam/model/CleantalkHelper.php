@@ -15,7 +15,7 @@
  *
  */
 
-namespace cleantalk\antispam\acp;
+namespace cleantalk\antispam\model;
 
 class CleantalkHelper
 {
