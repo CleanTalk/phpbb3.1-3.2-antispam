@@ -36,6 +36,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_SFW_DESCR'		        	=> 'Включает SpamFireWall. Это не даст ботам зайти на сайт и позволит снизить нагрузку на веб-сервер.',
 	
 	'ACP_CLEANTALK_APIKEY_LABEL'	            => 'Ключ доступа',
+	'ACP_CLEANTALK_APIKEY_LABEL_PLACEHOLDER'    => 'Введите ключ доступа',	
 	'ACP_CLEANTALK_APIKEY_DESCR'	            => 'Для получения зарегистрируйтесь на сайте ',
 	'ACP_CLEANTALK_REG_NOTICE'                  => 'E-mail форума',
 	'ACP_CLEANTALK_REG_NOTICE2'                 => 'будет использован для регистрации',
@@ -48,6 +49,7 @@ $lang = array_merge($lang, array(
 
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'		    => 'Проверить пользователей на спам',
 	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> 'Антиспам от CleanTalk проверит всех пользователей по черным спискам и покажет вам тех, кто проявил спам-активность на других сайтах. ',
+	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'Страницы:',
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'Проверить на спам',
 	'ACP_CHECKUSERS_DONE_1'                     => 'Готово. Все пользователи проверены на спам, результат в таблице ниже',
 	'ACP_CHECKUSERS_DONE_2'                     => 'Готово. Все пользователи проверены на спам, найдено 0 результатов',
@@ -65,13 +67,15 @@ $lang = array_merge($lang, array(
 	
 	'SFW_DIE_NOTICE_IP'                         => 'SpamFireWall включен для вашего IP',
 	'SFW_DIE_MAKE_SURE_JS_ENABLED'              => 'Что бы продолжить работу с сайтом, убедитесь что у вас включен JavaScript.',
-	'SFW_DIE_CLICK_TO_PASS'                     => 'Нажмите ниже что снять блокировку,',
+	'SFW_DIE_CLICK_TO_PASS'                     => 'Нажмите ниже что снять блокировку',
 	'SFW_DIE_YOU_WILL_BE_REDIRECTED'            => 'Вы будете автоматически переадресовны на запрошенную вами страницу через 3 секунды.',
 	'SFW_DIE_NO_FILE'                           => 'Ваш IP похож на спамерский.',
+	'SFW_DIE_PAGE_GENERATED'					=> 'Страница была сгенерирована',
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'Ошибка работы с сервисом CleanTalk',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>Ошибка работы с сервисом CleanTalk</strong><br />%s',
 	'CLEANTALK_ERROR_CURL'		                => 'CURL ошибка: "%s"',
 	'CLEANTALK_ERROR_NO_CURL'		            => 'Нет поддержки CURL',
 	'CLEANTALK_ERROR_ADDON'		                => ' или выключена настройка allow_url_fopen в php.ini.',
+	'CLEANTALK_NOTIFICATION'					=> 'Вы уверены?',
 ));

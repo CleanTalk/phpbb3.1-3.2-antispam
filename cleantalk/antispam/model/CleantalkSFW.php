@@ -26,7 +26,6 @@ class cleantalkSFW
 	//Database variables
 	private $table_prefix;
 	private $db;
-	private $query;
 	private $db_result;
 	private $db_result_data = array();
 	
@@ -135,9 +134,7 @@ class cleantalkSFW
 				WHERE network = ".intval($this->ip_array[$i])." & mask;";
 			$this->unversal_query($query);
 			$this->unversal_fetch();
-			
-			$curr_ip = long2ip(intval($this->ip_array[$i]));
-			
+						
 			if($this->db_result_data['cnt']){
 				$this->result = true;
 				$this->blocked_ip=$this->ip_str_array[$i];
@@ -283,7 +280,6 @@ class cleantalkSFW
 		$sfw_die_page = str_replace('{SFW_DIE_MAKE_SURE_JS_ENABLED}',   $user->lang('SFW_DIE_MAKE_SURE_JS_ENABLED'),   $sfw_die_page);
 		$sfw_die_page = str_replace('{SFW_DIE_CLICK_TO_PASS}',          $user->lang('SFW_DIE_CLICK_TO_PASS'),          $sfw_die_page);
 		$sfw_die_page = str_replace('{SFW_DIE_YOU_WILL_BE_REDIRECTED}', $user->lang('SFW_DIE_YOU_WILL_BE_REDIRECTED'), $sfw_die_page);
-		$sfw_die_page = str_replace('{CLEANTALK_TITLE}',                $user->lang('ACP_CLEANTALK_TITLE'),            $sfw_die_page);
 		
 		// Service info
 		$sfw_die_page = str_replace('{REMOTE_ADDRESS}', $this->blocked_ip, $sfw_die_page);
@@ -301,7 +297,7 @@ class cleantalkSFW
 			header("HTTP/1.0 403 Forbidden");
 			$sfw_die_page = str_replace('{GENERATED}', "", $sfw_die_page);
 		}else{
-			$sfw_die_page = str_replace('{GENERATED}', "<h2 class='second'>The page was generated at&nbsp;".date("D, d M Y H:i:s")."</h2>",$sfw_die_page);
+			$sfw_die_page = str_replace('{GENERATED}', "<h2 class='second'>{SFW_DIE_PAGE_GENERATED} ".date("D, d M Y H:i:s")."</h2>",$sfw_die_page);
 		}
 
 		trigger_error($sfw_die_page, E_USER_ERROR);

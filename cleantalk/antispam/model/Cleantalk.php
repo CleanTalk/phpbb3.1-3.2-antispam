@@ -692,7 +692,7 @@ class Cleantalk
 
 		global $request;
 
-		$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
+		$_SERVER = $request->server('REMOTE_ADDR');
 		
 		$headers = function_exists('apache_request_headers')
 			? apache_request_headers()
@@ -719,7 +719,7 @@ class Cleantalk
 		
 		global $request;
 
-		$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
+		$_SERVER = $request->server('REMOTE_ADDR');
 		
 		$headers = array();
 		foreach($_SERVER as $key => $val){

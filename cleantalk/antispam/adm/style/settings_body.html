@@ -48,7 +48,7 @@
 				<span>{L_ACP_CLEANTALK_APIKEY_DESCR}<a target="_blank" href="https://cleantalk.org/register?platform=phpbb31">https://cleantalk.org</a></span>
 			</dt>
 			<dd>
-			    <input type="text" size="40" maxlength="60" name="cleantalk_antispam_apikey" placeholder="Enter the key" value="{CLEANTALK_ANTISPAM_APIKEY}"/>
+			    <input type="text" size="40" maxlength="60" name="cleantalk_antispam_apikey" placeholder="{L_ACP_CLEANTALK_APIKEY_LABEL_PLACEHOLDER}" value="{CLEANTALK_ANTISPAM_APIKEY}"/>
 				<!-- IF not CLEANTALK_ANTISPAM_KEY_IS_OK -->
 					<span style="color: red;">{L_ACP_CLEANTALK_APIKEY_IS_BAD_LABEL}</span>
 					<br>
@@ -60,7 +60,7 @@
 					<span>{L_ACP_CLEANTALK_REG_NOTICE} ({CLEANTALK_ANTISPAM_REG_EMAIL}) {L_ACP_CLEANTALK_REG_NOTICE2}</span>
 					<br>
 					<span>
-						<a href="https://cleantalk.org/publicoffer'" target="_blank">{L_ACP_CLEANTALK_AGREEMENT}</a>
+						<a href="https://cleantalk.org/publicoffer" target="_blank">{L_ACP_CLEANTALK_AGREEMENT}</a>
 					</span>
 				<!-- ENDIF -->
 				<!-- IF CLEANTALK_ANTISPAM_KEY_IS_OK -->
@@ -123,11 +123,19 @@
 			</tbody>
 		</table>
 		<br />
-		<div class="checkusers_pages">
-			<p>{CT_CHECKUSERS_PAGES}</p>
+		<div class="checkusers_pages">		
+		<p>
+			<ul>
+				<li style='display: inline-block; padding: 3px 5px;'>{L_ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE}</li>
+				<!-- BEGIN CT_PAGES_CHECKUSERS -->
+				<li style='display: inline-block; padding: 3px 5px;border-radius: 3px;{CT_PAGES_CHECKUSERS.PAGE_STYLE}'><a href ='{CT_PAGES_CHECKUSERS.PAGE_LINK}'>{CT_PAGES_CHECKUSERS.PAGE_NUMBER}</a></li>
+				<!-- END CT_PAGES_CHECKUSERS -->
+			</ul>
+		</p>
+				
 		</div>
-		<input type=submit name='ct_delete_checked' value='{L_ACP_CHECKUSERS_DELETESEL}' onclick="return confirm('Are you sure?')">
-		<input type=submit name='ct_delete_all' value='{L_ACP_CHECKUSERS_DELETEALL}' onclick="return confirm('Are you sure?')">
+		<input type=submit name='ct_delete_checked' value='{L_ACP_CHECKUSERS_DELETESEL}' onclick="return confirm('{L_CLEANTALK_NOTIFICATION}')">
+		<input type=submit name='ct_delete_all' value='{L_ACP_CHECKUSERS_DELETEALL}' onclick="return confirm('{L_CLEANTALK_NOTIFICATION}')">
 		<br />{L_ACP_CHECKUSERS_DELETEALL_DESCR}
 	</form>
 	<!-- ENDIF -->

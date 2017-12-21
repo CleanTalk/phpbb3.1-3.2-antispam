@@ -31,21 +31,4 @@ class release_5_4_0 extends \phpbb\db\migration\migration
 			
 		);
 	}
-
-	public function update_schema()
-	{
-		return array();
-	}
-
-	public function revert_schema()
-	{	
-		return array(
-			'drop_columns' => array(
-				$this->table_prefix . 'config_text' => array(
-					'cleantalk_antispam_js_keys'
-				)
-			)
-		);
-	}
-
 }

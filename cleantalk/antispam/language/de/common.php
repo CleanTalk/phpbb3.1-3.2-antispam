@@ -38,6 +38,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_SFW_DESCR'		        	=> 'Enables SpamFireWall. Reduces webserver load and prevents bots to access the website.',
 	
 	'ACP_CLEANTALK_APIKEY_LABEL'		        => 'Zugangsschlüssel',
+	'ACP_CLEANTALK_APIKEY_LABEL_PLACEHOLDER'    => 'Geben Sie den Hauptschlüssel',	
 	'ACP_CLEANTALK_APIKEY_DESCR'		        => 'Um ein Zugangsschlüssel zu bekommen, registriere dich auf der Seite ',
 	'ACP_CLEANTALK_REG_NOTICE'                  => 'Board e-mail',
 	'ACP_CLEANTALK_REG_NOTICE2'                 => 'will be used for registration',
@@ -70,10 +71,12 @@ $lang = array_merge($lang, array(
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Please click bellow to pass protection,',
 	'SFW_DIE_YOU_WILL_BE_REDIRECTED'            => 'Or you will be automatically redirected to the requested page after 3 seconds.',
 	'SFW_DIE_NO_FILE'                           => 'You IP looks like spammer`s IP',
+	'SFW_DIE_PAGE_GENERATED'					=> 'Seite wurde erzeugt',
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'Fehler beim verbinden zum CleanTalk Service',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>Fehler beim verbinden zum CleanTalk Service</strong><br />%s',
 	'CLEANTALK_ERROR_CURL'		                => 'CURL error: "%s"',
 	'CLEANTALK_ERROR_NO_CURL'		            => 'No CURL support compiled in',
 	'CLEANTALK_ERROR_ADDON'		                => ' or disabled allow_url_fopen in php.ini.',
+	'CLEANTALK_NOTIFICATION'					=> 'Sind Sie sicher?',
 ));

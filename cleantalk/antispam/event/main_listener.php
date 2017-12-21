@@ -93,8 +93,9 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function add_js_to_head($event)
 	{		
-		if (empty($this->config['cleantalk_antispam_apikey']))
+		if (empty($this->config['cleantalk_antispam_apikey'])){
 			return;
+		}
 
 		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::get_check_js_script());
 	}
@@ -172,9 +173,15 @@ class main_listener implements EventSubscriberInterface
 				$spam_check['type'] = 'comment';
 				$spam_check['sender_email'] = '';
 				$spam_check['sender_nickname'] = '';
-				if (array_key_exists('user_email', $data['post_data'])) $spam_check['sender_email'] = $data['post_data']['user_email'];
-				if (array_key_exists('username', $data['post_data'])) $spam_check['sender_nickname'] = $data['post_data']['username'];
-				if (array_key_exists('post_subject', $data['post_data'])) $spam_check['message_title'] = $data['post_data']['post_subject'];
+				if (array_key_exists('user_email', $data['post_data'])) {
+					$spam_check['sender_email'] = $data['post_data']['user_email'];
+				}
+				if (array_key_exists('username', $data['post_data'])) {
+					$spam_check['sender_nickname'] = $data['post_data']['username'];
+				}
+				if (array_key_exists('post_subject', $data['post_data'])) {
+					$spam_check['message_title'] = $data['post_data']['post_subject'];
+				}
 				$spam_check['message_body'] = utf8_normalize_nfc($this->request->variable('message', '', true));
 				if($spam_check['sender_email'] == '' && isset($this->user->data))
 				{
@@ -253,7 +260,9 @@ class main_listener implements EventSubscriberInterface
 				$spam_check['type'] = 'register';
 				$spam_check['sender_email'] = $data['user_row']['user_email'];
 				$spam_check['sender_nickname'] = $data['user_row']['username'];
-				if (array_key_exists('user_timezone', $data['user_row'])) $spam_check['timezone'] = $data['user_row']['user_timezone'];
+				if (array_key_exists('user_timezone', $data['user_row'])) {
+					$spam_check['timezone'] = $data['user_row']['user_timezone'];
+				}
 				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{

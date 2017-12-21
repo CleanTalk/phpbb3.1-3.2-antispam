@@ -285,15 +285,14 @@ class main_module
 		$server_uri = 'index.php?sid='.$request->variable('sid','1').'&i='.$request->variable('i','1');
 		if ($pages>1)
 		{
-			$pages_str = "<ul><li style='display: inline-block; margin: 10px 5px;'>Pages:</li>";
-			for($i=1; $pages >= $i; $i++){
-				$pages_str  .= "					
-					<li style='display: inline-block; padding: 3px 5px; background: rgba(23,96,147,".(($request->is_set('curr_page', \phpbb\request\request_interface::GET) && $request->variable('start_entry',1) == $i) || (!$request->is_set('curr_page', \phpbb\request\request_interface::GET) && $i == 1) ? "0.6" : "0.3")."); border-radius: 3px;'>
-								<a href=".$server_uri."&start_entry=".($i-1)*$on_page."&curr_page=$i>$i</a>
-					</li>";
-				}
-			$pages_str.="</ul>";
-			$template->assign_var('CT_CHECKUSERS_PAGES', $pages_str);
+			for ($i=1; $pages >= $i; $i++){
+				$template->assign_block_vars('CT_PAGES_CHECKUSERS', array(
+					'PAGE_LINK' => $server_uri.'&start_entry='.($i-1)*$on_page.'&curr_page='.$i,
+					'PAGE_NUMBER' => $i, 
+					'PAGE_STYLE' => 'background: rgba(23,96,147,'.(($request->variable('curr_page',1) == $i) ? '0.6' : '0.3').');',
+
+				));							
+			}			
 		}
 		if ($found)
 		{
