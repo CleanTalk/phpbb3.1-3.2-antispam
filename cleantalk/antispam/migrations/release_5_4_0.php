@@ -41,7 +41,7 @@ class release_5_4_0 extends \phpbb\db\migration\migration
 	{	
 		return array(
 			'drop_columns' => array(
-				phpbb_config_text => array(
+				$this->table_prefix . 'config_text' => array(
 					'cleantalk_antispam_js_keys'
 				)
 			)

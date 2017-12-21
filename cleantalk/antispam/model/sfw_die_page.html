@@ -18,8 +18,8 @@
 <style>
     html{font-size: 14pt;}
     h1{text-align:center}
-    h1.main{margin-top: 1em;margin-bottom: 3em;}
-    div.container {text-align:center;}
+    h1.main{margin-top: 1em;margin-bottom: 3em; color:#666;}
+    div.container {text-align:center; color:#666;}
     div.container p.js_notice{width: 60%; display: inline-block;}
     div.footer {color: #666; position: absolute; bottom: 1em; text-align: center; width: 100%;}
     div.footer a {color: #666; vertical-align:bottom; text-align: center;}
@@ -56,7 +56,7 @@ function get_current_url() {
         </div>
     </div>
     <div class='footer'>
-    <a href='https://cleantalk.org' target='_blank'>{CLEANTALK_TITLE}</a>
+		<a href='https://cleantalk.org' target='_blank'>{CLEANTALK_TITLE}</a>
     </div>
     <script type='text/javascript'>
         document.getElementById('js_info').style.display = 'none';
@@ -64,9 +64,9 @@ function get_current_url() {
 		setTimeout(function(){
 			set_spamFireWallCookie('{COOKIE_PREFIX}ct_sfw_pass_key','{SFW_COOKIE}');
 			set_spamFireWallCookie('{COOKIE_PREFIX}ct_sfw_passed','1');
-		}, 3000);
+		}, 50);
         setTimeout(function(){
-            window.location.reload(1);
+            window.location.href = window.location.href + (window.location.search === '' ? '?sfw=pass' : '&sfw=pass');
         }, reload_timeout);
     </script>
 </body>

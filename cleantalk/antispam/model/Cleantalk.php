@@ -426,7 +426,7 @@ class Cleantalk
 				|| $this->stay_on_server == true) {
 	        
             $url = (!empty($this->work_url)) ? $this->work_url : $this->server_url;
-					
+			
             $result = $this->sendRequest($msg, $url, $this->server_timeout);
         }
 
@@ -721,7 +721,7 @@ class Cleantalk
 
 		$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
 		
-		$to_return = array();
+		$headers = array();
 		foreach($_SERVER as $key => $val){
 			if(preg_match('/\AHTTP_/', $key)){
 				$server_key = preg_replace('/\AHTTP_/', '', $key);

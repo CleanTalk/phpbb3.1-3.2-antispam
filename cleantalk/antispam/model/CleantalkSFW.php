@@ -30,6 +30,23 @@ class cleantalkSFW
 	private $db_result;
 	private $db_result_data = array();
 	
+	private $cdn_cf = array(
+		'103.21.244.0/22',
+		'103.22.200.0/22',
+		'103.31.4.0/22',
+		'104.16.0.0/12',
+		'108.162.192.0/18',
+		'131.0.72.0/22',
+		'141.101.64.0/18',
+		'162.158.0.0/15',
+		'172.64.0.0/13',
+		'173.245.48.0/20',
+		'188.114.96.0/20',
+		'190.93.240.0/20',
+		'197.234.240.0/22',
+		'198.41.128.0/17',
+	);
+	
 	public function __construct()
 	{
 		global $db, $table_prefix;
@@ -62,36 +79,47 @@ class cleantalkSFW
 	*/
 	public function get_ip(){
 		
-		$result=Array();
+		global $request;
+		$cdn = $this->cdn_cf;
+		$result = Array();
 		
+		// Getting IP
+		$result['remote_addr'] = filter_var( $request->server('REMOTE_ADDR'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+		$this->ip_str_array[] = $result['remote_addr'];
+		$this->ip_array[]=sprintf("%u", ip2long($result['remote_addr']));
+		
+		// Getting test IP
+		$sfw_test_ip = $request->variable('sfw_test_ip', '');
+		if($sfw_test_ip){
+			$result['sfw_test_ip'] = filter_var( $sfw_test_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+			$this->ip_str_array[]=$result['sfw_test_ip'];
+			$this->ip_array[]=sprintf("%u", ip2long($result['sfw_test_ip']));
+		}
+		
+		// Getting Cloudflare IP
 		$headers = function_exists('apache_request_headers')
 			? apache_request_headers()
 			: self::apache_request_headers();
-
-		global $request;
-		$headers['REMOTE_ADDR'] = $request->server('REMOTE_ADDR');
-		$sfw_test_ip = $request->variable('sfw_test_ip', '');
 		
-		if( isset($headers['X-Forwarded-For']) ){
-			$the_ip = explode(",", trim($headers['X-Forwarded-For']));
-			$the_ip = trim($the_ip[0]);
-			$result[] = mysql_escape_string($the_ip);
-			$this->ip_str_array[]=$the_ip;
-			$this->ip_array[]=sprintf("%u", ip2long($the_ip));
-		}
-		
-		$the_ip = filter_var( $headers['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
-		$result[] = mysql_escape_string($the_ip);
-		$this->ip_str_array[]=$the_ip;
-		$this->ip_array[]=sprintf("%u", ip2long($the_ip));
-
-		if($sfw_test_ip){
-			$result[] = mysql_escape_string($sfw_test_ip);
-			$this->ip_str_array[]=$sfw_test_ip;
-			$this->ip_array[]=sprintf("%u", ip2long($sfw_test_ip));
+		if(isset($headers['Cf_Connecting_Ip'])){
+			foreach($cdn as $cidr){
+				if($this->ip_mask_match($result['remote_addr'], $cidr)){
+					$result['cf_connecting_ip'] = filter_var( $_SERVER['Cf_Connecting_Ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+					$this->ip_array[] = sprintf("%u", ip2long($result['cf_connecting_ip']));
+					unset($result['remote_addr']);
+					break;
+				}
+			}
 		}
 		
 		return array_unique($result);
+	}
+	
+	public function ip_mask_match($ip, $cidr){
+		$exploded = explode ('/', $cidr);
+		$net = $exploded[0];
+		$mask = 4294967295 << (32 - $exploded[1]);
+		return (ip2long($ip) & $mask) == (ip2long($net) & $mask);
 	}
 	
 	/*
@@ -108,7 +136,7 @@ class cleantalkSFW
 			$this->unversal_query($query);
 			$this->unversal_fetch();
 			
-			$curr_ip = long2ip($this->ip_array[$i]);
+			$curr_ip = long2ip(intval($this->ip_array[$i]));
 			
 			if($this->db_result_data['cnt']){
 				$this->result = true;
@@ -130,21 +158,31 @@ class cleantalkSFW
 		
 		$blocked = ($result == 'blocked' ? ' + 1' : '');
 		$time = time();
-		$ip = mysql_escape_string($ip);
+		$ip = filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 		
-		$query = "INSERT INTO ".$this->table_prefix."cleantalk_sfw_logs
-		SET 
-			ip = '$ip',
-			all_entries = 1,
-			blocked_entries = 1,
-			entries_timestamp = '".intval($time)."'
-		ON DUPLICATE KEY 
-		UPDATE 
-			all_entries = all_entries + 1,
-			blocked_entries = blocked_entries".strval($blocked).",
-			entries_timestamp = '".intval($time)."'";
-
+		$query = "SELECT COUNT(*)
+			FROM ".$this->table_prefix."cleantalk_sfw_logs
+			WHERE ip = '$ip';";
 		$this->unversal_query($query, true);
+		$this->unversal_fetch();
+		
+		if($this->db_result_data){
+			$query = "UPDATE ".$this->table_prefix."cleantalk_sfw_logs
+				SET
+					all_entries = all_entries + 1,
+					blocked_entries = blocked_entries".strval($blocked).",
+					entries_timestamp = $time
+				WHERE ip = '$ip';";
+			$this->unversal_query($query, true);
+		}else{	
+			$query = "INSERT INTO ".$this->table_prefix."cleantalk_sfw_logs
+			SET 
+				ip = '$ip',
+				all_entries = 1,
+				blocked_entries = 1,
+				entries_timestamp = ".$time.";";
+			$this->unversal_query($query, true);
+		}
 	}
 	
 	/*
@@ -265,9 +303,8 @@ class cleantalkSFW
 		}else{
 			$sfw_die_page = str_replace('{GENERATED}', "<h2 class='second'>The page was generated at&nbsp;".date("D, d M Y H:i:s")."</h2>",$sfw_die_page);
 		}
-		
-		die($sfw_die_page);
-		
+
+		trigger_error($sfw_die_page, E_USER_ERROR);
 	}
 	
 	/*

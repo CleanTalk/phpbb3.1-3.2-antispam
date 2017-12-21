@@ -17,7 +17,7 @@
 
 namespace cleantalk\antispam\acp;
 
-class cleantalkHelper
+class CleantalkHelper
 {
 	
 	const URL = 'https://api.cleantalk.org'; // CleanTalk's API url
@@ -122,7 +122,7 @@ class cleantalkHelper
 		$request = array(
 			'method_name' => 'spam_check_cms',
 			'auth_key' => $api_key,
-			'data' => $data
+			'data' => implode(',',$data),
 		);
 		
 		$result = self::sendRawRequest(self::URL, $request);
