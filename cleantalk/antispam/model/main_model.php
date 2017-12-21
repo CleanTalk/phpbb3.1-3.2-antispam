@@ -221,9 +221,9 @@ class main_model
 	static public function set_submit_time()
 	{
 		global $db, $user;
-		$sql = 'UPDATE ' . SESSIONS_TABLE . 
-			' SET ct_submit_time = ' . time() .
-			' WHERE session_id = \'' . $db->sql_escape($user->session_id) . '\'';
+		$sql = "UPDATE " . SESSIONS_TABLE . 
+			" SET ct_submit_time = " . time() .
+			" WHERE session_id = '" . $db->sql_escape($user->session_id) . "'";
 		$db->sql_query($sql);
 	}
     static public function cleantalk_get_checkjs_code()

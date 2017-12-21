@@ -23,8 +23,9 @@ class main_module
 		
 		if ($request->is_set_post('submit') || $request->is_set_post('get_key_auto')){
 			
-			if (!check_form_key('cleantalk/antispam'))
+			if (!check_form_key('cleantalk/antispam')){
 				trigger_error('FORM_INVALID');
+			}
 
 			$config->set('cleantalk_antispam_regs', $request->variable('cleantalk_antispam_regs', 0));
 			$config->set('cleantalk_antispam_guests', $request->variable('cleantalk_antispam_guests', 0));
@@ -134,6 +135,10 @@ class main_module
 		$ct_del_all  = $request->variable('ct_delete_all', '',       false, \phpbb\request\request_interface::POST);
 				
 		if($ct_del_all!=''){
+
+			if (!check_form_key('cleantalk/antispam')){
+				trigger_error('FORM_INVALID');
+			}
 			
 			if (!function_exists('user_delete')){
 				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
@@ -149,7 +154,9 @@ class main_module
 		}
 		
 		if(sizeof($ct_del_user)>0){
-			
+			if (!check_form_key('cleantalk/antispam')){
+				trigger_error('FORM_INVALID');
+			}
 			if (!function_exists('user_delete')){
 				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
@@ -159,7 +166,9 @@ class main_module
 		}
 		
 		if($request->is_set('check_users_spam')){
-			
+			if (!check_form_key('cleantalk/antispam')){
+				trigger_error('FORM_INVALID');
+			}
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
 				SET ct_marked=0';
 			$result = $db->sql_query($sql);
@@ -203,10 +212,12 @@ class main_module
 				
 				if(!empty($result['error']))
 				{					
-					if($result['error_string'] == 'CONNECTION_ERROR')
+					if($result['error_string'] == 'CONNECTION_ERROR'){
 						$error = $user->lang('ACP_CHECKUSERS_DONE_3');
-					else
+					}
+					else {
 						$error = $result['error_message'];
+					}
 				}
 				else
 				{
@@ -282,7 +293,7 @@ class main_module
 		}
 		$db->sql_freeresult($result);
 		$pages = ceil($spam_users_count / $on_page);
-		$server_uri = 'index.php?sid='.$request->variable('sid','1').'&i='.$request->variable('i','1');
+		$server_uri = 'index.'.$phpEx.'?sid='.$request->variable('sid','1').'&i='.$request->variable('i','1');
 		if ($pages>1)
 		{
 			for ($i=1; $pages >= $i; $i++){

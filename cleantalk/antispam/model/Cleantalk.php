@@ -691,19 +691,16 @@ class Cleantalk
 	static public function cleantalk_get_real_ip(){
 
 		global $request;
-
-		$_SERVER = $request->server('REMOTE_ADDR');
 		
-		$headers = function_exists('apache_request_headers')
-			? apache_request_headers()
-			: self::apache_request_headers();
-		
-		if(array_key_exists( 'X-Forwarded-For', $headers )){
-			$the_ip=explode(",", trim($headers['X-Forwarded-For']));
-			$the_ip = trim($the_ip[0]);
-		}else{
-			$the_ip = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
-		}
+		if (isset($request->server('X_FORWARDED_FOR')))
+        {
+            $the_ip = explode(",", trim($request->server('X_FORWARDED_FOR')));
+            $the_ip = trim($the_ip[0]);
+        }
+        else {
+            $the_ip = filter_var($request->server('REMOTE_ADDR'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+        }
+        
 		return $the_ip;
 	}
 	
