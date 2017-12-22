@@ -96,8 +96,7 @@ class main_listener implements EventSubscriberInterface
 		if (empty($this->config['cleantalk_antispam_apikey'])){
 			return;
 		}
-
-		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::get_check_js_script());
+		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::cleantalk_get_checkjs_code());
 	}
 
 	/**

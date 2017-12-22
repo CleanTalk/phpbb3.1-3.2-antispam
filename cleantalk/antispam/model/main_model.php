@@ -31,10 +31,10 @@ class main_model
 
 		$ct = new \cleantalk\antispam\model\Cleantalk();
 		
-		$root_dir= realpath(dirname(__FILE__).'/../../../../');
-		if(file_exists($root_dir."/cleantalk.pem")){
+		if(!file_exists($phpbb_root_path."/store/cleantalk.pem") && file_exists($phpbb_root_path."/ext/cleantalk/antispam/cleantalk.pem")){
+			rename($phpbb_root_path."/ext/cleantalk/antispam/cleantalk.pem", $phpbb_root_path."/store/cleantalk.pem"); 
 			$ct->ssl_on = true;
-			$ct->ssl_path = $root_dir."/cleantalk.pem";
+			$ct->ssl_path = $phpbb_root_path."/store/cleantalk.pem";
 		}
 
 		$ct->work_url       = $config['cleantalk_antispam_work_url'];
@@ -303,22 +303,6 @@ class main_model
 			$result = false;
 	    return  $result;
 	}
-	/**
-	* Gets conplete JS-code with session-unique hash to insert into template for JS-ebabled checkibg
-	*
-	* @return string JS-code
-	*/
-	static public function get_check_js_script()
-	{	
-		$ct_check_value = self::cleantalk_get_checkjs_code();
-		
-		$ct_addon_body = '<script type="text/javascript">
-			var ct_cookie_name = "'.self::JS_FIELD_NAME.'",
-				ct_cookie_value = "'.$ct_check_value.'";
-		</script>';
-		
-		return $ct_addon_body;
-	}
 	
 	/**
 	* Check new visitors for SFW database
@@ -389,7 +373,7 @@ class main_model
 		
 		global $config;
 		
-		$result = \cleantalk\antispam\acp\CleantalkHelper::noticePaidTill($api_key);
+		$result = \cleantalk\antispam\model\CleantalkHelper::noticePaidTill($api_key);
 		if(empty($result['error'])){
 			$config->set('cleantalk_antispam_show_notice', $result['show_notice']);
 			$config->set('cleantalk_antispam_renew',       $result['renew']);

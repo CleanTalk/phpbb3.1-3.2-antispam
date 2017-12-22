@@ -200,17 +200,16 @@ class cleantalkSFW
 				$value[0] = intval($value[0]);
 				$value[1] = intval($value[1]);
 			} unset($value);
-			
-			$query="INSERT INTO ".$this->table_prefix."cleantalk_sfw VALUES ";
+			$sql_ary = null;
 			for($i=0, $arr_count = count($result); $i < $arr_count; $i++){
-				if($i == count($result)-1){
-					$query.="(".$result[$i][0].",".$result[$i][1].");";
-				}else{
-					$query.="(".$result[$i][0].",".$result[$i][1]."), ";
-				}
+				$sql_ary[] = array(
+					'network' => $result[$i][0],
+					'mask'    => $result[$i][1],
+				);
 			}
-			$this->unversal_query($query, true);
-			
+			if ($sql_ary !== null){
+				$this->db->sql_multi_insert($this->table_prefix.'cleantalk_sfw',$sql_ary);	
+			}					
 			return true;
 			
 		}else{

@@ -692,7 +692,7 @@ class Cleantalk
 
 		global $request;
 		
-		if (isset($request->server('X_FORWARDED_FOR')))
+		if ($request->server('X_FORWARDED_FOR') !== null)
         {
             $the_ip = explode(",", trim($request->server('X_FORWARDED_FOR')));
             $the_ip = trim($the_ip[0]);

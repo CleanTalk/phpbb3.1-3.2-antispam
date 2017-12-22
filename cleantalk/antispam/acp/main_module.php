@@ -20,7 +20,6 @@ class main_module
 		$this->tpl_name = 'settings_body';
 		$this->page_title = $user->lang('ACP_CLEANTALK_TITLE');
 		add_form_key('cleantalk/antispam');
-		
 		if ($request->is_set_post('submit') || $request->is_set_post('get_key_auto')){
 			
 			if (!check_form_key('cleantalk/antispam')){
@@ -164,8 +163,7 @@ class main_module
 				user_delete('remove', $key);
 			}
 		}
-		
-		if($request->is_set('check_users_spam')){
+		if($request->variable('check_spam', '',       false, \phpbb\request\request_interface::POST)){
 			if (!check_form_key('cleantalk/antispam')){
 				trigger_error('FORM_INVALID');
 			}
@@ -253,7 +251,7 @@ class main_module
 			}
 			else
 			{
-				@header("Location: ".str_replace('&check_users_spam=1', '&finish_check=1', html_entity_decode($request->server('REQUEST_URI'))));
+				$template->assign_var('CT_ACP_CHECKUSERS_DONE_1',1);
 			}
 		}
 		$start_entry = '0';		
@@ -272,10 +270,6 @@ class main_module
 			FROM ' . USERS_TABLE . '
 			WHERE ct_marked = 1';
 		$result = $db->sql_query_limit($sql, $on_page, $start_entry);
-		if($request->variable('finish_check', '', false, \phpbb\request\request_interface::GET) != '')
-		{
-			$template->assign_var('CT_ACP_CHECKUSERS_DONE_1', '1');
-		}
 		$found = false;
 		while($row = $db->sql_fetchrow($result))
 		{			
@@ -296,6 +290,7 @@ class main_module
 		$server_uri = 'index.'.$phpEx.'?sid='.$request->variable('sid','1').'&i='.$request->variable('i','1');
 		if ($pages>1)
 		{
+			$template->assign_var('CT_PAGES_TITLE',1);
 			for ($i=1; $pages >= $i; $i++){
 				$template->assign_block_vars('CT_PAGES_CHECKUSERS', array(
 					'PAGE_LINK' => $server_uri.'&start_entry='.($i-1)*$on_page.'&curr_page='.$i,
@@ -309,7 +304,7 @@ class main_module
 		{
 			$template->assign_var('CT_TABLE_USERS_SPAM', '1');
 		}
-		if(!$found && $request->variable('finish_check', '', false, \phpbb\request\request_interface::GET) != '')
+		if(!$found && $request->variable('check_spam', '',       false, \phpbb\request\request_interface::POST))
 		{
 			$template->assign_var('CT_ACP_CHECKUSERS_DONE_2', '1');
 		}
