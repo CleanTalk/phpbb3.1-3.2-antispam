@@ -40,7 +40,7 @@ class main_module
 			
 			if($request->is_set_post('get_key_auto')){
 							
-				$result = \cleantalk\antispam\acp\CleantalkHelper::getApiKey(
+				$result = \cleantalk\antispam\model\CleantalkHelper::getApiKey(
 					$config['board_email'],
 					$request->server('SERVER_NAME'),
 					'phpbb31',
@@ -67,7 +67,7 @@ class main_module
 			if($savekey != ''){
 				
 				if(!$key_is_valid){
-					$result = \cleantalk\antispam\acp\CleantalkHelper::noticeValidateKey($savekey);
+					$result = \cleantalk\antispam\model\CleantalkHelper::noticeValidateKey($savekey);
 					if(empty($result['error'])){
 						$key_is_valid = $result['valid'] ? true : false;
 					}
@@ -84,7 +84,7 @@ class main_module
 					
 					if(!$user_token_is_valid){
 						
-						$result = \cleantalk\antispam\acp\CleantalkHelper::noticePaidTill($savekey);
+						$result = \cleantalk\antispam\model\CleantalkHelper::noticePaidTill($savekey);
 						
 						if(empty($result['error'])){
 							$config->set('cleantalk_antispam_show_notice', $result['show_notice']);
@@ -199,7 +199,7 @@ class main_module
 			for($i=0;$i<sizeof($users);$i++)
 			{
 				
-				$result = \cleantalk\antispam\acp\CleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], $data[$i]);
+				$result = \cleantalk\antispam\model\CleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], $data[$i]);
 				
 				if(!empty($result['error']))
 				{					

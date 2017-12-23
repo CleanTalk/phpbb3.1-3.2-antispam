@@ -389,7 +389,7 @@ class main_model
 		
 		global $config;
 		
-		$result = \cleantalk\antispam\acp\CleantalkHelper::noticePaidTill($api_key);
+		$result = \cleantalk\antispam\model\CleantalkHelper::noticePaidTill($api_key);
 		if(empty($result['error'])){
 			$config->set('cleantalk_antispam_show_notice', $result['show_notice']);
 			$config->set('cleantalk_antispam_renew',       $result['renew']);
