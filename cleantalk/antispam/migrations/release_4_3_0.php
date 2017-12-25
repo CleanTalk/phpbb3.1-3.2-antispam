@@ -22,11 +22,6 @@ class release_4_3_0 extends \phpbb\db\migration\migration
 		return array('\cleantalk\antispam\migrations\release_1_0_0');
 	}
 
-	public function update_data()
-	{
-		return array();
-	}
-
 	public function update_schema()
 	{
 		return array(
