@@ -53,18 +53,18 @@ class cleantalkSFW
 		$this->db = $db;
 	}
 	
-	public function unversal_query($query)
+	public function universal_query($query)
 	{
 		$this->db_result = $this->db->sql_query($query);
 	}
 	
-	public function unversal_fetch()
+	public function universal_fetch()
 	{
 		$this->db_result_data = $this->db->sql_fetchrow($this->db_result);
 		$this->db->sql_freeresult($this->db_result);
 	}
 
-	public function unversal_fetch_all()
+	public function universal_fetch_all()
 	{
 		$this->db_result_data = $this->db->sql_fetchrowset($this->db_result);
 		$this->db->sql_freeresult($this->db_result);
@@ -132,8 +132,8 @@ class cleantalkSFW
 				COUNT(network) AS cnt
 				FROM ".$this->table_prefix."cleantalk_sfw
 				WHERE network = ".intval($this->ip_array[$i])." & mask;";
-			$this->unversal_query($query);
-			$this->unversal_fetch();
+			$this->universal_query($query);
+			$this->universal_fetch();
 						
 			if($this->db_result_data['cnt']){
 				$this->result = true;
@@ -160,8 +160,8 @@ class cleantalkSFW
 		$query = "SELECT COUNT(*)
 			FROM ".$this->table_prefix."cleantalk_sfw_logs
 			WHERE ip = '$ip';";
-		$this->unversal_query($query, true);
-		$this->unversal_fetch();
+		$this->universal_query($query);
+		$this->universal_fetch();
 		
 		if($this->db_result_data){
 			$query = "UPDATE ".$this->table_prefix."cleantalk_sfw_logs
@@ -170,7 +170,7 @@ class cleantalkSFW
 					blocked_entries = blocked_entries".strval($blocked).",
 					entries_timestamp = $time
 				WHERE ip = '$ip';";
-			$this->unversal_query($query, true);
+			$this->universal_query($query);
 		}else{	
 			$query = "INSERT INTO ".$this->table_prefix."cleantalk_sfw_logs
 			SET 
@@ -178,7 +178,7 @@ class cleantalkSFW
 				all_entries = 1,
 				blocked_entries = 1,
 				entries_timestamp = ".$time.";";
-			$this->unversal_query($query, true);
+			$this->universal_query($query);
 		}
 	}
 	
@@ -193,7 +193,7 @@ class cleantalkSFW
 		
 		if(empty($result['error'])){
 			
-			$this->unversal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw;", true);
+			$this->universal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw;");
 						
 			// Cast result to int
 			foreach($result as $value){
@@ -226,8 +226,8 @@ class cleantalkSFW
 		
 		//Getting logs
 		$query = "SELECT * FROM ".$this->table_prefix."cleantalk_sfw_logs";
-		$this->unversal_query($query);
-		$this->unversal_fetch_all();
+		$this->universal_query($query);
+		$this->universal_fetch_all();
 		
 		if(count($this->db_result_data)){
 			
@@ -244,7 +244,7 @@ class cleantalkSFW
 			//Checking answer and deleting all lines from the table
 			if(empty($result['error'])){
 				if($result['rows'] == count($data)){
-					$this->unversal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw_logs", true);
+					$this->universal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw_logs");
 					return true;
 				}
 			}else{
