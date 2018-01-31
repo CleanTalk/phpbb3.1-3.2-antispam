@@ -97,6 +97,32 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::cleantalk_get_checkjs_code());
+		if ($this->config['cleantalk_antispam_ccf'])
+		{
+			$this->ct_comment_result = null;
+			$spam_check = array();
+			$spam_check['type'] = 'comment';
+			$spam_check['sender_email'] = $this->request->variable('email','');
+			$spam_check['sender_nickname'] = $this->request->variable('username','');
+			$spam_check['message_title'] = $this->request->variable('contact_subject','');
+			$spam_check['message_body'] = utf8_normalize_nfc($this->request->variable('message', '', true));
+			$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);			
+			if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
+			{ 
+				if ($result['stop_queue'] == 1)
+				{
+					// Output error
+        			$error_tpl=file_get_contents(dirname(__FILE__).'/../'."/model/error.html");
+					print str_replace('%ERROR_TEXT%',$result['ct_result_comment'],$error_tpl);
+					die();	
+				}
+				else
+				{
+					// No error output but send comment to manual approvement
+					$this->ct_comment_result = $result;
+				}
+			}
+		}
 	}
 
 	/**

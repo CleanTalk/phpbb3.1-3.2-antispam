@@ -30,12 +30,6 @@ class main_model
 		$checkjs = self::cleantalk_is_valid_js() ? 1 : 0;
 
 		$ct = new \cleantalk\antispam\model\Cleantalk();
-		
-		if(!file_exists($phpbb_root_path."/store/cleantalk.pem") && file_exists($phpbb_root_path."/ext/cleantalk/cleantalk.pem")){
-			rename($phpbb_root_path."/ext/cleantalk/cleantalk.pem",$phpbb_root_path."/store/cleantalk.pem");
-			$ct->ssl_on = true;
-			$ct->ssl_path = $phpbb_root_path."/store/cleantalk.pem";
-		}
 
 		$ct->work_url       = $config['cleantalk_antispam_work_url'];
 		$ct->server_url     = $config['cleantalk_antispam_server_url'];
