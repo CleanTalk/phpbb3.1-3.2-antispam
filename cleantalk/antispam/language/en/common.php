@@ -53,6 +53,7 @@ $lang = array_merge($lang, array(
 
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'			=> 'Check users for spam',
 	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> "Anti-spam by CleanTalk will check all users against blacklists database and show you senders that have spam activity on other websites. Just click 'Check users for spam' to start.",
+	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'Pages:',	
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'Check users for spam',
 	'ACP_CHECKUSERS_DONE_1'                     => 'Done. All users tested via blacklists database, please see result below.',
 	'ACP_CHECKUSERS_DONE_2'                     => 'Done. All users tested via blacklists database, found 0 spam users.',
