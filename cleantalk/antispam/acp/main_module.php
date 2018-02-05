@@ -103,7 +103,7 @@ class main_module
 					$ct_feedback['auth_key'] = $savekey;
 					$ct_feedback['type'] = 'send_feedback';
 					$ct_feedback['feedback'] = '0:phpbb31-' . preg_replace("/(\d+)\.(\d*)\.?(\d*)/", "$1$2$3", $composer_json->version);
-					$result = \cleantalk\antispam\model\main_model::check_spam($ct_feedback);
+					\cleantalk\antispam\model\main_model::check_spam($ct_feedback);
 				}else{
 					$config->set('cleantalk_antispam_key_is_ok', 0);
 					$config->set('cleantalk_antispam_user_token', '');
@@ -203,7 +203,6 @@ class main_module
 			}
 			
 			$db->sql_freeresult($result);
-			
 			$error="";
 			for($i=0;$i<sizeof($users);$i++)
 			{
@@ -256,7 +255,7 @@ class main_module
 				$template->assign_var('CT_ACP_CHECKUSERS_DONE_1',1);
 			}
 		}
-		$start_entry = '0';		
+		$start_entry = 0;		
 		if($request->is_set('start_entry', \phpbb\request\request_interface::GET))
 		{
 			$start_entry = $request->variable('start_entry', 1);
@@ -288,8 +287,8 @@ class main_module
 			));
 		}
 		$db->sql_freeresult($result);
-		$pages = ceil($spam_users_count / $on_page);
-		$server_uri = 'index.'.$phpEx.'?sid='.$request->variable('sid','1').'&i='.$request->variable('i','1');
+		$pages = ceil($spam_users_count / $on_page); 
+		$server_uri = append_sid('index.'.$phpEx,array('i'=>$request->variable('i','1')));
 		if ($pages>1)
 		{
 			$template->assign_var('CT_PAGES_TITLE',1);
