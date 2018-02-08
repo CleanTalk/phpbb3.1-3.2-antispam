@@ -103,13 +103,13 @@ class main_listener implements EventSubscriberInterface
 			//Checking contact form
 			$this->ct_comment_result = null;
 			$spam_check = array();			
-			if (!empty($this->request->variable('email','')))
+			if ($this->request->variable('email','') != '')
 				$spam_check['sender_email'] = $this->request->variable('email','');
-			if (!empty($this->request->variable('username','')))
+			if ($this->request->variable('username','') != '')
 				$spam_check['sender_nickname'] = $this->request->variable('username','');
-			if (!empty($this->request->variable('contact_subject','')))
+			if ($this->request->variable('contact_subject','') != '')
 				$spam_check['message_title'] = $this->request->variable('contact_subject','');
-			if (!empty($this->request->variable('message', '', true)))
+			if ($this->request->variable('message', '', true) != '')
 				$spam_check['message_body'] = utf8_normalize_nfc($this->request->variable('message', '', true));
 			if (count($spam_check)>0)
 			{
