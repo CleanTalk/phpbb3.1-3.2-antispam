@@ -113,21 +113,13 @@ class main_listener implements EventSubscriberInterface
 			if (count($spam_check)>0)
 			{
 				$spam_check['type'] = 'comment';
-				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);			
+				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);		
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
-				{ 
-					if ($result['stop_queue'] == 1)
-					{
-						// Output error
-	        			$error_tpl=file_get_contents(dirname(__FILE__).'/../'."/model/error.html");
-						print str_replace('%ERROR_TEXT%',$result['ct_result_comment'],$error_tpl);
-						die();	
-					}
-					else
-					{
-						// No error output but send comment to manual approvement
-						$this->ct_comment_result = $result;
-					}
+				{				 
+					// Output error
+        			$error_tpl=file_get_contents(dirname(__FILE__).'/../'."/model/error.html");
+					print str_replace('%ERROR_TEXT%',$result['ct_result_comment'],$error_tpl);
+					die();	
 				}
 			}
 		}
@@ -147,7 +139,7 @@ class main_listener implements EventSubscriberInterface
 
 		$data = $event->get_data();
 		$form_id = $data['form_name'];
-		if ($this->config['cleantalk_antispam_guests'] && $form_id == 'posting' || $this->config['cleantalk_antispam_regs'] && $form_id == 'ucp_register')
+		if ($this->config['cleantalk_antispam_guests'] && $form_id == 'posting' || $this->config['cleantalk_antispam_regs'] && $form_id == 'ucp_register' || $this->config['cleantalk_antispam_ccf'] && $form_id == 'contactadmin')
 		{
 			\cleantalk\antispam\model\main_model::set_submit_time();
 		}

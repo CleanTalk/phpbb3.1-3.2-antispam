@@ -34,8 +34,8 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_LABEL'		        => 'إدارة آخر الأعضاء المُسجلين ',
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'سيتم فحص المشاركات والمواضيع بواسطة آخر الأعضاء المُسجلين. ومنع المُزعجة منها أو إرسالها للموافقة عليها بواسطة المشرفين.',
 
-	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'تحقق من كل أشكال الاتصال',
-	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'تمكين مكافحة البريد المزعج لأي أشكال الاتصال.',
+	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'اختبار نموذج الاتصال',
+	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'لتمكين مكافحة البريد المزعج اختبار نموذج الاتصال.',
 		
 	'ACP_CLEANTALK_SFW_LABEL'		       		=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'					=> 'تفعيل جدار الحماية. تخفيف حمل السيرفر وحماية الموقع من العمليات المُزعجة.',
