@@ -26,7 +26,6 @@ class cleantalkSFW
 	//Database variables
 	private $table_prefix;
 	private $db;
-	private $query;
 	private $db_result;
 	private $db_result_data = array();
 	
@@ -54,18 +53,18 @@ class cleantalkSFW
 		$this->db = $db;
 	}
 	
-	public function unversal_query($query)
+	public function universal_query($query)
 	{
 		$this->db_result = $this->db->sql_query($query);
 	}
 	
-	public function unversal_fetch()
+	public function universal_fetch()
 	{
 		$this->db_result_data = $this->db->sql_fetchrow($this->db_result);
 		$this->db->sql_freeresult($this->db_result);
 	}
 
-	public function unversal_fetch_all()
+	public function universal_fetch_all()
 	{
 		$this->db_result_data = $this->db->sql_fetchrowset($this->db_result);
 		$this->db->sql_freeresult($this->db_result);
@@ -133,11 +132,9 @@ class cleantalkSFW
 				COUNT(network) AS cnt
 				FROM ".$this->table_prefix."cleantalk_sfw
 				WHERE network = ".intval($this->ip_array[$i])." & mask;";
-			$this->unversal_query($query);
-			$this->unversal_fetch();
-			
-			$curr_ip = long2ip(intval($this->ip_array[$i]));
-			
+			$this->universal_query($query);
+			$this->universal_fetch();
+						
 			if($this->db_result_data['cnt']){
 				$this->result = true;
 				$this->blocked_ip=$this->ip_str_array[$i];
@@ -163,8 +160,8 @@ class cleantalkSFW
 		$query = "SELECT COUNT(*)
 			FROM ".$this->table_prefix."cleantalk_sfw_logs
 			WHERE ip = '$ip';";
-		$this->unversal_query($query, true);
-		$this->unversal_fetch();
+		$this->universal_query($query);
+		$this->universal_fetch();
 		
 		if($this->db_result_data){
 			$query = "UPDATE ".$this->table_prefix."cleantalk_sfw_logs
@@ -173,7 +170,7 @@ class cleantalkSFW
 					blocked_entries = blocked_entries".strval($blocked).",
 					entries_timestamp = $time
 				WHERE ip = '$ip';";
-			$this->unversal_query($query, true);
+			$this->universal_query($query);
 		}else{	
 			$query = "INSERT INTO ".$this->table_prefix."cleantalk_sfw_logs
 			SET 
@@ -181,7 +178,7 @@ class cleantalkSFW
 				all_entries = 1,
 				blocked_entries = 1,
 				entries_timestamp = ".$time.";";
-			$this->unversal_query($query, true);
+			$this->universal_query($query);
 		}
 	}
 	
@@ -196,24 +193,23 @@ class cleantalkSFW
 		
 		if(empty($result['error'])){
 			
-			$this->unversal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw;", true);
+			$this->universal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw;");
 						
 			// Cast result to int
 			foreach($result as $value){
 				$value[0] = intval($value[0]);
 				$value[1] = intval($value[1]);
 			} unset($value);
-			
-			$query="INSERT INTO ".$this->table_prefix."cleantalk_sfw VALUES ";
+			$sql_ary = null;
 			for($i=0, $arr_count = count($result); $i < $arr_count; $i++){
-				if($i == count($result)-1){
-					$query.="(".$result[$i][0].",".$result[$i][1].");";
-				}else{
-					$query.="(".$result[$i][0].",".$result[$i][1]."), ";
-				}
+				$sql_ary[] = array(
+					'network' => $result[$i][0],
+					'mask'    => $result[$i][1],
+				);
 			}
-			$this->unversal_query($query, true);
-			
+			if ($sql_ary !== null){
+				$this->db->sql_multi_insert($this->table_prefix.'cleantalk_sfw',$sql_ary);	
+			}					
 			return true;
 			
 		}else{
@@ -230,8 +226,8 @@ class cleantalkSFW
 		
 		//Getting logs
 		$query = "SELECT * FROM ".$this->table_prefix."cleantalk_sfw_logs";
-		$this->unversal_query($query);
-		$this->unversal_fetch_all();
+		$this->universal_query($query);
+		$this->universal_fetch_all();
 		
 		if(count($this->db_result_data)){
 			
@@ -248,7 +244,7 @@ class cleantalkSFW
 			//Checking answer and deleting all lines from the table
 			if(empty($result['error'])){
 				if($result['rows'] == count($data)){
-					$this->unversal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw_logs", true);
+					$this->universal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw_logs");
 					return true;
 				}
 			}else{
@@ -283,7 +279,6 @@ class cleantalkSFW
 		$sfw_die_page = str_replace('{SFW_DIE_MAKE_SURE_JS_ENABLED}',   $user->lang('SFW_DIE_MAKE_SURE_JS_ENABLED'),   $sfw_die_page);
 		$sfw_die_page = str_replace('{SFW_DIE_CLICK_TO_PASS}',          $user->lang('SFW_DIE_CLICK_TO_PASS'),          $sfw_die_page);
 		$sfw_die_page = str_replace('{SFW_DIE_YOU_WILL_BE_REDIRECTED}', $user->lang('SFW_DIE_YOU_WILL_BE_REDIRECTED'), $sfw_die_page);
-		$sfw_die_page = str_replace('{CLEANTALK_TITLE}',                $user->lang('ACP_CLEANTALK_TITLE'),            $sfw_die_page);
 		
 		// Service info
 		$sfw_die_page = str_replace('{REMOTE_ADDRESS}', $this->blocked_ip, $sfw_die_page);
@@ -301,7 +296,7 @@ class cleantalkSFW
 			header("HTTP/1.0 403 Forbidden");
 			$sfw_die_page = str_replace('{GENERATED}', "", $sfw_die_page);
 		}else{
-			$sfw_die_page = str_replace('{GENERATED}', "<h2 class='second'>The page was generated at&nbsp;".date("D, d M Y H:i:s")."</h2>",$sfw_die_page);
+			$sfw_die_page = str_replace('{GENERATED}', "<h2 class='second'>{SFW_DIE_PAGE_GENERATED} ".date("D, d M Y H:i:s")."</h2>",$sfw_die_page);
 		}
 
 		trigger_error($sfw_die_page, E_USER_ERROR);

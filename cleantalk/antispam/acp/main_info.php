@@ -17,7 +17,11 @@ class main_info
 		return array(
 			'filename'	=> '\cleantalk\antispam\acp\main_module',
 			'title'		=> 'ACP_CLEANTALK_TITLE',
+<<<<<<< HEAD
 			'version'	=> '5.5.1',
+=======
+			'version'	=> '5.6.0',
+>>>>>>> dev
 			'modes'		=> array(
 				'settings'	=> array('title' => 'ACP_CLEANTALK_SETTINGS', 'auth' => 'ext_cleantalk/antispam && acl_a_board', 'cat' => array('ACP_CLEANTALK_TITLE')),
 			),

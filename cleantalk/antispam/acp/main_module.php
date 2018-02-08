@@ -20,15 +20,16 @@ class main_module
 		$this->tpl_name = 'settings_body';
 		$this->page_title = $user->lang('ACP_CLEANTALK_TITLE');
 		add_form_key('cleantalk/antispam');
-		
 		if ($request->is_set_post('submit') || $request->is_set_post('get_key_auto')){
 			
-			if (!check_form_key('cleantalk/antispam'))
+			if (!check_form_key('cleantalk/antispam')){
 				trigger_error('FORM_INVALID');
+			}
 
 			$config->set('cleantalk_antispam_regs', $request->variable('cleantalk_antispam_regs', 0));
 			$config->set('cleantalk_antispam_guests', $request->variable('cleantalk_antispam_guests', 0));
 			$config->set('cleantalk_antispam_nusers', $request->variable('cleantalk_antispam_nusers', 0));
+			$config->set('cleantalk_antispam_ccf', $request->variable('cleantalk_antispam_ccf',0));
 			$config->set('cleantalk_antispam_sfw_enabled', $request->variable('cleantalk_antispam_sfw_enabled', 0));
 			
 			$key_is_valid = false;
@@ -102,7 +103,7 @@ class main_module
 					$ct_feedback['auth_key'] = $savekey;
 					$ct_feedback['type'] = 'send_feedback';
 					$ct_feedback['feedback'] = '0:phpbb31-' . preg_replace("/(\d+)\.(\d*)\.?(\d*)/", "$1$2$3", $composer_json->version);
-					$result = \cleantalk\antispam\model\main_model::check_spam($ct_feedback);
+					\cleantalk\antispam\model\main_model::check_spam($ct_feedback);
 				}else{
 					$config->set('cleantalk_antispam_key_is_ok', 0);
 					$config->set('cleantalk_antispam_user_token', '');
@@ -120,6 +121,7 @@ class main_module
 			'CLEANTALK_ANTISPAM_REGS'		=> $config['cleantalk_antispam_regs'] ? true : false,
 			'CLEANTALK_ANTISPAM_GUESTS'		=> $config['cleantalk_antispam_guests'] ? true : false,
 			'CLEANTALK_ANTISPAM_NUSERS'		=> $config['cleantalk_antispam_nusers'] ? true : false,
+			'CLEANTALK_ANTISPAM_CCF'		=> $config['cleantalk_antispam_ccf'] ? true: false,
 			'CLEANTALK_ANTISPAM_SFW_ENABLED'=> $config['cleantalk_antispam_sfw_enabled'] ? true : false,
 			'CLEANTALK_ANTISPAM_APIKEY'		=> $config['cleantalk_antispam_apikey'],
 			'CLEANTALK_ANTISPAM_KEY_IS_OK'	=> $config['cleantalk_antispam_key_is_ok'] ? true : false,
@@ -134,6 +136,10 @@ class main_module
 		$ct_del_all  = $request->variable('ct_delete_all', '',       false, \phpbb\request\request_interface::POST);
 				
 		if($ct_del_all!=''){
+
+			if (!check_form_key('cleantalk/antispam')){
+				trigger_error('FORM_INVALID');
+			}
 			
 			if (!function_exists('user_delete')){
 				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
@@ -149,7 +155,9 @@ class main_module
 		}
 		
 		if(sizeof($ct_del_user)>0){
-			
+			if (!check_form_key('cleantalk/antispam')){
+				trigger_error('FORM_INVALID');
+			}
 			if (!function_exists('user_delete')){
 				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
@@ -157,9 +165,10 @@ class main_module
 				user_delete('remove', $key);
 			}
 		}
-		
-		if($request->is_set('check_users_spam')){
-			
+		if($request->variable('check_spam', '',       false, \phpbb\request\request_interface::POST)){
+			if (!check_form_key('cleantalk/antispam')){
+				trigger_error('FORM_INVALID');
+			}
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
 				SET ct_marked=0';
 			$result = $db->sql_query($sql);
@@ -194,7 +203,6 @@ class main_module
 			}
 			
 			$db->sql_freeresult($result);
-			
 			$error="";
 			for($i=0;$i<sizeof($users);$i++)
 			{
@@ -203,10 +211,12 @@ class main_module
 				
 				if(!empty($result['error']))
 				{					
-					if($result['error_string'] == 'CONNECTION_ERROR')
+					if($result['error_string'] == 'CONNECTION_ERROR'){
 						$error = $user->lang('ACP_CHECKUSERS_DONE_3');
-					else
+					}
+					else {
 						$error = $result['error_message'];
+					}
 				}
 				else
 				{
@@ -242,10 +252,10 @@ class main_module
 			}
 			else
 			{
-				@header("Location: ".str_replace('&check_users_spam=1', '&finish_check=1', html_entity_decode($request->server('REQUEST_URI'))));
+				$template->assign_var('CT_ACP_CHECKUSERS_DONE_1',1);
 			}
 		}
-		$start_entry = '0';		
+		$start_entry = 0;		
 		if($request->is_set('start_entry', \phpbb\request\request_interface::GET))
 		{
 			$start_entry = $request->variable('start_entry', 1);
@@ -261,10 +271,6 @@ class main_module
 			FROM ' . USERS_TABLE . '
 			WHERE ct_marked = 1';
 		$result = $db->sql_query_limit($sql, $on_page, $start_entry);
-		if($request->variable('finish_check', '', false, \phpbb\request\request_interface::GET) != '')
-		{
-			$template->assign_var('CT_ACP_CHECKUSERS_DONE_1', '1');
-		}
 		$found = false;
 		while($row = $db->sql_fetchrow($result))
 		{			
@@ -281,25 +287,25 @@ class main_module
 			));
 		}
 		$db->sql_freeresult($result);
-		$pages = ceil($spam_users_count / $on_page);
-		$server_uri = 'index.php?sid='.$request->variable('sid','1').'&i='.$request->variable('i','1');
+		$pages = ceil($spam_users_count / $on_page); 
+		$server_uri = append_sid('index.'.$phpEx,array('i'=>$request->variable('i','1')));
 		if ($pages>1)
 		{
-			$pages_str = "<ul><li style='display: inline-block; margin: 10px 5px;'>Pages:</li>";
-			for($i=1; $pages >= $i; $i++){
-				$pages_str  .= "					
-					<li style='display: inline-block; padding: 3px 5px; background: rgba(23,96,147,".(($request->is_set('curr_page', \phpbb\request\request_interface::GET) && $request->variable('start_entry',1) == $i) || (!$request->is_set('curr_page', \phpbb\request\request_interface::GET) && $i == 1) ? "0.6" : "0.3")."); border-radius: 3px;'>
-								<a href=".$server_uri."&start_entry=".($i-1)*$on_page."&curr_page=$i>$i</a>
-					</li>";
-				}
-			$pages_str.="</ul>";
-			$template->assign_var('CT_CHECKUSERS_PAGES', $pages_str);
+			$template->assign_var('CT_PAGES_TITLE',1);
+			for ($i=1; $pages >= $i; $i++){
+				$template->assign_block_vars('CT_PAGES_CHECKUSERS', array(
+					'PAGE_LINK' => $server_uri.'&start_entry='.($i-1)*$on_page.'&curr_page='.$i,
+					'PAGE_NUMBER' => $i, 
+					'PAGE_STYLE' => 'background: rgba(23,96,147,'.(($request->variable('curr_page',1) == $i) ? '0.6' : '0.3').');',
+
+				));							
+			}			
 		}
 		if ($found)
 		{
 			$template->assign_var('CT_TABLE_USERS_SPAM', '1');
 		}
-		if(!$found && $request->variable('finish_check', '', false, \phpbb\request\request_interface::GET) != '')
+		if(!$found && $request->variable('check_spam', '',       false, \phpbb\request\request_interface::POST))
 		{
 			$template->assign_var('CT_ACP_CHECKUSERS_DONE_2', '1');
 		}

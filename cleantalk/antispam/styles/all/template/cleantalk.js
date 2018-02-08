@@ -22,7 +22,6 @@ ctSetCookie("ct_ps_timestamp", Math.floor(new Date().getTime()/1000));
 ctSetCookie("ct_fkp_timestamp", "0");
 ctSetCookie("ct_pointer_data", "0");
 ctSetCookie("ct_timezone", "0");
-
 setTimeout(function(){
 	ctSetCookie(ct_cookie_name, ct_cookie_value);
 	ctSetCookie("ct_timezone", ct_date.getTimezoneOffset()/60*(-1));

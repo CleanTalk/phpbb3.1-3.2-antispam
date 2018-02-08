@@ -32,11 +32,15 @@ $lang = array_merge($lang, array(
 
 	'ACP_CLEANTALK_NUSERS_LABEL'		        => 'Moderate Newly Registered Users',
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'Posts and topics from new users will be test for spam. Spam will be rejected or sent to approvement.',
-	
+
+	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Check contact forms',
+	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Enable anti-spam test for contact forms.',
+
 	'ACP_CLEANTALK_SFW_LABEL'		       		=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'		        	=> 'Enables SpamFireWall. Reduces webserver load and prevents bots to access the website.',
 
 	'ACP_CLEANTALK_APIKEY_LABEL'		        => 'Access key',
+	'ACP_CLEANTALK_APIKEY_LABEL_PLACEHOLDER'    => 'Enter the access key',		
 	'ACP_CLEANTALK_APIKEY_DESCR'		        => 'To get an access key please register at site ',
 	'ACP_CLEANTALK_REG_NOTICE'                  => 'Board e-mail',
 	'ACP_CLEANTALK_REG_NOTICE2'                 => 'will be used for registration',
@@ -49,6 +53,7 @@ $lang = array_merge($lang, array(
 
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'			=> 'Check users for spam',
 	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> "Anti-spam by CleanTalk will check all users against blacklists database and show you senders that have spam activity on other websites. Just click 'Check users for spam' to start.",
+	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'Pages:',	
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'Check users for spam',
 	'ACP_CHECKUSERS_DONE_1'                     => 'Done. All users tested via blacklists database, please see result below.',
 	'ACP_CHECKUSERS_DONE_2'                     => 'Done. All users tested via blacklists database, found 0 spam users.',
@@ -69,10 +74,12 @@ $lang = array_merge($lang, array(
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Please click bellow to pass protection,',
 	'SFW_DIE_YOU_WILL_BE_REDIRECTED'            => 'Or you will be automatically redirected to the requested page after 3 seconds.',
 	'SFW_DIE_NO_FILE'                           => 'You IP looks like spammer`s IP',
+	'SFW_DIE_PAGE_GENERATED'					=> 'The page was generated at',
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'Error while connecting to CleanTalk service',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>Error while connecting to CleanTalk service</strong><br />%s',
 	'CLEANTALK_ERROR_CURL'		                => 'CURL error: "%s"',
 	'CLEANTALK_ERROR_NO_CURL'		            => 'No CURL support compiled in',
 	'CLEANTALK_ERROR_ADDON'		                => ' or disabled allow_url_fopen in php.ini.',
+	'CLEANTALK_NOTIFICATION'					=> 'Are you sure?',
 ));

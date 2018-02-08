@@ -33,11 +33,15 @@ $lang = array_merge($lang, array(
 	
 	'ACP_CLEANTALK_NUSERS_LABEL'				=> 'Moderar nuevos usuarios registrados',
 	'ACP_CLEANTALK_NUSERS_DESCR'				=> 'Mensajes y temas de los nuevos usuarios estarán a prueba en busca de Spam. Los correos no deseados serán rechazados, o enviados para ser aprobados.',
-	
+
+	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Comprobar que formularios de contacto',
+	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Activar el filtro antispam de prueba para el formulario de contacto.',
+		
 	'ACP_CLEANTALK_SFW_LABEL'					=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'					=> 'Enables SpamFireWall. Reduces webserver load and prevents bots to access the website.',
 	
 	'ACP_CLEANTALK_APIKEY_LABEL'				=> 'Llave de acceso',
+	'ACP_CLEANTALK_APIKEY_LABEL_PLACEHOLDER'    => 'Escriba la clave de acceso',		
 	'ACP_CLEANTALK_APIKEY_DESCR'				=> 'Para obtener una clave de acceso, por favor registrese en el sitio ',
 	'ACP_CLEANTALK_REG_NOTICE'                  => 'Board e-mail',
 	'ACP_CLEANTALK_REG_NOTICE2'                 => 'will be used for registration',
@@ -50,12 +54,14 @@ $lang = array_merge($lang, array(
 	
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'			=> 'Comprobar usuarios de Spam',
 	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> "Anti-Spam por CleanTalk comprobará todos los usuarios de la base de datos contra las listas negras y le mostrará los remitentes de correo no deseado que tienen actividad en otros sitios web. Simplemente haga clic 'Comprobar usuarios de Spam' para comenzar.",
+	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'Página:',	
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'Comprobar usuarios de Spam',
 	'ACP_CHECKUSERS_DONE_1' 					=> 'Hecho. Todos los usuarios de la base de datos han sido probados a través de listas negras, por favor vea el resultado a continuación.',
 	'ACP_CHECKUSERS_DONE_2' 					=> 'Hecho. Todos los usuarios de la base de datos han sido probados a través de listas negras, se encontraron 0 usuarios de Spam.',
 	'ACP_CHECKUSERS_DONE_3'						=> 'Error. No hay conexión con la base de datos de lista negra.',
 	'ACP_CHECKUSERS_SELECT' 					=> 'Seleccionar',
 	'ACP_CHECKUSERS_USERNAME'					=> 'Nombre de usuario',
+	'ACP_CHECKUSERS_MESSAGES'					=> 'Mensajes',
 	'ACP_CHECKUSERS_JOINED' 					=> 'Ingreso',
 	'ACP_CHECKUSERS_EMAIL' 						=> 'Email',
 	'ACP_CHECKUSERS_IP' 						=> 'IP',
@@ -69,10 +75,12 @@ $lang = array_merge($lang, array(
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Please click bellow to pass protection,',
 	'SFW_DIE_YOU_WILL_BE_REDIRECTED'            => 'Or you will be automatically redirected to the requested page after 3 seconds.',
 	'SFW_DIE_NO_FILE'                           => 'You IP looks like spammer`s IP',
+	'SFW_DIE_PAGE_GENERATED'					=> 'La página se ha generado',	
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'Error al conectar con el servicio CleanTalk',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>Error al conectar con el servicio CleanTalk</strong><br />%s',
 	'CLEANTALK_ERROR_CURL'		                => 'CURL error: "%s"',
 	'CLEANTALK_ERROR_NO_CURL'		            => 'No CURL support compiled in',
 	'CLEANTALK_ERROR_ADDON'		                => ' or disabled allow_url_fopen in php.ini.',
+	'CLEANTALK_NOTIFICATION'					=> '¿Está usted seguro?',
 ));

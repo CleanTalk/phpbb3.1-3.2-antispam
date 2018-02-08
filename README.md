@@ -1,6 +1,10 @@
 CleanTalk Antispam extension for phpbb v.3.1.
 ============================================
+<<<<<<< HEAD
 ## Version 5.5.1
+=======
+## Version 5.6.0
+>>>>>>> dev
 
 ## How to install.
   * Follow standard instruction at https://www.phpbb.com/extensions/installing/

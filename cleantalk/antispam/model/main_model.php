@@ -31,11 +31,6 @@ class main_model
 
 		$ct = new \cleantalk\antispam\model\Cleantalk();
 		
-		$root_dir= realpath(dirname(__FILE__).'/../../../../');
-		if(file_exists($root_dir."/cleantalk.pem")){
-			$ct->ssl_on = true;
-			$ct->ssl_path = $root_dir."/cleantalk.pem";
-		}
 
 		$ct->work_url       = $config['cleantalk_antispam_work_url'];
 		$ct->server_url     = $config['cleantalk_antispam_server_url'];
@@ -221,9 +216,9 @@ class main_model
 	static public function set_submit_time()
 	{
 		global $db, $user;
-		$sql = 'UPDATE ' . SESSIONS_TABLE . 
-			' SET ct_submit_time = ' . time() .
-			' WHERE session_id = \'' . $db->sql_escape($user->session_id) . '\'';
+		$sql = "UPDATE " . SESSIONS_TABLE . 
+			" SET ct_submit_time = " . time() .
+			" WHERE session_id = '" . $db->sql_escape($user->session_id) . "'";
 		$db->sql_query($sql);
 	}
     static public function cleantalk_get_checkjs_code()
@@ -302,22 +297,6 @@ class main_model
 		}else
 			$result = false;
 	    return  $result;
-	}
-	/**
-	* Gets conplete JS-code with session-unique hash to insert into template for JS-ebabled checkibg
-	*
-	* @return string JS-code
-	*/
-	static public function get_check_js_script()
-	{	
-		$ct_check_value = self::cleantalk_get_checkjs_code();
-		
-		$ct_addon_body = '<script type="text/javascript">
-			var ct_cookie_name = "'.self::JS_FIELD_NAME.'",
-				ct_cookie_value = "'.$ct_check_value.'";
-		</script>';
-		
-		return $ct_addon_body;
 	}
 	
 	/**

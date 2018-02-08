@@ -26,7 +26,7 @@ class CleantalkHelper
 	 * Function checks api key status
 	 *
 	 * @param string api key
-	 * @param string perform check flag
+	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
 	static public function noticeValidateKey($api_key, $do_check = true)
@@ -49,7 +49,7 @@ class CleantalkHelper
 	 * @param string website's host
 	 * @param string website's platform
 	 * @param string website's timezone
-	 * @param string perform check flag
+	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
 	static public function getApiKey($email, $host, $platform, $timezone = null, $do_check = true)
@@ -73,7 +73,7 @@ class CleantalkHelper
 	 * Function gets information about renew notice
 	 *
 	 * @param string api_key
-	 * @param string perform check flag
+	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
 	static public function noticePaidTill($api_key, $do_check = true)
@@ -93,7 +93,7 @@ class CleantalkHelper
 	 * Function gets information about account
 	 *
 	 * @param string api_key
-	 * @param string perform check flag
+	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
 	static public function getAccountStatus($api_key, $do_check = true)
@@ -114,7 +114,7 @@ class CleantalkHelper
 	 *
 	 * @param string api_key
 	 * @param string data "ip1,ip2,ip3..."
-	 * @param string perform check flag
+	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
 	static public function spamCheckCms($api_key, $data, $do_check = true){
@@ -136,7 +136,7 @@ class CleantalkHelper
 	 *
 	 * @param string api_key
 	 * @param string agent-version
-	 * @param string perform check flag
+	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
 	static public function sendEmptyFeedback($api_key, $agent_version, $do_check = true){
@@ -159,7 +159,7 @@ class CleantalkHelper
 	 *
 	 * @param string website host
 	 * @param integer report days
-	 * @param string perform check flag
+	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
 	static public function getAntispamReport($host, $period = 1, $do_check = true)
@@ -175,38 +175,8 @@ class CleantalkHelper
 		
 		return $result;
 	}
-	
-	/**
-	 * Function gets spam statistics
-	 *
-	 * @param string api key
-	 * @return array
-	 */
-	static function getAntispamReportBreif($api_key, $do_check = true)
-	{
-		$request=Array(
-			'auth_key' => $api_key,
-			'method_name' => 'get_antispam_report_breif'
-		);
-		$result = sendRawRequest(self::URL,$request);
-						
-		if($result === false){
-			return "Network error. Please, check <a target='_blank' href='https://cleantalk.org/help/faq-setup#hosting'>this article</a>.";
-		}
-		
-		$result = !empty($result) ? json_decode($result, true) : false;
-				
-		if(!empty($result['error_message'])){
-			return  $result['error_message'];
-		}else{
-			$tmp = array();
-			for($i=0; $i<7; $i++)
-				$tmp[date("Y-m-d", time()-86400*7+86400*$i)] = 0;
-			$result['data']['spam_stat'] = array_merge($tmp, $result['data']['spam_stat']);			
-			return $result['data'];
-		}
-	}
-	
+
+
 	/**
 	 * Function checks server response
 	 *

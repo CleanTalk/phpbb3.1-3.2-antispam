@@ -33,11 +33,15 @@ $lang = array_merge($lang, array(
 
 	'ACP_CLEANTALK_NUSERS_LABEL'		        => 'إدارة آخر الأعضاء المُسجلين ',
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'سيتم فحص المشاركات والمواضيع بواسطة آخر الأعضاء المُسجلين. ومنع المُزعجة منها أو إرسالها للموافقة عليها بواسطة المشرفين.',
-	
+
+	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'اختبار نموذج الاتصال',
+	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'لتمكين مكافحة البريد المزعج اختبار نموذج الاتصال.',
+		
 	'ACP_CLEANTALK_SFW_LABEL'		       		=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'					=> 'تفعيل جدار الحماية. تخفيف حمل السيرفر وحماية الموقع من العمليات المُزعجة.',
 
 	'ACP_CLEANTALK_APIKEY_LABEL'		        => 'مفتاح الدخول ',
+	'ACP_CLEANTALK_APIKEY_LABEL_PLACEHOLDER'    => 'أدخل مفتاح الوصول',	
 	'ACP_CLEANTALK_APIKEY_DESCR'		        => 'للحصول على مفتاح الدخول , نرجوا التسجيل في الموقع ',
 	'ACP_CLEANTALK_REG_NOTICE'                  => 'Board e-mail',
 	'ACP_CLEANTALK_REG_NOTICE2'                 => 'will be used for registration',
@@ -50,6 +54,7 @@ $lang = array_merge($lang, array(
 
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'			=> 'فحص الأعضاء المُزعجين',
 	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> "المكافح CleanTalk سوف يفحص جميع الأعضاء في قاعدة بيانات القوائم السوداء لديه , وسيعرض لك أسماء الأعضاء الذين لديهم نشاط مُزعج في المواقع الأخرى. فقط انقر على الزر 'فحص الأعضاء المُزعجين' لبدء عملية الفحص.",
+	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'صفحات',	
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'فحص الأعضاء المُزعجين',
 	'ACP_CHECKUSERS_DONE_1'                     => 'تم فحص جميع الأعضاء بواسطة قاعدة بيانات القوائم السوداء. الرجاء الإطلاع على النتيجة أدناه :',
 	'ACP_CHECKUSERS_DONE_2'                     => 'تم فحص جميع الأعضاء بواسطة قاعدة بيانات القوائم السوداء. لم يتم العثور على أعضاء مُزعجين.',
@@ -70,10 +75,12 @@ $lang = array_merge($lang, array(
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Please click bellow to pass protection,',
 	'SFW_DIE_YOU_WILL_BE_REDIRECTED'            => 'Or you will be automatically redirected to the requested page after 3 seconds.',
 	'SFW_DIE_NO_FILE'                           => 'You IP looks like spammer`s IP',
-	
+	'SFW_DIE_PAGE_GENERATED'					=> 'The page was generated at',
+		
 	'CLEANTALK_ERROR_MAIL'		                => 'هناك خطأ أثناء عملية الإتصال بخدمة الـ CleanTalk',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>خطأ أثناء عملية الإتصال بخدمة الـ CleanTalk</strong><br />%s',
 	'CLEANTALK_ERROR_CURL'		                => 'CURL error: "%s"',
 	'CLEANTALK_ERROR_NO_CURL'		            => 'No CURL support compiled in',
 	'CLEANTALK_ERROR_ADDON'		                => ' or disabled allow_url_fopen in php.ini.',
+	'CLEANTALK_NOTIFICATION'					=> 'هل أنت متأكد ؟',
 ));
