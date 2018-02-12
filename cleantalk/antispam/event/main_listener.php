@@ -98,7 +98,7 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::cleantalk_get_checkjs_code());
-		if ($this->config['cleantalk_antispam_ccf'])
+		if ($this->config['cleantalk_antispam_ccf'] && $this->request->server('PATH_INFO') === '/contactadmin')
 		{
 			//Checking contact form
 			$this->ct_comment_result = null;
