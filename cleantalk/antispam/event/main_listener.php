@@ -183,8 +183,23 @@ class main_listener implements EventSubscriberInterface
 				$moderate = true;
 			}
 			$this->db->sql_freeresult($result);
+			//check numposts also
+			if (!$moderate)
+			{
+				$users_table = USERS_TABLE;
+				$sql = "SELECT u.user_id
+					FROM $users_table u
+					WHERE u.user_id = $user_id 
+					AND	u.user_posts <= 3";
+				$result = $this->db->sql_query($sql);
+				$row = $this->db->sql_fetchrow($result);
+				if ($row !== false && isset($row['user_id']))
+				{
+					$moderate = true;
+				}				
+			}
+			$this->db->sql_freeresult($result);			
 		}
-
 		if ($moderate)
 		{
 			$data = $event->get_data();
