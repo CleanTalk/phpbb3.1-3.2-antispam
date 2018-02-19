@@ -118,7 +118,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			\cleantalk\antispam\model\main_model::set_submit_time();
 		}
-		if ($this->config['cleantalk_antispam_ccf'] && !in_array($form_id, array('posting','uscp_register')))
+		if ($this->config['cleantalk_antispam_ccf'] && !in_array($form_id, array('posting','uscp_register','')))
 		{
 			//Checking contact form
 			$this->ct_comment_result = null;
