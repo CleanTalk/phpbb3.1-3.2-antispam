@@ -15,6 +15,9 @@ class main_model
 	const JS_FIELD_NAME = 'ct_checkjs';
 	const JS_TIME_ZONE_FIELD_NAME = 'ct_timezone';
 	const JS_POINTER_DATA_FIELD_NAME = 'ct_pointer_data';
+	const JS_PREVIOUS_REFERER = 'ct_prev_referer';
+	const JS_FKP_TIMESTAMP = 'ct_fkp_timestamp';
+	const JS_PS_TIMESTAMP = 'ct_ps_timestamp';
 
 	/**
 	* Checks user registration to spam
@@ -39,14 +42,16 @@ class main_model
 
 		//Pointer data, Timezone from JS, First key press timestamp, Page set timestamp
 		$pointer_data 			= $request->variable(self::JS_POINTER_DATA_FIELD_NAME, 	"none", false, \phpbb\request\request_interface::COOKIE);
-		$page_set_timestamp 	= $request->variable("ct_ps_timestamp", 				"none", false, \phpbb\request\request_interface::COOKIE);
+		$page_set_timestamp 	= $request->variable(self::JS_PS_TIMESTAMP, 			"none", false, \phpbb\request\request_interface::COOKIE);
 		$js_timezone 			= $request->variable(self::JS_TIME_ZONE_FIELD_NAME, 	"none", false, \phpbb\request\request_interface::COOKIE);
-		$first_key_timestamp 	= $request->variable("ct_fkp_timestamp", 				"none", false, \phpbb\request\request_interface::COOKIE);
+		$first_key_timestamp 	= $request->variable(self::JS_FKP_TIMESTAMP, 			"none", false, \phpbb\request\request_interface::COOKIE);
+		$previous_referer       = $request->variable($config['cookie_name'].'_'.self::JS_PREVIOUS_REFERER, "none", false, \phpbb\request\request_interface::COOKIE);
 		
 		$pointer_data 			= ($pointer_data 		=== "none" ? 0 : json_decode ($pointer_data));
 		$js_timezone 			= ($js_timezone 		=== "none" ? 0 : $js_timezone);
 		$first_key_timestamp 	= ($first_key_timestamp === "none" ? 0 : intval($first_key_timestamp));
 		$page_set_timestamp 	= ($page_set_timestamp 	=== "none" ? 0 : intval($page_set_timestamp));
+		$previous_referer       = ($previous_referer    === "none" ? 0 : $previous_referer);
 				
 		$user_agent  = $request->server('HTTP_USER_AGENT');
 		$refferrer   = $request->server('HTTP_REFERER');		
@@ -59,7 +64,8 @@ class main_model
 			'js_timezone'            => $js_timezone,
 			'mouse_cursor_positions' => $pointer_data,
 			'key_press_timestamp'    => $first_key_timestamp,
-			'page_set_timestamp'     => $page_set_timestamp	
+			'page_set_timestamp'     => $page_set_timestamp,
+			'REFFERRER_PREVIOUS'     => $previous_referer,	
 			)
 		);
 		
@@ -285,7 +291,9 @@ class main_model
 				
 	   	foreach($skip_params as $value){
 	   		if(array_key_exists($value,$request->get_super_global()))
+	   		{
 	   			$contact = false;
+	   		}
 	   	} unset($value);
 			
 		if(count($arr)){
@@ -294,16 +302,22 @@ class main_model
 				if(gettype($value)=='string'){
 					$decoded_json_value = json_decode($value, true);
 					if($decoded_json_value !== null)
+					{
 						$value = $decoded_json_value;
+					}
 				}
 				
 				if(!is_array($value) && !is_object($value)){
 					
 					if (in_array($key, $skip_params, true) && $key != 0 && $key != '' || preg_match("/^ct_checkjs/", $key))
+					{
 						$contact = false;
+					}
 					
 					if($value === '')
+					{
 						continue;
+					}
 					
 					// Skipping fields names with strings from (array)skip_fields_with_strings
 					foreach($skip_fields_with_strings as $needle){
@@ -335,13 +349,21 @@ class main_model
 						preg_match("/(nick.?name)?(user.?name)?(nick)?/", $key, $match_nickname);
 						
 						if(count($match_forename) > 1)
+						{
 							$nickname['first'] = $value;
+						}
 						elseif(count($match_surname) > 1)
+						{
 							$nickname['last'] = $value;
+						}
 						elseif(count($match_nickname) > 1)
+						{
 							$nickname['nick'] = $value;
+						}
 						else
+						{
 							$message[$prev_name.$key] = $value;
+						}
 					
 					// Subject
 					}elseif ($subject === null && preg_match("/subject/i", $key)){
@@ -364,7 +386,9 @@ class main_model
 					$nickname 	= ($temp['nickname'] 	? $temp['nickname'] : null);				
 					$subject 	= ($temp['subject'] 	? $temp['subject'] : null);
 					if($contact === true)
+					{
 						$contact = ($temp['contact'] === false ? false : true);
+					}
 					$prev_name 	= $prev_name_original;
 				}
 			} unset($key, $value);
@@ -400,6 +424,27 @@ class main_model
 	        $value = str_repeat('*', $length);
 	    }
 	    return $value;
+	}
+	/**
+	* Sets cookie
+	*/	
+	static public function cookie_test()
+	{
+		global $config, $request, $user;
+		// Cookie names to validate
+		$cookie_test_value = array(
+			'cookies_names' => array(),
+			'check_value' => $config['cleantalk_antispam_apikey'],
+		);
+		// Pervious referer
+		if($request->server('HTTP_REFERER','') !== ''){
+			$user->set_cookie('ct_prev_referer', $request->server('HTTP_REFERER',''), 0);
+			$cookie_test_value['cookies_names'][] = 'ct_prev_referer';
+			$cookie_test_value['check_value'] .= $request->server('HTTP_REFERER','');
+		}
+		// Cookies test
+		$cookie_test_value['check_value'] = md5($cookie_test_value['check_value']);
+		$user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), 0);		
 	}
 	/**
 	* Sets from display time in table

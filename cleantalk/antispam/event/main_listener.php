@@ -98,6 +98,7 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::cleantalk_get_checkjs_code());
+		\cleantalk\antispam\model\main_model::cookie_test();		
 	}
 
 	/**
@@ -118,7 +119,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			\cleantalk\antispam\model\main_model::set_submit_time();
 		}
-		if ($this->config['cleantalk_antispam_ccf'] && !in_array($form_id, array('posting','uscp_register','')))
+		if ($this->config['cleantalk_antispam_ccf'] && !in_array($form_id, array('posting','uscp_register')))
 		{
 			//Checking contact form
 			$this->ct_comment_result = null;
@@ -132,18 +133,33 @@ class main_listener implements EventSubscriberInterface
 			$message         = ($ct_temp_msg_data['message']  ? implode(',',$ct_temp_msg_data['message'])  : '');	
 
 			if ($sender_email !== '')
+			{
 				$spam_check['sender_email'] = $sender_email;
+			}
+			else if ($this->user->data['user_email'] !== '')
+			{
+				$spam_check['sender_email'] = $this->user->data['user_email'];
+			}
 			if ($sender_nickname !== '')
+			{
 				$spam_check['sender_nickname'] = $sender_nickname;
+			}
+			else if ($this->user->data['username'] !== '')
+			{
+				$spam_check['sender_nickname'] = $this->user->data['username'];		 
+			}
 			if ($subject !== '')
+			{
 				$spam_check['message_title'] = $subject;
+			}
 			if ($message !== '')
+			{
 				$spam_check['message_body'] = $message;
-
-			if (count($spam_check)>0)
+			}
+			if (isset($spam_check['message_title']) || isset($spam_check['message_body']))
 			{
 				$spam_check['type'] = 'comment';
-				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);	
+				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{				 
 					// Output error
