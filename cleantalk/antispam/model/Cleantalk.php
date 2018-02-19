@@ -390,7 +390,9 @@ class Cleantalk
         if($msg->method_name != 'send_feedback'){
             $tmp = self::request_headers();
             if ($tmp !== null)
+            {
                 $msg->all_headers=json_encode($tmp);
+            }
         }
         $si=(array)json_decode($msg->sender_info,true);
         
