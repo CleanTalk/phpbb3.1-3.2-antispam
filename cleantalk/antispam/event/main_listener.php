@@ -156,7 +156,7 @@ class main_listener implements EventSubscriberInterface
 			{
 				$spam_check['message_body'] = $message;
 			}
-			if (isset($spam_check['message_title']) || isset($spam_check['message_body']))
+			if (isset($spam_check['message_title']) || isset($spam_check['message_body']) || isset($spam_check['sender_email']))
 			{
 				$spam_check['type'] = 'comment';
 				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
