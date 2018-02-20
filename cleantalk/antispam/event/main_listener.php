@@ -31,7 +31,7 @@ class main_listener implements EventSubscriberInterface
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                 => 'check_newuser',
-			'core.common'					=> 'sfw_check',
+			'core.common'					=> 'global_check',
 		);
 	}
 
@@ -70,7 +70,6 @@ class main_listener implements EventSubscriberInterface
 		$this->request = $request;
 		$this->db = $db;
 	}
-
 	/**
 	* Loads language
 	*
@@ -119,56 +118,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			\cleantalk\antispam\model\main_model::set_submit_time();
 		}
-		if ($this->config['cleantalk_antispam_ccf'] && !in_array($form_id, array('posting','uscp_register')))
-		{
-			//Checking contact form
-			$this->ct_comment_result = null;
-			$spam_check = array();	
-			//Getting request params
-			$ct_temp_msg_data = \cleantalk\antispam\model\main_model::get_fields_any($this->request->get_super_global());
-
-			$sender_email    = ($ct_temp_msg_data['email']    ? $ct_temp_msg_data['email']    : '');
-			$sender_nickname = ($ct_temp_msg_data['nickname'] ? $ct_temp_msg_data['nickname'] : '');
-			$subject         = ($ct_temp_msg_data['subject']  ? $ct_temp_msg_data['subject']  : '');
-			$message         = ($ct_temp_msg_data['message']  ? implode(',',$ct_temp_msg_data['message'])  : '');	
-
-			if ($sender_email !== '')
-			{
-				$spam_check['sender_email'] = $sender_email;
-			}
-			else if ($this->user->data['user_email'] !== '')
-			{
-				$spam_check['sender_email'] = $this->user->data['user_email'];
-			}
-			if ($sender_nickname !== '')
-			{
-				$spam_check['sender_nickname'] = $sender_nickname;
-			}
-			else if ($this->user->data['username'] !== '')
-			{
-				$spam_check['sender_nickname'] = $this->user->data['username'];		 
-			}
-			if ($subject !== '')
-			{
-				$spam_check['message_title'] = $subject;
-			}
-			if ($message !== '')
-			{
-				$spam_check['message_body'] = $message;
-			}
-			if (isset($spam_check['message_title']) || isset($spam_check['message_body']) || isset($spam_check['sender_email']))
-			{
-				$spam_check['type'] = 'comment';
-				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
-				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
-				{				 
-					// Output error
-					trigger_error($result['ct_result_comment']);
-				}
-			}
-		}
 	}
-
 	/**
 	* Checks post or topic to spam
 	*
@@ -219,9 +169,9 @@ class main_listener implements EventSubscriberInterface
 				if ($row !== false && isset($row['user_id']))
 				{
 					$moderate = true;
-				}				
+				}
+				$this->db->sql_freeresult($result);								
 			}
-			$this->db->sql_freeresult($result);
 
 		}
 
@@ -339,11 +289,54 @@ class main_listener implements EventSubscriberInterface
 	}
 	
 	/**
-	* Checks user thru SFW
+	* Global checks
 	* @void
 	*/
-	public function sfw_check()
+	public function global_check()
 	{
 		\cleantalk\antispam\model\main_model::sfw_check();
+		if ($this->config['cleantalk_antispam_ccf'] && $this->request->server('PHP_SELF','') !== '/adm/index.php' && $this->request->variable('submit',''))
+		{
+			//Checking contact form
+			$this->ct_comment_result = null;
+			$spam_check = array();	
+
+			//Getting request params
+			$ct_temp_msg_data = \cleantalk\antispam\model\main_model::get_fields_any($this->request->get_super_global());
+
+			$sender_email    = ($ct_temp_msg_data['email']    ? $ct_temp_msg_data['email']    : '');
+			$sender_nickname = ($ct_temp_msg_data['nickname'] ? $ct_temp_msg_data['nickname'] : '');
+			$subject         = ($ct_temp_msg_data['subject']  ? $ct_temp_msg_data['subject']  : '');
+			$message         = ($ct_temp_msg_data['message']  ? implode(',',$ct_temp_msg_data['message'])  : '');	
+
+			if ($sender_email)
+			{
+				$spam_check['sender_email'] = $sender_email;
+			}
+			if ($sender_nickname)
+			{
+				$spam_check['sender_nickname'] = $sender_nickname;
+			}
+			if ($subject)
+			{
+				$spam_check['message_title'] = $subject;
+			}
+			if ($message)
+			{
+				$spam_check['message_body'] = $message;
+			}
+			
+			if (isset($spam_check['sender_email']) || isset($spam_check['message_title']) || isset($spam_check['message_body']) )
+			{
+				$spam_check['type'] = 'comment';
+
+				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
+				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
+				{				 
+					// Output error
+					trigger_error($result['ct_result_comment']);
+				}
+			}
+		}			
 	}
 }
