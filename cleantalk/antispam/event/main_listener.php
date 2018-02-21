@@ -295,8 +295,10 @@ class main_listener implements EventSubscriberInterface
 	public function global_check()
 	{
 		\cleantalk\antispam\model\main_model::sfw_check();
-		if ($this->config['cleantalk_antispam_ccf'] && $this->request->server('PHP_SELF','') !== '/adm/index.php' && $this->request->variable('submit',''))
+		
+		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->request->server('PHP_SELF',''), array('/adm/index.php','/ucp.php','/posting.php')) && $this->request->variable('submit',''))
 		{
+			
 			//Checking contact form
 			$this->ct_comment_result = null;
 			$spam_check = array();	
@@ -331,6 +333,7 @@ class main_listener implements EventSubscriberInterface
 				$spam_check['type'] = 'comment';
 
 				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
+
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{				 
 					// Output error
