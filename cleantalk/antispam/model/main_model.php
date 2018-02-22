@@ -83,9 +83,9 @@ class main_model
 		$ct_request->sender_info = $sender_info;
 		$ct_request->sender_email = array_key_exists('sender_email', $spam_check) ? $spam_check['sender_email'] : '';
 		$ct_request->sender_nickname = array_key_exists('sender_nickname', $spam_check) ? $spam_check['sender_nickname'] : '';
-		$ct_request->sender_ip = $user->ip;
-		$ct_request->submit_time = (!empty($user->data['ct_submit_time'])) ? time() - $user->data['ct_submit_time'] : null;
-
+		$ct_request->sender_ip = $ct->cleantalk_get_real_ip();
+		$ct_request->submit_time = ($page_set_timestamp !== 0) ? time() - $page_set_timestamp : null;
+		
 		switch ($spam_check['type'])
 		{
 		case 'comment':
@@ -436,6 +436,7 @@ class main_model
 			'cookies_names' => array(),
 			'check_value' => $config['cleantalk_antispam_apikey'],
 		);
+
 		// Pervious referer
 		if($request->server('HTTP_REFERER','') !== ''){
 			$user->set_cookie('ct_prev_referer', $request->server('HTTP_REFERER',''), 0);
@@ -446,17 +447,7 @@ class main_model
 		$cookie_test_value['check_value'] = md5($cookie_test_value['check_value']);
 		$user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), 0);		
 	}
-	/**
-	* Sets from display time in table
-	*/
-	static public function set_submit_time()
-	{
-		global $db, $user;
-		$sql = "UPDATE " . SESSIONS_TABLE . 
-			" SET ct_submit_time = " . time() .
-			" WHERE session_id = '" . $db->sql_escape($user->session_id) . "'";
-		$db->sql_query($sql);
-	}
+
     static public function cleantalk_get_checkjs_code()
     {
 		global $config,$phpbb_container;

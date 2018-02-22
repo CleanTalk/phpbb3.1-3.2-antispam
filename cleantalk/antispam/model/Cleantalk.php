@@ -595,7 +595,7 @@ class Cleantalk
         if (!$data_ip || !preg_match("/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/", $data_ip))
             return $data_ip;
         
-        return self::cleantalk_get_real_ip();
+        return $this->cleantalk_get_real_ip();
     }
 
     /**
@@ -669,17 +669,35 @@ class Cleantalk
         return $str;
     }
     
-    static public function cleantalk_get_real_ip(){
+    public function cleantalk_get_real_ip(){
 
         global $request;
         
-        if ($request->server('X_FORWARDED_FOR') !== null)
+        if ($request->server('X_FORWARDED_FOR'))
         {
-            $the_ip = explode(",", trim($request->server('X_FORWARDED_FOR')));
-            $the_ip = trim($the_ip[0]);
+            $ip = explode(",", trim($request->server('X_FORWARDED_FOR')));
+            $ip = trim($ip[0]);
         }
-        else {
-            $the_ip = filter_var($request->server('REMOTE_ADDR'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+        elseif ($request->server('HTTP_X_FORWARDED_FOR'))
+        {
+            $ip = explode(",", trim($request->server('HTTP_X_FORWARDED_FOR')));
+            $ip = trim($ip[0]);
+        }
+        else
+        {
+            $ip = $request->server('REMOTE_ADDR');
+        }
+
+        // Validating IP
+        // IPv4
+        if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
+            $the_ip = $ip;
+            // IPv6
+        }elseif(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)){
+            $the_ip = $ip;
+            // Unknown
+        }else{
+            $the_ip = null;
         }
         
         return $the_ip;

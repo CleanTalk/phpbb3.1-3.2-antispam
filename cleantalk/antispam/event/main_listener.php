@@ -27,7 +27,6 @@ class main_listener implements EventSubscriberInterface
 		return array(
 			'core.user_setup'				=> 'load_language_on_setup',
 			'core.page_header_after'        => 'add_js_to_head',
-			'core.add_form_key'				=> 'form_set_time',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                 => 'check_newuser',
@@ -83,6 +82,7 @@ class main_listener implements EventSubscriberInterface
 			'lang_set' => 'common',
 		);
 		$event['lang_set_ext'] = $lang_set_ext;
+
 	}
 
 	/**
@@ -97,27 +97,8 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::cleantalk_get_checkjs_code());
-		\cleantalk\antispam\model\main_model::cookie_test();		
-	}
+		\cleantalk\antispam\model\main_model::cookie_test();	
 
-	/**
-	* Sets from display time in table
-	*
-	* @param array	$event		array with event variable values
-	*/
-	public function form_set_time($event)
-	{
-		if (empty($this->config['cleantalk_antispam_apikey']))
-		{
-			return;
-		}
-
-		$data = $event->get_data();
-		$form_id = $data['form_name'];
-		if ($this->config['cleantalk_antispam_guests'] && $form_id == 'posting' || $this->config['cleantalk_antispam_regs'] && $form_id == 'ucp_register' || $this->config['cleantalk_antispam_ccf'])
-		{
-			\cleantalk\antispam\model\main_model::set_submit_time();
-		}
 	}
 	/**
 	* Checks post or topic to spam
