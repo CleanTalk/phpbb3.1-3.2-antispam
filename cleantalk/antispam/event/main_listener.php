@@ -107,6 +107,7 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function check_comment($event)
 	{
+		global $auth;
 		if (empty($this->config['cleantalk_antispam_apikey']))
 		{
 			return;
@@ -180,15 +181,14 @@ class main_listener implements EventSubscriberInterface
 					$spam_check['message_title'] = $data['post_data']['post_subject'];
 				}
 				$spam_check['message_body'] = utf8_normalize_nfc($this->request->variable('message', '', true));
-				if($spam_check['sender_email'] == '' && isset($this->user->data))
+				if(($auth->acl_getf_global('m_') || $auth->acl_getf_global('a_') || $spam_check['sender_email'] == '') && isset($this->user->data))
 				{
 					$spam_check['sender_email'] = $this->user->data['user_email'];
 				}
-				if($spam_check['sender_nickname'] == '' && isset($this->user->data))
+				if(($auth->acl_getf_global('m_') || $auth->acl_getf_global('a_') || $spam_check['sender_nickname'] == '') && isset($this->user->data))
 				{
 					$spam_check['sender_nickname'] = $this->user->data['username'];
 				}
-
 				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{ 
