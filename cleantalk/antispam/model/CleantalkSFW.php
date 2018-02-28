@@ -95,12 +95,7 @@ class cleantalkSFW
 			$this->ip_array[]=sprintf("%u", ip2long($result['sfw_test_ip']));
 		}
 		
-		// Getting Cloudflare IP
-		$headers = function_exists('apache_request_headers')
-			? apache_request_headers()
-			: self::apache_request_headers();
-		
-		if(isset($headers['Cf_Connecting_Ip'])){
+		if($request->server('HTTP_CF_CONNECTING_IP')){
 			foreach($cdn as $cidr){
 				if($this->ip_mask_match($result['remote_addr'], $cidr)){
 					$result['cf_connecting_ip'] = filter_var( $_SERVER['Cf_Connecting_Ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
@@ -274,7 +269,6 @@ class cleantalkSFW
 		}
 		
 		// Translation
-		$request_uri = $request->server('REQUEST_URI');
 		$sfw_die_page = str_replace('{SFW_DIE_NOTICE_IP}',              $user->lang('SFW_DIE_NOTICE_IP'),              $sfw_die_page);
 		$sfw_die_page = str_replace('{SFW_DIE_MAKE_SURE_JS_ENABLED}',   $user->lang('SFW_DIE_MAKE_SURE_JS_ENABLED'),   $sfw_die_page);
 		$sfw_die_page = str_replace('{SFW_DIE_CLICK_TO_PASS}',          $user->lang('SFW_DIE_CLICK_TO_PASS'),          $sfw_die_page);
@@ -282,7 +276,7 @@ class cleantalkSFW
 		
 		// Service info
 		$sfw_die_page = str_replace('{REMOTE_ADDRESS}', $this->blocked_ip, $sfw_die_page);
-		$sfw_die_page = str_replace('{REQUEST_URI}', $request_uri, $sfw_die_page);
+		$sfw_die_page = str_replace('{REQUEST_URI}', $request->server('REQUEST_URI'), $sfw_die_page);
 		$sfw_die_page = str_replace('{COOKIE_PREFIX}', $cookie_prefix, $sfw_die_page);
 		$sfw_die_page = str_replace('{COOKIE_DOMAIN}', $cookie_domain, $sfw_die_page);
 		$sfw_die_page = str_replace('{SFW_COOKIE}', md5($this->blocked_ip.$api_key), $sfw_die_page);
@@ -449,30 +443,4 @@ class cleantalkSFW
 		}
 	}
 	
-	/* 
-	 * If Apache web server is missing then making
-	 * Patch for apache_request_headers() 
-	 */
-	static function apache_request_headers(){
-		
-		global $request;
-		$_SERVER = $request->get_super_global(\phpbb\request\request_interface::SERVER);
-
-		$headers = array();	
-		foreach($_SERVER as $key => $val){
-			if(preg_match('/\AHTTP_/', $key)){
-				$server_key = preg_replace('/\AHTTP_/', '', $key);
-				$key_parts = explode('_', $server_key);
-				if(count($key_parts) > 0 and strlen($server_key) > 2){
-					foreach($key_parts as $part_index => $part){
-						$key_parts[$part_index] = mb_strtolower($part);
-						$key_parts[$part_index][0] = strtoupper($key_parts[$part_index][0]);					
-					}
-					$server_key = implode('-', $key_parts);
-				}
-				$headers[$server_key] = $val;
-			}
-		}
-		return $headers;
-	}
 }
