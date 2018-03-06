@@ -88,13 +88,13 @@ class main_module
 						$result = \cleantalk\antispam\model\CleantalkHelper::noticePaidTill($savekey);
 						
 						if(empty($result['error'])){
-							$config->set('cleantalk_antispam_show_notice', $result['show_notice']);
-							$config->set('cleantalk_antispam_renew',       $result['renew']);
-							$config->set('cleantalk_antispam_trial',       $result['trial']);
-							$config->set('cleantalk_antispam_user_token',  $result['user_token']);
-							$config->set('cleantalk_antispam_spam_count',  $result['spam_count']);
-							$config->set('cleantalk_antispam_moderate_ip', $result['moderate_ip']);
-							$config->set('cleantalk_antispam_ip_license',  $result['ip_license']);
+							$config->set('cleantalk_antispam_show_notice', ($result['show_notice']) ? $result['show_notice'] : 0);
+							$config->set('cleantalk_antispam_renew',       ($result['renew']) ? $result['renew'] : 0);
+							$config->set('cleantalk_antispam_trial',       ($result['trial']) ? $result['trial'] : 0);
+							$config->set('cleantalk_antispam_user_token',  ($result['user_token']) ? $result['user_token'] : '');
+							$config->set('cleantalk_antispam_spam_count',  ($result['spam_count']) ? $result['spam_count'] : 0);
+							$config->set('cleantalk_antispam_moderate_ip', ($result['moderate_ip']) ? $result['moderate_ip'] : 0);
+							$config->set('cleantalk_antispam_ip_license',  ($result['ip_license']) ? $result['ip_license'] : 0);
 						}
 					}	
 					$composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
