@@ -379,7 +379,7 @@ class main_model
 					$prev_name_original = $prev_name;
 					$prev_name = ($prev_name === '' ? $key.'_' : $prev_name.$key.'_');
 					
-					$temp = get_fields_any($value, $message, $email, $nickname, $subject, $contact, $prev_name);
+					$temp = self::get_fields_any($value, $message, $email, $nickname, $subject, $contact, $prev_name);
 					
 					$message 	= $temp['message'];
 					$email 		= ($temp['email'] 		? $temp['email'] : null);
