@@ -92,7 +92,6 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function add_js_to_head($event)
 	{		
-		global $phpbb_root_path;
 		if (empty($this->config['cleantalk_antispam_apikey'])){
 			return;
 		}
