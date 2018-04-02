@@ -98,7 +98,7 @@ class cleantalkSFW
 		if($request->server('HTTP_CF_CONNECTING_IP')){
 			foreach($cdn as $cidr){
 				if($this->ip_mask_match($result['remote_addr'], $cidr)){
-					$result['cf_connecting_ip'] = filter_var( $_SERVER['Cf_Connecting_Ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+					$result['cf_connecting_ip'] = filter_var( $request->server('Cf_Connecting_Ip'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 					$this->ip_array[] = sprintf("%u", ip2long($result['cf_connecting_ip']));
 					unset($result['remote_addr']);
 					break;
