@@ -310,10 +310,9 @@ class Cleantalk
             
             // Disabling CA cert verivication
             // Disabling common name verification
-            if ($this->ssl_on && $this->ssl_path != '') {
+            if ($this->ssl_on) {
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-                curl_setopt($ch, CURLOPT_CAINFO, $this->ssl_path);
             }else{ // Disabling CA cert verivication and common name verification
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
@@ -439,7 +438,7 @@ class Cleantalk
                         $server_host = $server['ip'];
                         $work_url = $server_host;
                     }
-                    $work_url = $url_prefix . $work_url; 
+                    $work_url = $url_prefix . filter_var($work_url,FILTER_VALIDATE_IP) !== false ? gethostbyaddr($work_url):$work_url; 
                     if (isset($url_suffix)) 
                         $work_url = $work_url . $url_suffix;
                     

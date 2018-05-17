@@ -31,7 +31,7 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 			array('config.add', array('cleantalk_antispam_nusers', 1)),
 			array('config.add', array('cleantalk_antispam_apikey', '')),
 			//System settings
-			array('config.add', array('cleantalk_antispam_work_url', 'http://moderate.cleantalk.ru')),
+			array('config.add', array('cleantalk_antispam_work_url', '')),
 			array('config.add', array('cleantalk_antispam_server_url', 'http://moderate.cleantalk.ru')),
 			array('config.add', array('cleantalk_antispam_server_ttl', 0)),
 			array('config.add', array('cleantalk_antispam_server_changed', 0)),

@@ -6,6 +6,7 @@
 * @copyright (C) 2014 СleanTalk team (http://cleantalk.org)
 * @license GNU/GPL: http://www.gnu.org/copyleft/gpl.html
 *
+* Translated By : Raul [ThE KuKa] 
 */
 
 if (!defined('IN_PHPBB'))
@@ -34,7 +35,10 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'Posts and topics from new users will be test for spam. Spam will be rejected or sent to approvement.',
 
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Check contact forms',
-	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Enable anti-spam test for contact forms.',
+	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Enable anti-spam test for contact forms. May provide confclits!',
+
+	'ACP_CLEANTALK_SSL_LABEL'	           		=> 'Enable SSL secure connection',
+	'ACP_CLEANTALK_SSL_DESCR'	           		=> 'Note, to enable this option, your site must already have a working SSL certificate.',	
 
 	'ACP_CLEANTALK_SFW_LABEL'		       		=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'		        	=> 'Enables SpamFireWall. Reduces webserver load and prevents bots to access the website.',

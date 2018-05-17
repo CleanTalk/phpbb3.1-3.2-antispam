@@ -33,7 +33,10 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_DESCR'	            => 'Посты и темы от вновь зарегистрированных будут проверяться на спам. Спам будет отвергнут или направлен на одобрение.',
 
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Проверять контактные формы',
-	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Включить антиспам тест для контактной формы.',	
+	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Включить антиспам тест для контактной формы. Внимание, возможны конфликты!',	
+
+	'ACP_CLEANTALK_SSL_LABEL'	           		=> 'Включить передачу через SSL',
+	'ACP_CLEANTALK_SSL_DESCR'	           		=> 'Внимание, для включения этой опции, ваш сайт уже должен иметь рабочий SSL сертификат.',		
 
 	'ACP_CLEANTALK_SFW_LABEL'		       		=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'		        	=> 'Включает SpamFireWall. Это не даст ботам зайти на сайт и позволит снизить нагрузку на веб-сервер.',

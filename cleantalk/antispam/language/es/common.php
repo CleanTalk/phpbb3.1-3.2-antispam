@@ -35,7 +35,10 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_DESCR'				=> 'Mensajes y temas de los nuevos usuarios estarán a prueba en busca de Spam. Los correos no deseados serán rechazados, o enviados para ser aprobados.',
 
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Comprobar que formularios de contacto',
-	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Activar el filtro antispam de prueba para el formulario de contacto.',
+	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Activar el filtro antispam de prueba para el formulario de contacto. Atención, puede haber conflictos!',
+	
+	'ACP_CLEANTALK_SSL_LABEL'	           		=> 'Activar la transmisión a través de SSL',
+	'ACP_CLEANTALK_SSL_DESCR'	           		=> 'Atención, para activar esta opción, su sitio web debe tener un certificado SSL.',	
 		
 	'ACP_CLEANTALK_SFW_LABEL'					=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'					=> 'Enables SpamFireWall. Reduces webserver load and prevents bots to access the website.',
