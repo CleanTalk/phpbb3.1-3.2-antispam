@@ -131,7 +131,7 @@ class main_model
 				}else{
 					$ct_result->errstr = $user->lang('CLEANTALK_ERROR_NO_CURL');
 				}
-				$ct_result->errstr .= $user->lang('CLEANTALK_ERROR_ADDON');
+				$ct_result->errstr = $ct_result->errstr . " ". $user->lang('CLEANTALK_ERROR_ADDON');
 							
 				$ret_val['errstr'] = self::filter_response($ct_result->errstr);
 			}else{
