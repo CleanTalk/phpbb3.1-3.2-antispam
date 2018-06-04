@@ -261,7 +261,10 @@ class CleantalkHelper
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			// resolve 'Expect: 100-continue' issue
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
-			
+            // see http://stackoverflow.com/a/23322368
+            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);            			
 			$result = curl_exec($ch);
 			
 			if($result !== false){

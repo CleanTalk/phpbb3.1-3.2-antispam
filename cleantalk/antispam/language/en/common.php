@@ -35,7 +35,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'Posts and topics from new users will be test for spam. Spam will be rejected or sent to approvement.',
 
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Check contact forms',
-	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Enable anti-spam test for contact forms. May provide confclits!',
+	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Enable anti-spam test for contact forms. May provide confliсts!',
 
 	'ACP_CLEANTALK_SSL_LABEL'	           		=> 'Enable SSL secure connection',
 	'ACP_CLEANTALK_SSL_DESCR'	           		=> 'Note, to enable this option, your site must already have a working SSL certificate.',	
@@ -61,7 +61,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'Check users for spam',
 	'ACP_CHECKUSERS_DONE_1'                     => 'Done. All users tested via blacklists database, please see result below.',
 	'ACP_CHECKUSERS_DONE_2'                     => 'Done. All users tested via blacklists database, found 0 spam users.',
-	'ACP_CHECKUSERS_DONE_3'						=> 'Error. No connection with blacklist databse.',
+	'ACP_CHECKUSERS_DONE_3'						=> 'Error. No connection with blacklist database.',
 	'ACP_CHECKUSERS_SELECT'                     => 'Select',
 	'ACP_CHECKUSERS_USERNAME'                   => 'Username',
 	'ACP_CHECKUSERS_MESSAGES'                   => 'Messages',
