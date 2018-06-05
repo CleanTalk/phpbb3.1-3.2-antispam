@@ -31,7 +31,6 @@ class main_module
 			$config->set('cleantalk_antispam_nusers', $request->variable('cleantalk_antispam_nusers', 0));
 			$config->set('cleantalk_antispam_ccf', $request->variable('cleantalk_antispam_ccf',0));
 			$config->set('cleantalk_antispam_sfw_enabled', $request->variable('cleantalk_antispam_sfw_enabled', 0));
-			$config->set('cleantalk_antispam_ssl', $request->variable('cleantalk_antispam_ssl', 0));
 			
 			$key_is_valid = false;
 			$user_token_is_valid = false;
@@ -124,7 +123,6 @@ class main_module
 			'CLEANTALK_ANTISPAM_NUSERS'		=> $config['cleantalk_antispam_nusers'] ? true : false,
 			'CLEANTALK_ANTISPAM_CCF'		=> $config['cleantalk_antispam_ccf'] ? true: false,
 			'CLEANTALK_ANTISPAM_SFW_ENABLED'=> $config['cleantalk_antispam_sfw_enabled'] ? true : false,
-			'CLEANTALK_ANTISPAM_SSL'        => $config['cleantalk_antispam_ssl'] ? true: false,
 			'CLEANTALK_ANTISPAM_APIKEY'		=> $config['cleantalk_antispam_apikey'],
 			'CLEANTALK_ANTISPAM_KEY_IS_OK'	=> $config['cleantalk_antispam_key_is_ok'] ? true : false,
 			'CLEANTALK_ANTISPAM_USER_TOKEN'	=> $config['cleantalk_antispam_user_token'],
