@@ -313,12 +313,15 @@ class main_listener implements EventSubscriberInterface
 				$spam_check['type'] = 'comment';
 
 				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
-
-				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
-				{				 
-					// Output error
-					trigger_error($result['ct_result_comment']);
+				if ($result)
+				{
+					if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
+					{				 
+						// Output error
+						trigger_error($result['ct_result_comment']);
+					}					
 				}
+
 			}
 		}			
 	}

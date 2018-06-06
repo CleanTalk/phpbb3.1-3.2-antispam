@@ -114,85 +114,88 @@ class main_model
 			$config->set('cleantalk_antispam_server_ttl',     $ct->server_ttl);
 			$config->set('cleantalk_antispam_server_changed', time());
 		}
-		
-		// First check errstr flag.
-		if (!empty($ct_result->errstr) && $checkjs = 1
-			|| (!empty($ct_result->inactive) && $ct_result->inactive == 1)
-		)
+		if ($ct_result)
 		{
-			// Cleantalk error so we go default way (no action at all).
-			$ret_val['errno'] = 1;
-			$ct_result->allow = 1;
-			
-			if (!empty($ct_result->errstr)){
+			// First check errstr flag.
+			if (!empty($ct_result->errstr) && $checkjs = 1
+				|| (!empty($ct_result->inactive) && $ct_result->inactive == 1)
+			)
+			{
+				// Cleantalk error so we go default way (no action at all).
+				$ret_val['errno'] = 1;
+				$ct_result->allow = 1;
 				
-				if($ct_result->curl_err){
-					$ct_result->errstr = $user->lang('CLEANTALK_ERROR_CURL', $ct_result->curl_err);
+				if (!empty($ct_result->errstr)){
+					
+					if($ct_result->curl_err){
+						$ct_result->errstr = $user->lang('CLEANTALK_ERROR_CURL', $ct_result->curl_err);
+					}else{
+						$ct_result->errstr = $user->lang('CLEANTALK_ERROR_NO_CURL');
+					}
+					$ct_result->errstr = $ct_result->errstr . " ". $user->lang('CLEANTALK_ERROR_ADDON');
+								
+					$ret_val['errstr'] = self::filter_response($ct_result->errstr);
 				}else{
-					$ct_result->errstr = $user->lang('CLEANTALK_ERROR_NO_CURL');
+					$ret_val['errstr'] = self::filter_response($ct_result->comment);
 				}
-				$ct_result->errstr = $ct_result->errstr . " ". $user->lang('CLEANTALK_ERROR_ADDON');
-							
-				$ret_val['errstr'] = self::filter_response($ct_result->errstr);
-			}else{
-				$ret_val['errstr'] = self::filter_response($ct_result->comment);
-			}
 
-			$phpbb_log->add('admin', ANONYMOUS, '127.0.0.1', 'CLEANTALK_ERROR_LOG', time(), array($ret_val['errstr']));
+				$phpbb_log->add('admin', ANONYMOUS, '127.0.0.1', 'CLEANTALK_ERROR_LOG', time(), array($ret_val['errstr']));
 
-			// Email to admin once per 15 min
-			if (time() - 900 > $config['cleantalk_antispam_error_time'])
-			{
-				$config->set('cleantalk_antispam_error_time', time());
-				if (!function_exists('phpbb_mail'))
+				// Email to admin once per 15 min
+				if (time() - 900 > $config['cleantalk_antispam_error_time'])
 				{
-					include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx);
+					$config->set('cleantalk_antispam_error_time', time());
+					if (!function_exists('phpbb_mail'))
+					{
+						include($phpbb_root_path . 'includes/functions_messenger.' . $phpEx);
+					}
+
+					$hr_url = str_replace(array('http://', 'https://'), array('', ''), generate_board_url());
+					$err_title = $hr_url. ' - ' . $user->lang['CLEANTALK_ERROR_MAIL'];
+					$err_message = $hr_url. ' - ' . $user->lang['CLEANTALK_ERROR_MAIL'] . " :\n" . $ret_val['errstr'];
+
+					$headers = array();
+					$headers[] = 'Reply-To: ' . $config['board_email'];
+					$headers[] = 'Return-Path: <' . $config['board_email'] . '>';
+					$headers[] = 'Sender: <' . $config['board_email'] . '>';
+					$headers[] = 'MIME-Version: 1.0';
+					$headers[] = 'X-Mailer: phpBB3';
+					$headers[] = 'X-MimeOLE: phpBB3';
+					$headers[] = 'X-phpBB-Origin: phpbb://' . $hr_url;
+					$headers[] = 'Content-Type: text/plain; charset=UTF-8'; // format=flowed
+					$headers[] = 'Content-Transfer-Encoding: 8bit'; // 7bit
+
+					$dummy = '';
+					phpbb_mail($config['board_email'], $err_title, $err_message, $headers, "\n", $dummy);
 				}
 
-				$hr_url = str_replace(array('http://', 'https://'), array('', ''), generate_board_url());
-				$err_title = $hr_url. ' - ' . $user->lang['CLEANTALK_ERROR_MAIL'];
-				$err_message = $hr_url. ' - ' . $user->lang['CLEANTALK_ERROR_MAIL'] . " :\n" . $ret_val['errstr'];
-
-				$headers = array();
-				$headers[] = 'Reply-To: ' . $config['board_email'];
-				$headers[] = 'Return-Path: <' . $config['board_email'] . '>';
-				$headers[] = 'Sender: <' . $config['board_email'] . '>';
-				$headers[] = 'MIME-Version: 1.0';
-				$headers[] = 'X-Mailer: phpBB3';
-				$headers[] = 'X-MimeOLE: phpBB3';
-				$headers[] = 'X-phpBB-Origin: phpbb://' . $hr_url;
-				$headers[] = 'Content-Type: text/plain; charset=UTF-8'; // format=flowed
-				$headers[] = 'Content-Transfer-Encoding: 8bit'; // 7bit
-
-				$dummy = '';
-				phpbb_mail($config['board_email'], $err_title, $err_message, $headers, "\n", $dummy);
+				return $ret_val;
 			}
-
-			return $ret_val;
-		}
-		else if (!empty($ct_result->errstr) && $checkjs = 0)
-		{
-			$ct_result->allow = 0;
-		}
-
-		if ($ct_result->allow == 0)
-		{
-			// Spammer.
-			$ret_val['allow'] = 0;
-			$ret_val['ct_result_comment'] = self::filter_response($ct_result->comment);
-
-			// Check stop_queue flag.
-			if ($spam_check['type'] == 'comment' && $ct_result->stop_queue == 0)
+			else if (!empty($ct_result->errstr) && $checkjs = 0)
 			{
-				// Spammer and stop_queue == 0 - to manual approvement.
-				$ret_val['stop_queue'] = 0;
+				$ct_result->allow = 0;
 			}
-			else
+
+			if ($ct_result->allow == 0)
 			{
-				// New user or Spammer and stop_queue == 1 - display form error message.
-				$ret_val['stop_queue'] = 1;
-			}
+				// Spammer.
+				$ret_val['allow'] = 0;
+				$ret_val['ct_result_comment'] = self::filter_response($ct_result->comment);
+
+				// Check stop_queue flag.
+				if ($spam_check['type'] == 'comment' && $ct_result->stop_queue == 0)
+				{
+					// Spammer and stop_queue == 0 - to manual approvement.
+					$ret_val['stop_queue'] = 0;
+				}
+				else
+				{
+					// New user or Spammer and stop_queue == 1 - display form error message.
+					$ret_val['stop_queue'] = 1;
+				}
+			}			
 		}
+
 	return $ret_val;
 	}
 
