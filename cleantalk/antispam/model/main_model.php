@@ -29,7 +29,7 @@ class main_model
 	static public function check_spam( $spam_check )
 	{
 		global $config, $user, $request, $phpbb_root_path, $phpEx, $phpbb_log;
-		
+		$user->add_lang('acp/common');
 		$checkjs = self::cleantalk_is_valid_js() ? 1 : 0;
 
 		$ct = new \cleantalk\antispam\model\Cleantalk();
