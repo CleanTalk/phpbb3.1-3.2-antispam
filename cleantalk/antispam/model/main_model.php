@@ -54,21 +54,29 @@ class main_model
 		$previous_referer       = ($previous_referer    === "none" ? 0 : $previous_referer);
 				
 		$user_agent  = $request->server('HTTP_USER_AGENT');
-		$refferrer   = $request->server('HTTP_REFERER');		
+		$refferrer   = $request->server('HTTP_REFERER');	
+		$page_url    = $request->server('SERVER_NAME').$request->server('REQUEST_URI');	
 		$sender_info = json_encode(
 			array(
 			'cms_lang'               => $config['default_lang'],
 			'REFFERRER'              => $refferrer,
-			'post_url'               => $refferrer,
+			'page_url'               => $page_url,
 			'USER_AGENT'             => $user_agent,
 			'js_timezone'            => $js_timezone,
 			'mouse_cursor_positions' => $pointer_data,
 			'key_press_timestamp'    => $first_key_timestamp,
 			'page_set_timestamp'     => $page_set_timestamp,
-			'REFFERRER_PREVIOUS'     => $previous_referer,	
+			'REFFERRER_PREVIOUS'     => $previous_referer,
+			'fields_number'          => sizeof($spam_check),	
 			)
 		);
-		
+		$post_info = json_encode(
+			array(
+			'comment_type'			 => $spam_check['type'],
+			'post_url'               => $refferrer,
+			)
+
+		);
 		$composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
 
 		$ct_request = new \cleantalk\antispam\model\CleantalkRequest();
@@ -81,6 +89,7 @@ class main_model
 		$ct_request->agent = 'phpbb31-' . preg_replace("/(\d+)\.(\d*)\.?(\d*)/", "$1$2$3", $composer_json->version);
 		$ct_request->js_on = $checkjs;
 		$ct_request->sender_info = $sender_info;
+		$ct_request->post_info = $post_info;
 		$ct_request->sender_email = array_key_exists('sender_email', $spam_check) ? $spam_check['sender_email'] : '';
 		$ct_request->sender_nickname = array_key_exists('sender_nickname', $spam_check) ? $spam_check['sender_nickname'] : '';
 		$ct_request->sender_ip = $ct->cleantalk_get_real_ip();
@@ -448,7 +457,7 @@ class main_model
 		// Cookies test
 		$cookie_test_value['check_value'] = md5($cookie_test_value['check_value']);
 		$user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), 0);		
-	}
+	} 
 
     static public function cleantalk_get_checkjs_code()
     {
