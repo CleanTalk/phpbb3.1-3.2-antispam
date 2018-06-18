@@ -67,7 +67,8 @@ class main_model
 			'key_press_timestamp'    => $first_key_timestamp,
 			'page_set_timestamp'     => $page_set_timestamp,
 			'REFFERRER_PREVIOUS'     => $previous_referer,
-			'fields_number'          => sizeof($spam_check),	
+			'fields_number'          => sizeof($spam_check),
+			'cookies_enabled'        => self::test_cookie(),	
 			)
 		);
 		$post_info = json_encode(
@@ -439,7 +440,7 @@ class main_model
 	/**
 	* Sets cookie
 	*/	
-	static public function cookie_test()
+	static public function set_cookie()
 	{
 		global $config, $request, $user;
 		// Cookie names to validate
@@ -458,7 +459,33 @@ class main_model
 		$cookie_test_value['check_value'] = md5($cookie_test_value['check_value']);
 		$user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), 0);		
 	} 
+	/**
+	* Test cookie
+	*/
+	static public function test_cookie()
+	{
+		global $config, $request;
 
+        if($request->is_set($config['cookie_name'].'_ct_cookies_test', \phpbb\request\request_interface::COOKIE))
+        {           
+            $cookie_test = json_decode(htmlspecialchars_decode($request->variable($config['cookie_name'].'_ct_cookies_test','', false, \phpbb\request\request_interface::COOKIE)),true);
+            
+            $check_srting = $config['cleantalk_antispam_apikey'];
+            foreach($cookie_test['cookies_names'] as $cookie_name){
+                $check_srting .= $request->variable($config['cookie_name'].'_'.$cookie_name,'', false, \phpbb\request\request_interface::COOKIE);
+            } unset($cokie_name);
+            
+            if($cookie_test['check_value'] == md5($check_srting)){
+                return 1;
+            }else{
+                return 0;
+            }
+        }
+        else{
+            return null;
+        }
+
+	}
     static public function cleantalk_get_checkjs_code()
     {
 		global $config,$phpbb_container;

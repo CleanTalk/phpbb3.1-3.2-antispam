@@ -96,7 +96,7 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::cleantalk_get_checkjs_code());
-		\cleantalk\antispam\model\main_model::cookie_test();	
+		\cleantalk\antispam\model\main_model::set_cookie();	
 
 	}
 	/**
