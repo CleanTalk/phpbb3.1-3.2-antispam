@@ -288,11 +288,6 @@ class Cleantalk
             $url = $url . $this->api_version;
         }
         
-        // Switching to secure connection
-        if ($this->ssl_on && !preg_match("/^https:/", $url)) {
-            $url = preg_replace("/^(http)/i", "$1s", $url);
-        }
-        
         $result = false;
         $curl_error = null;
         if(function_exists('curl_init')){
@@ -310,20 +305,15 @@ class Cleantalk
             
             // Disabling CA cert verivication
             // Disabling common name verification
-            if ($this->ssl_on) {
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            }else{ // Disabling CA cert verivication and common name verification
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            }
+            // Disabling CA cert verivication and common name verification
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
             $result = curl_exec($ch);
             if (!$result) {
                 $curl_error = curl_error($ch);
                 // Use SSL next time, if error occurs.
                 if(!$this->ssl_on){
-                    $this->ssl_on = true;
                     return $this->sendRequest($original_data, $original_url, $server_timeout);
                 }
             }
@@ -348,7 +338,7 @@ class Cleantalk
             }
         }
         
-        if (!$result || !self::cleantalk_is_JSON($result)) {
+        if (!$result || !$this->cleantalk_is_JSON($result)) {
             $response = null;
             $response['errno'] = 1;
             $response['errstr'] = true;
@@ -364,11 +354,9 @@ class Cleantalk
             $response->errno = 0;
             $response->errstr = $errstr;
         } else {
-            $errstr = 'Unknown response from ' . $url . '.' . ' ' . $result;
-            
+
             $response = null;
             $response['errno'] = 1;
-            $response['errstr'] = $errstr;
             $response = json_decode(json_encode($response));
         } 
         
@@ -386,7 +374,7 @@ class Cleantalk
         $result = false;
         global $request;
         if($msg->method_name != 'send_feedback'){
-            $tmp = self::request_headers();
+            $tmp = $this->request_headers();
             if ($tmp !== null)
             {
                 $msg->all_headers=json_encode($tmp);
@@ -702,7 +690,7 @@ class Cleantalk
         return $the_ip;
     }
     
-    static public function cleantalk_is_JSON($string){
+    public function cleantalk_is_JSON($string){
         return ((is_string($string) && (is_object(json_decode($string)) || is_array(json_decode($string))))) ? true : false;
     }
     
@@ -710,34 +698,30 @@ class Cleantalk
      * If Apache web server is missing then making
      * Patch for apache_request_headers() 
      */
-    static function request_headers(){
+    public function request_headers(){
         
         global $request;
 
-        $headers = null;
-        if(method_exists($request,'server'))
-        {
-            $headers['Host']  = $request->server('HTTP_HOST','');
-            $headers['X-Real-IP'] = $request->server('HTTP_X_REAL_IP','');
-            $headers['X-Forwarded-Proto'] = $request->server('HTTP_X_FORWARDED_PROTO','');
-            $headers['Connection'] = $request->server('HTTP_CONNECTION','');
-            $headers['Content-Length'] = $request->server('CONTENT_LENGTH','');
-            $headers['Cache-Control'] = $request->server('HTTP_CACHE_CONTROL','');
-            $headers['Origin'] = $request->server('HTTP_ORIGIN','');
-            $headers['Upgrade-Insecure-Requests'] = $request->server('HTTP_UPGRADE_INSECURE_REQUESTS','');
-            $headers['Content-Type'] = $request->server('CONTENT_TYPE','');
-            $headers['User-Agent'] = $request->server('HTTP_USER_AGENT','');
-            $headers['Accept'] = $request->server('HTTP_ACCEPT','');
-            $headers['Referer'] = $request->server('HTTP_REFERER','');
-            $headers['Accept-Encoding'] = $request->server('HTTP_ACCEPT_ENCODING','');
-            $headers['Accept-Language'] = $request->server('HTTP_ACCEPT_LANGUAGE',''); 
-            $headers['Cookie'] = preg_replace(array(
-                        '/\s{0,1}ct_checkjs=[a-z0-9]*[;|$]{0,1}/',
-                        '/\s{0,1}ct_timezone=.{0,1}\d{1,2}[;|$]/', 
-                        '/\s{0,1}ct_pointer_data=.*5D[;|$]{0,1}/', 
-                        '/;{0,1}\s{0,3}$/'
-                    ), '', $request->server('HTTP_COOKIE',''));           
-        }
+        $headers['Host']  = $request->server('HTTP_HOST','');
+        $headers['X-Real-IP'] = $request->server('HTTP_X_REAL_IP','');
+        $headers['X-Forwarded-Proto'] = $request->server('HTTP_X_FORWARDED_PROTO','');
+        $headers['Connection'] = $request->server('HTTP_CONNECTION','');
+        $headers['Content-Length'] = $request->server('CONTENT_LENGTH','');
+        $headers['Cache-Control'] = $request->server('HTTP_CACHE_CONTROL','');
+        $headers['Origin'] = $request->server('HTTP_ORIGIN','');
+        $headers['Upgrade-Insecure-Requests'] = $request->server('HTTP_UPGRADE_INSECURE_REQUESTS','');
+        $headers['Content-Type'] = $request->server('CONTENT_TYPE','');
+        $headers['User-Agent'] = $request->server('HTTP_USER_AGENT','');
+        $headers['Accept'] = $request->server('HTTP_ACCEPT','');
+        $headers['Referer'] = $request->server('HTTP_REFERER','');
+        $headers['Accept-Encoding'] = $request->server('HTTP_ACCEPT_ENCODING','');
+        $headers['Accept-Language'] = $request->server('HTTP_ACCEPT_LANGUAGE',''); 
+        $headers['Cookie'] = preg_replace(array(
+                    '/\s{0,1}ct_checkjs=[a-z0-9]*[;|$]{0,1}/',
+                    '/\s{0,1}ct_timezone=.{0,1}\d{1,2}[;|$]/', 
+                    '/\s{0,1}ct_pointer_data=.*5D[;|$]{0,1}/', 
+                    '/;{0,1}\s{0,3}$/'
+                ), '', $request->server('HTTP_COOKIE',''));           
 
         return $headers;
     }

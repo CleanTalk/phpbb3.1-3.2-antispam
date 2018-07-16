@@ -39,7 +39,6 @@ class main_model
 		$ct->server_url     = $config['cleantalk_antispam_server_url'];
 		$ct->server_ttl     = $config['cleantalk_antispam_server_ttl'];
 		$ct->server_changed = $config['cleantalk_antispam_server_changed'];
-		$ct->ssl_on         = $config['cleantalk_antispam_ssl'];
 		//Pointer data, Timezone from JS, First key press timestamp, Page set timestamp
 		$pointer_data 			= $request->variable(self::JS_POINTER_DATA_FIELD_NAME, 	"none", false, \phpbb\request\request_interface::COOKIE);
 		$page_set_timestamp 	= $request->variable(self::JS_PS_TIMESTAMP, 			"none", false, \phpbb\request\request_interface::COOKIE);

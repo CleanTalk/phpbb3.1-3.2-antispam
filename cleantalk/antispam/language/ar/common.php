@@ -36,9 +36,6 @@ $lang = array_merge($lang, array(
 
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'اختبار نموذج الاتصال',
 	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'لتمكين مكافحة البريد المزعج اختبار نموذج الاتصال. الملاحظة التعارضات المحتملة!',
-
-	'ACP_CLEANTALK_SSL_LABEL'	           		=> 'لتمكين نقل عبر SSL',
-	'ACP_CLEANTALK_SSL_DESCR'	           		=> 'لتمكين هذا الخيار ، موقع الويب الخاص بك يجب أن يكون شهادة SSL.',	
 			
 	'ACP_CLEANTALK_SFW_LABEL'		       		=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'					=> 'تفعيل جدار الحماية. تخفيف حمل السيرفر وحماية الموقع من العمليات المُزعجة.',

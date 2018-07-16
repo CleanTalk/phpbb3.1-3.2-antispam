@@ -36,9 +36,6 @@ $lang = array_merge($lang, array(
 
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Kontaktformulare überprüfen',
 	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Aktivieren Antispam-Test für Kontaktformular. Achtung, Konflikte sind möglich!',
-
-	'ACP_CLEANTALK_SSL_LABEL'	           		=> 'Aktivieren Sie die SSL-gesicherte Verbindung',
-	'ACP_CLEANTALK_SSL_DESCR'	           		=> 'Achtung, um diese Option zu aktivieren, muss Ihre Website bereits ein funktionierendes SSL-Zertifikat haben.',	
 			
 	'ACP_CLEANTALK_SFW_LABEL'		       		=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'		        	=> 'Enables SpamFireWall. Reduces webserver load and prevents bots to access the website.',

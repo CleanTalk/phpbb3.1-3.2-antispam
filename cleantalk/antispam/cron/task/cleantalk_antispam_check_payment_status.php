@@ -14,8 +14,11 @@ class cleantalk_antispam_check_payment_status extends \phpbb\cron\task\base
 		
 	public function run()
 	{
-		\cleantalk\antispam\model\main_model::check_payment_status($this->config['cleantalk_antispam_apikey']);
-		$this->config->set('cleantalk_antispam_check_payment_status_last_gc', time());
+		if ($this->should_run && $this->is_runnable)
+		{
+			\cleantalk\antispam\model\main_model::check_payment_status($this->config['cleantalk_antispam_apikey']);
+			$this->config->set('cleantalk_antispam_check_payment_status_last_gc', time());			
+		}
 	}
 	
 	// Is allow to run?

@@ -37,9 +37,6 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Check contact forms',
 	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Enable anti-spam test for contact forms. May provide confliсts!',
 
-	'ACP_CLEANTALK_SSL_LABEL'	           		=> 'Enable SSL secure connection',
-	'ACP_CLEANTALK_SSL_DESCR'	           		=> 'Note, to enable this option, your site must already have a working SSL certificate.',	
-
 	'ACP_CLEANTALK_SFW_LABEL'		       		=> 'SpamFireWall',
 	'ACP_CLEANTALK_SFW_DESCR'		        	=> 'Enables SpamFireWall. Reduces webserver load and prevents bots to access the website.',
 
