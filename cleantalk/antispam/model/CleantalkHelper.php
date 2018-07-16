@@ -29,15 +29,15 @@ class CleantalkHelper
 	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	public function noticeValidateKey($api_key, $do_check = true)
+	static public function noticeValidateKey($api_key, $do_check = true)
 	{
 		$request = array(
 			'method_name' => 'notice_validate_key',
 			'auth_key' => $api_key
 		);
 		
-		$result = $this->sendRawRequest(self::URL, $request);
-		$result = $do_check ? $this->checkRequestResult($result, 'notice_validate_key') : $result;
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? self::checkRequestResult($result, 'notice_validate_key') : $result;
 		
 		return $result;
 	}
@@ -52,7 +52,7 @@ class CleantalkHelper
 	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	public function getApiKey($email, $host, $platform, $timezone = null, $do_check = true)
+	static public function getApiKey($email, $host, $platform, $timezone = null, $do_check = true)
 	{
 		$request = array(
 			'method_name' => 'get_api_key',
@@ -63,8 +63,8 @@ class CleantalkHelper
 			'product_name' => 'antispam'
 		);
 		
-		$result = $this->sendRawRequest(self::URL, $request);
-		$result = $do_check ? $this->checkRequestResult($result, 'get_api_key') : $result;
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? self::checkRequestResult($result, 'get_api_key') : $result;
 		
 		return $result;
 	}
@@ -76,15 +76,15 @@ class CleantalkHelper
 	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	public function noticePaidTill($api_key, $do_check = true)
+	static public function noticePaidTill($api_key, $do_check = true)
 	{
 		$request = array(
 			'method_name' => 'notice_paid_till',
 			'auth_key' => $api_key
 		);
 		
-		$result = $this->sendRawRequest(self::URL, $request);
-		$result = $do_check ? $this->checkRequestResult($result, 'notice_paid_till') : $result;
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? self::checkRequestResult($result, 'notice_paid_till') : $result;
 		
 		return $result;
 	}
@@ -96,15 +96,15 @@ class CleantalkHelper
 	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	public function getAccountStatus($api_key, $do_check = true)
+	static public function getAccountStatus($api_key, $do_check = true)
 	{
 		$request = array(
 			'method_name' => 'get_account_status',
 			'auth_key' => $api_key
 		);
 		
-		$result = $this->sendRawRequest(self::URL, $request);
-		$result = $do_check ? $this->checkRequestResult($result, 'get_account_status') : $result;
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? self::checkRequestResult($result, 'get_account_status') : $result;
 		
 		return $result;
 	}
@@ -117,7 +117,7 @@ class CleantalkHelper
 	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	public function spamCheckCms($api_key, $data, $do_check = true){
+	static public function spamCheckCms($api_key, $data, $do_check = true){
 		
 		$request = array(
 			'method_name' => 'spam_check_cms',
@@ -125,8 +125,8 @@ class CleantalkHelper
 			'data' => implode(',',$data),
 		);
 		
-		$result = $this->sendRawRequest(self::URL, $request);
-		$result = $do_check ? $result = $this->checkRequestResult($result, 'spam_check_cms') : $result;
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? $result = self::checkRequestResult($result, 'spam_check_cms') : $result;
 		
 		return $result;
 	}
@@ -139,7 +139,7 @@ class CleantalkHelper
 	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	public function sendEmptyFeedback($api_key, $agent_version, $do_check = true){
+	static public function sendEmptyFeedback($api_key, $agent_version, $do_check = true){
 		
 		$request = array(
 			'method_name' => 'send_feedback',
@@ -147,8 +147,8 @@ class CleantalkHelper
 			'feedback' => 0 . ':' . $agent_version
 		);
 		
-		$result = $this->sendRawRequest(self::URL, $request);
-		$result = $do_check ? $result = $this->checkRequestResult($result, 'send_feedback') : $result;
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? $result = self::checkRequestResult($result, 'send_feedback') : $result;
 		
 		return $result;
 	}
@@ -162,7 +162,7 @@ class CleantalkHelper
 	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	public function getAntispamReport($host, $period = 1, $do_check = true)
+	static public function getAntispamReport($host, $period = 1, $do_check = true)
 	{
 		$request = array(
 			'method_name' => 'get_antispam_report',
@@ -170,12 +170,48 @@ class CleantalkHelper
 			'period' => $period
 		);
 		
-		$result = $this->sendRawRequest(self::URL, $request);
-		$result = $do_check ? $result = $this->checkRequestResult($result, 'get_antispam_report') : $result;
+		$result = self::sendRawRequest(self::URL, $request);
+		$result = $do_check ? $result = self::checkRequestResult($result, 'get_antispam_report') : $result;
 		
 		return $result;
 	}
 
+	/*
+	* Wrapper for 2s_blacklists_db API method
+	* 
+	* returns mixed STRING || array('error' => true, 'error_string' => STRING)
+	*/
+	static public function get_2sBlacklistsDb($api_key, $do_check = true){
+		$url='https://api.cleantalk.org';
+		$request = array(
+			'auth_key' => $api_key,
+			'method_name' => '2s_blacklists_db'
+		);
+		
+		$result = self::sendRawRequest($url, $request);
+		$result = $do_check ? self::checkRequestResult($result, '2s_blacklists_db') : $result;
+		
+		return $result;
+	}
+	/*
+	* Wrapper for sfw_logs API method
+	* 
+	* returns mixed STRING || array('error' => true, 'error_string' => STRING)
+	*/
+	public function sfwLogs($api_key, $data, $do_check = true){
+		$url='https://api.cleantalk.org';
+		$request = array(
+			'auth_key' => $api_key,
+			'method_name' => 'sfw_logs',
+			'data' => json_encode($data),
+			'rows' => count($data),
+			'timestamp' => time()
+		);
+		$result = self::sendRawRequest($url, $request);
+		$result = $do_check ? self::checkRequestResult($result, 'sfw_logs') : $result;
+		
+		return $result;
+	}
 
 	/**
 	 * Function checks server response
@@ -184,7 +220,7 @@ class CleantalkHelper
 	 * @param string request_method
 	 * @return mixed (array || array('error' => true, 'error_string' => STRING))
 	 */
-	public function checkRequestResult($result, $method_name = null)
+	static public function checkRequestResult($result, $method_name = null)
 	{		
 		// Errors handling
 		
@@ -237,7 +273,7 @@ class CleantalkHelper
 	 * @param integer connect timeout
 	 * @return type
 	 */
-	public function sendRawRequest($url, $data, $isJSON = false, $timeout = 3){
+	static public function sendRawRequest($url, $data, $isJSON = false, $timeout = 3){
 		
 		$result=null;
 		if(!$isJSON){

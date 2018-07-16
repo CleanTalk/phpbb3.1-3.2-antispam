@@ -10,7 +10,6 @@
 
 namespace cleantalk\antispam\model;
 use phpbb\config\config;
-use phpbb\template\template;
 use phpbb\request\request;
 use phpbb\user;
 use phpbb\log\log;
@@ -83,10 +82,10 @@ class main_model
 		$this->user->add_lang('acp/common');
 		$checkjs = $this->cleantalk_is_valid_js() ? 1 : 0;
 	
-		$this->ct->work_url       = $this->config['cleantalk_antispam_work_url'];
-		$this->ct->server_url     = $this->config['cleantalk_antispam_server_url'];
-		$this->ct->server_ttl     = $this->config['cleantalk_antispam_server_ttl'];
-		$this->ct->server_changed = $this->config['cleantalk_antispam_server_changed'];
+		$this->cleantalk->work_url       = $this->config['cleantalk_antispam_work_url'];
+		$this->cleantalk->server_url     = $this->config['cleantalk_antispam_server_url'];
+		$this->cleantalk->server_ttl     = $this->config['cleantalk_antispam_server_ttl'];
+		$this->cleantalk->server_changed = $this->config['cleantalk_antispam_server_changed'];
 		//Pointer data, Timezone from JS, First key press timestamp, Page set timestamp
 		$pointer_data 			= $this->request->variable(self::JS_POINTER_DATA_FIELD_NAME, 	"none", false, \phpbb\request\request_interface::COOKIE);
 		$page_set_timestamp 	= $this->request->variable(self::JS_PS_TIMESTAMP, 			"none", false, \phpbb\request\request_interface::COOKIE);
@@ -139,7 +138,7 @@ class main_model
 		$this->cleantalk_request->post_info = $post_info;
 		$this->cleantalk_request->sender_email = array_key_exists('sender_email', $spam_check) ? $spam_check['sender_email'] : '';
 		$this->cleantalk_request->sender_nickname = array_key_exists('sender_nickname', $spam_check) ? $spam_check['sender_nickname'] : '';
-		$this->cleantalk_request->sender_ip = $this->ct->cleantalk_get_real_ip();
+		$this->cleantalk_request->sender_ip = $this->cleantalk->cleantalk_get_real_ip();
 		$this->cleantalk_request->submit_time = ($page_set_timestamp !== 0) ? time() - $page_set_timestamp : null;
 		
 		switch ($spam_check['type'])
@@ -148,15 +147,15 @@ class main_model
 			$this->cleantalk_request->message = (array_key_exists('message_title', $spam_check) ? $spam_check['message_title'] : '' ).
 				" \n\n" .
 				(array_key_exists('message_body', $spam_check) ? $spam_check['message_body'] : '');
-			$ct_result = $this->ct->isAllowMessage($this->cleantalk_request);
+			$ct_result = $this->cleantalk->isAllowMessage($this->cleantalk_request);
 			 break;
 		case 'register':
 			$this->cleantalk_request->tz = array_key_exists('timezone', $spam_check) ? $spam_check['timezone'] : '';
-			$ct_result = $this->ct->isAllowUser($this->cleantalk_request);
+			$ct_result = $this->cleantalk->isAllowUser($this->cleantalk_request);
 			break;
 		case 'send_feedback':
 			$this->cleantalk_request->feedback = $spam_check['feedback'];
-			$ct_result = $this->ct->sendFeedback($this->cleantalk_request);
+			$ct_result = $this->cleantalk->sendFeedback($this->cleantalk_request);
 			break;
 		}
 		$ret_val = array();
@@ -164,10 +163,10 @@ class main_model
 		$ret_val['allow'] = 1;
 		$ret_val['ct_request_id'] = $ct_result->id;
 
-		if ($this->ct->server_change)
+		if ($this->cleantalk->server_change)
 		{
-			$this->config->set('cleantalk_antispam_work_url',   $this->ct->work_url);
-			$this->config->set('cleantalk_antispam_server_ttl',     $this->ct->server_ttl);
+			$this->config->set('cleantalk_antispam_work_url',   $this->cleantalk->work_url);
+			$this->config->set('cleantalk_antispam_server_ttl',     $this->cleantalk->server_ttl);
 			$this->config->set('cleantalk_antispam_server_changed', time());
 		}
 		if ($ct_result)

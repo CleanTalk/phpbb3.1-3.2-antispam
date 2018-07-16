@@ -18,11 +18,8 @@ class cleantalk_antispam_sfw_update extends \phpbb\cron\task\base
 		
 	public function run()
 	{
-		if ($this->should_run && $this->is_runnable)
-		{
-			$this->cleantalk_sfw->sfw_update($this->config['cleantalk_antispam_apikey']);
-			$this->config->set('cleantalk_antispam_sfw_update_last_gc', time());			
-		}
+		$this->cleantalk_sfw->sfw_update($this->config['cleantalk_antispam_apikey']);
+		$this->config->set('cleantalk_antispam_sfw_update_last_gc', time());			
 
 	}
 	

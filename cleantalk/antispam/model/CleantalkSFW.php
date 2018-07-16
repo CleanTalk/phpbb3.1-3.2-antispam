@@ -12,8 +12,8 @@
 
 
 namespace cleantalk\antispam\model;
-use phpbb\config\config;
 use phpbb\template\template;
+use phpbb\config\config;
 use phpbb\request\request;
 use phpbb\user;
 use phpbb\db\driver\driver_interface;
@@ -48,6 +48,7 @@ class CleantalkSFW
 		'197.234.240.0/22',
 		'198.41.128.0/17',
 	);
+
 	/* @var \phpbb\template\template */
 	protected $template;
 
@@ -68,8 +69,6 @@ class CleantalkSFW
 
 	/**
 	* Constructor
-	*
-	* @param template		$template	Template object
 	* @param config			$config		Config object
 	* @param user			$user		User object
 	* @param request		$request	Request object
@@ -179,7 +178,7 @@ class CleantalkSFW
 			
 			$is_sfw_check = true;
 
-			$ip = $this->cleantalk_sfw->get_ip();
+			$ip = $this->get_ip();
 			
 			$cookie_prefix = $this->config['cookie_name']   ? $this->config['cookie_name'].'_'           : '';
 			$cookie_domain = $this->config['cookie_domain'] ? " domain={$this->config['cookie_domain']};" : ''; 
@@ -194,20 +193,19 @@ class CleantalkSFW
 					
 					$is_sfw_check = false;
 					if($ct_sfw_passed){
-						$this->cleantalk_sfw->sfw_update_logs($ct_cur_ip, 'passed');
+						$this->sfw_update_logs($ct_cur_ip, 'passed');
 						$this->user->set_cookie('ct_sfw_passed', '0', 10);
 					}
 				}
 				
 			} unset($ct_cur_ip);
-			
 			if($is_sfw_check){
-				$this->cleantalk_sfw->check_ip();
-				if($this->cleantalk_sfw->result){
-					$this->cleantalk_sfw->sfw_update_logs($sfw->blocked_ip, 'blocked');
-					$this->cleantalk_sfw->sfw_die($this->config['cleantalk_antispam_apikey'], $cookie_prefix, $cookie_domain);
+				$this->check_ip();
+				if($this->result){
+					$this->sfw_update_logs($this->blocked_ip, 'blocked');
+					$this->sfw_die($this->config['cleantalk_antispam_apikey'], $cookie_prefix, $cookie_domain);
 				}else{
-					$this->user->set_cookie('ct_sfw_pass_key', md5($sfw->passed_ip.$this->config['cleantalk_antispam_apikey']), 0);
+					$this->user->set_cookie('ct_sfw_pass_key', md5($this->passed_ip.$this->config['cleantalk_antispam_apikey']), 0);
 				}
 			}			
 		}
@@ -225,13 +223,14 @@ class CleantalkSFW
 		$time = time();
 		$ip = filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 		
-		$query = "SELECT COUNT(*)
+		$query = "SELECT COUNT(*) as cnt
 			FROM ".$this->table_prefix."cleantalk_sfw_logs
 			WHERE ip = '$ip';";
 		$this->universal_query($query);
 		$this->universal_fetch();
-		
-		if($this->db_result_data){
+
+		if($this->db_result_data['cnt'] > 0){
+
 			$query = "UPDATE ".$this->table_prefix."cleantalk_sfw_logs
 				SET
 					all_entries = all_entries + 1,
@@ -246,6 +245,7 @@ class CleantalkSFW
 				all_entries = 1,
 				blocked_entries = 1,
 				entries_timestamp = ".$time.";";
+
 			$this->universal_query($query);
 		}
 	}
@@ -257,7 +257,7 @@ class CleantalkSFW
 	*/
 	public function sfw_update($ct_key){
 		
-		$result = $this->get_2sBlacklistsDb($ct_key);
+		$result =\cleantalk\antispam\model\CleantalkHelper::get_2sBlacklistsDb($ct_key);
 		
 		if(empty($result['error'])){
 			
@@ -307,7 +307,7 @@ class CleantalkSFW
 			unset($key, $value);
 			
 			//Sending the request
-			$result = $this->sfwLogs($ct_key, $data);
+			$result =\cleantalk\antispam\model\CleantalkHelper::sfwLogs($ct_key, $data);
 			
 			//Checking answer and deleting all lines from the table
 			if(empty($result['error'])){
@@ -367,152 +367,5 @@ class CleantalkSFW
 
 		trigger_error($sfw_die_page, E_USER_ERROR);
 	}
-	
-	/*
-	* Wrapper for sfw_logs API method
-	* 
-	* returns mixed STRING || array('error' => true, 'error_string' => STRING)
-	*/
-	public function sfwLogs($api_key, $data, $do_check = true){
-		$url='https://api.cleantalk.org';
-		$request = array(
-			'auth_key' => $api_key,
-			'method_name' => 'sfw_logs',
-			'data' => json_encode($data),
-			'rows' => count($data),
-			'timestamp' => time()
-		);
-		$result = $this->sendRawRequest($url, $request);
-		$result = $do_check ? $this->checkRequestResult($result, 'sfw_logs') : $result;
-		
-		return $result;
-	}
-	
-	/*
-	* Wrapper for 2s_blacklists_db API method
-	* 
-	* returns mixed STRING || array('error' => true, 'error_string' => STRING)
-	*/
-	public function get_2sBlacklistsDb($api_key, $do_check = true){
-		$url='https://api.cleantalk.org';
-		$request = array(
-			'auth_key' => $api_key,
-			'method_name' => '2s_blacklists_db'
-		);
-		
-		$result = $this->sendRawRequest($url, $request);
-		$result = $do_check ? $this->checkRequestResult($result, '2s_blacklists_db') : $result;
-		
-		return $result;
-	}
-	
-	/**
-	 * Function sends raw request to API server
-	 *
-	 * @param string url of API server
-	 * @param array data to send
-	 * @param boolean is data have to be JSON encoded or not
-	 * @param integer connect timeout
-	 * @return type
-	 */
-	public function sendRawRequest($url,$data,$isJSON=false,$timeout=3){
-		
-		$result=null;
-		if(!$isJSON){
-			$data=http_build_query($data);
-			$data=str_replace("&amp;", "&", $data);
-		}else{
-			$data= json_encode($data);
-		}
-		
-		$curl_exec=false;
-		if (function_exists('curl_init') && function_exists('json_decode')){
-		
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-			curl_setopt($ch, CURLOPT_POST, true);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 			
-			// receive server response ...
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			// resolve 'Expect: 100-continue' issue
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
-			
-			$result = curl_exec($ch);
-			
-			if($result!==false){
-				$curl_exec=true;
-			}
-			
-			curl_close($ch);
-		}
-		if(!$curl_exec){
-			
-			$opts = array(
-				'http'=>array(
-					'method' => "POST",
-					'timeout'=> $timeout,
-					'content' => $data
-				)
-			);
-			$context = stream_context_create($opts);
-			$result = @file_get_contents($url, 0, $context);
-		}
-		return $result;
-	}
-	
-	/**
-	 * Function checks server response
-	 *
-	 * @param string request_method
-	 * @param string result
-	 * @return mixed (array || array('error' => true, 'error_string' => STRING))
-	 */
-	public function checkRequestResult($result, $method_name = null)
-	{
-		
-		// Errors handling
-		// Bad connection
-		if(empty($result)){
-			$result = array(
-				'error' => true,
-				'error_string' => 'CONNECTION_ERROR'
-			);
-			return $result;
-		}
-		
-		// JSON decode errors
-		$result = json_decode($result, true);
-		if(empty($result)){
-			$result = array(
-				'error' => true,
-				'error_string' => 'JSON_DECODE_ERROR'
-			);
-			return $result;
-		}
-		
-		// Server errors
-		if($result && (isset($result['error_no']) || isset($result['error_message']))){
-			$result = array(
-				'error' => true,
-				'error_string' => "SERVER_ERROR NO:{$result['error_no']} MSG:{$result['error_message']}",
-				'error_no' => $result['error_no'],
-				'error_message' => $result['error_message']
-			);
-			return $result;
-		}
-		
-		/* mehod_name = notice_validate_key */
-		if($method_name == 'notice_validate_key' && isset($result['valid'])){
-			$result['error'] = false;
-			return $result;
-		}
-		
-		/* Other methods */
-		if(isset($result['data']) && is_array($result['data'])){
-			return $result['data'];
-		}
-	}
-	
 }

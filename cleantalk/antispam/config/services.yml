@@ -9,22 +9,9 @@ services:
             - @dbal.conn
             - @cleantalk.antispam.cleantalk_sfw
             - @cleantalk.antispam.main_model
+            - '%core.php_ext%'                                            
         tags:
             - { name: event.listener }
-
-    cleantalk.antispam.cleantalk_acp:
-        class: cleantalk\antispam\acp\main_module
-        arguments:
-            - @template
-            - @config
-            - @user
-            - @request
-            - @dbal.conn
-            - @cleantalk.antispam.cleantalk_helper
-            - @cleantalk.antispam.cleantalk_sfw
-            - @cleantalk.antispam.main_model
-            - '%core.root_path%'            
-            - '%core.php_ext%'                                
 
     cleantalk.antispam.cleantalk_sfw:
         class: cleantalk\antispam\model\CleantalkSFW
@@ -43,9 +30,6 @@ services:
 
     cleantalk.antispam.cleantalk_request:
         class: cleantalk\antispam\model\CleantalkRequest  
-
-    cleantalk.antispam.cleantalk_helper:
-        class: cleantalk\antispam\model\CleantalkHelper   
 
     cleantalk.antispam.main_model:
         class: cleantalk\antispam\model\main_model
@@ -84,7 +68,6 @@ services:
         class: cleantalk\antispam\cron\task\cleantalk_antispam_check_payment_status
         arguments:
             - @config
-            - @cleantalk.antispam.cleantalk_helper
         calls:
             - [set_name, [cron.task.cleantalk_antispam_check_payment_status]]
         tags:

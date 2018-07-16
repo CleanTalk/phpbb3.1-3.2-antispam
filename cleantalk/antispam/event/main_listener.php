@@ -57,6 +57,9 @@ class main_listener implements EventSubscriberInterface
 	/* @var \cleantalk\antispam\model\main_model */
 	protected $main_model;
 
+	/** @var string php file extension  */
+	protected $php_ext;	
+
 	/* @var array Stores result of spam checking of post or topic when needed*/
 	private $ct_comment_result;
 
@@ -69,7 +72,7 @@ class main_listener implements EventSubscriberInterface
 	* @param request		$request	Request object
 	* @param driver_interface 	$db 		The database object
 	*/
-	public function __construct(template $template, config $config, user $user, request $request, driver_interface $db, CleantalkSFW $cleantalk_sfw, main_model $main_model)
+	public function __construct(template $template, config $config, user $user, request $request, driver_interface $db, CleantalkSFW $cleantalk_sfw, main_model $main_model, $php_ext)
 	{
 		$this->template = $template;
 		$this->config = $config;
@@ -78,6 +81,7 @@ class main_listener implements EventSubscriberInterface
 		$this->db = $db;
 		$this->cleantalk_sfw = $cleantalk_sfw;
 		$this->main_model = $main_model;
+		$this->php_ext = $php_ext;
 	}
 	/**
 	* Loads language
@@ -287,7 +291,7 @@ class main_listener implements EventSubscriberInterface
 	public function global_check()
 	{
 		$this->cleantalk_sfw->sfw_check();
-		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->request->server('PHP_SELF',''), array('/adm/index.php','/ucp.php','/posting.php')) && $this->request->variable('submit',''))
+		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->request->server('PHP_SELF',''), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
 		{
 			
 			//Checking contact form
