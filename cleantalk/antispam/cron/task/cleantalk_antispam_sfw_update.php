@@ -7,17 +7,20 @@ class cleantalk_antispam_sfw_update extends \phpbb\cron\task\base
 
 	protected $config;
 
-	public function __construct(\phpbb\config\config $config)
+	/* @var \cleantalk\antispam\model\CleantalkSFW */
+	protected $cleantalk_sfw;	
+
+	public function __construct(\phpbb\config\config $config, \cleantalk\antispam\model\CleantalkSFW $cleantalk_sfw)
 	{
 		$this->config = $config;
+		$this->cleantalk_sfw = $cleantalk_sfw;
 	}
 		
 	public function run()
 	{
 		if ($this->should_run && $this->is_runnable)
 		{
-			\cleantalk\antispam\model\main_model::sfw_update($this->config['cleantalk_antispam_apikey']);
-			
+			$this->cleantalk_sfw->sfw_update($this->config['cleantalk_antispam_apikey']);
 			$this->config->set('cleantalk_antispam_sfw_update_last_gc', time());			
 		}
 
@@ -33,7 +36,7 @@ class cleantalk_antispam_sfw_update extends \phpbb\cron\task\base
 	public function should_run()
 	{
 		return (int)$this->config['cleantalk_antispam_sfw_update_last_gc'] < time() - (int)$this->config['cleantalk_antispam_sfw_update_gc'];
-	}
+	}	
 	
 }
 

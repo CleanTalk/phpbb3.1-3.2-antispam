@@ -14,6 +14,8 @@
 
 namespace cleantalk\antispam\model;
 
+use phpbb\request\request;
+
 class Cleantalk
 {
 
@@ -107,6 +109,17 @@ class Cleantalk
      */
     public $min_server_timeout = 50;
 
+    /* @var \phpbb\request\request */
+    protected $request;
+
+    /**
+    * Constructor
+    * @param request        $request    Request object
+    */    
+    public function __construct(request $request)
+    {
+        $this->request = $request;
+    }
     /**
      * Function checks whether it is possible to publish the message
      * @param CleantalkRequest $request
@@ -372,7 +385,6 @@ class Cleantalk
     private function httpRequest($msg) {
         
         $result = false;
-        global $request;
         if($msg->method_name != 'send_feedback'){
             $tmp = $this->request_headers();
             if ($tmp !== null)
@@ -382,10 +394,10 @@ class Cleantalk
         }
         $si=(array)json_decode($msg->sender_info,true);
         
-        if(method_exists($request,'server')){
-            $si['remote_addr']=$request->server('REMOTE_ADDR');
-            $msg->x_forwarded_for=$request->server('X_FORWARDED_FOR');
-            $msg->x_real_ip=$request->server('X_REAL_IP');
+        if(method_exists($this->request,'server')){
+            $si['remote_addr']=$this->request->server('REMOTE_ADDR');
+            $msg->x_forwarded_for=$this->request->server('X_FORWARDED_FOR');
+            $msg->x_real_ip=$this->request->server('X_REAL_IP');
         }
         
         $msg->sender_info=json_encode($si);
@@ -657,22 +669,20 @@ class Cleantalk
     }
     
     public function cleantalk_get_real_ip(){
-
-        global $request;
         
-        if ($request->server('X_FORWARDED_FOR'))
+        if ($this->request->server('X_FORWARDED_FOR'))
         {
-            $ip = explode(",", trim($request->server('X_FORWARDED_FOR')));
+            $ip = explode(",", trim($this->request->server('X_FORWARDED_FOR')));
             $ip = trim($ip[0]);
         }
-        elseif ($request->server('HTTP_X_FORWARDED_FOR'))
+        elseif ($this->request->server('HTTP_X_FORWARDED_FOR'))
         {
-            $ip = explode(",", trim($request->server('HTTP_X_FORWARDED_FOR')));
+            $ip = explode(",", trim($this->request->server('HTTP_X_FORWARDED_FOR')));
             $ip = trim($ip[0]);
         }
         else
         {
-            $ip = $request->server('REMOTE_ADDR');
+            $ip = $this->request->server('REMOTE_ADDR');
         }
 
         // Validating IP
@@ -699,29 +709,27 @@ class Cleantalk
      * Patch for apache_request_headers() 
      */
     public function request_headers(){
-        
-        global $request;
 
-        $headers['Host']  = $request->server('HTTP_HOST','');
-        $headers['X-Real-IP'] = $request->server('HTTP_X_REAL_IP','');
-        $headers['X-Forwarded-Proto'] = $request->server('HTTP_X_FORWARDED_PROTO','');
-        $headers['Connection'] = $request->server('HTTP_CONNECTION','');
-        $headers['Content-Length'] = $request->server('CONTENT_LENGTH','');
-        $headers['Cache-Control'] = $request->server('HTTP_CACHE_CONTROL','');
-        $headers['Origin'] = $request->server('HTTP_ORIGIN','');
-        $headers['Upgrade-Insecure-Requests'] = $request->server('HTTP_UPGRADE_INSECURE_REQUESTS','');
-        $headers['Content-Type'] = $request->server('CONTENT_TYPE','');
-        $headers['User-Agent'] = $request->server('HTTP_USER_AGENT','');
-        $headers['Accept'] = $request->server('HTTP_ACCEPT','');
-        $headers['Referer'] = $request->server('HTTP_REFERER','');
-        $headers['Accept-Encoding'] = $request->server('HTTP_ACCEPT_ENCODING','');
-        $headers['Accept-Language'] = $request->server('HTTP_ACCEPT_LANGUAGE',''); 
+        $headers['Host']  = $this->request->server('HTTP_HOST','');
+        $headers['X-Real-IP'] = $this->request->server('HTTP_X_REAL_IP','');
+        $headers['X-Forwarded-Proto'] = $this->request->server('HTTP_X_FORWARDED_PROTO','');
+        $headers['Connection'] = $this->request->server('HTTP_CONNECTION','');
+        $headers['Content-Length'] = $this->request->server('CONTENT_LENGTH','');
+        $headers['Cache-Control'] = $this->request->server('HTTP_CACHE_CONTROL','');
+        $headers['Origin'] = $this->request->server('HTTP_ORIGIN','');
+        $headers['Upgrade-Insecure-Requests'] = $this->request->server('HTTP_UPGRADE_INSECURE_REQUESTS','');
+        $headers['Content-Type'] = $this->request->server('CONTENT_TYPE','');
+        $headers['User-Agent'] = $this->request->server('HTTP_USER_AGENT','');
+        $headers['Accept'] = $this->request->server('HTTP_ACCEPT','');
+        $headers['Referer'] = $this->request->server('HTTP_REFERER','');
+        $headers['Accept-Encoding'] = $this->request->server('HTTP_ACCEPT_ENCODING','');
+        $headers['Accept-Language'] = $this->request->server('HTTP_ACCEPT_LANGUAGE',''); 
         $headers['Cookie'] = preg_replace(array(
                     '/\s{0,1}ct_checkjs=[a-z0-9]*[;|$]{0,1}/',
                     '/\s{0,1}ct_timezone=.{0,1}\d{1,2}[;|$]/', 
                     '/\s{0,1}ct_pointer_data=.*5D[;|$]{0,1}/', 
                     '/;{0,1}\s{0,3}$/'
-                ), '', $request->server('HTTP_COOKIE',''));           
+                ), '', $this->request->server('HTTP_COOKIE',''));           
 
         return $headers;
     }

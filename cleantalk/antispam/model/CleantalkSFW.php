@@ -12,8 +12,13 @@
 
 
 namespace cleantalk\antispam\model;
+use phpbb\config\config;
+use phpbb\template\template;
+use phpbb\request\request;
+use phpbb\user;
+use phpbb\db\driver\driver_interface;
 
-class cleantalkSFW
+class CleantalkSFW
 {
 	public $ip = 0;
 	public $ip_str = '';
@@ -24,8 +29,6 @@ class cleantalkSFW
 	public $result = false;
 	
 	//Database variables
-	private $table_prefix;
-	private $db;
 	private $db_result;
 	private $db_result_data = array();
 	
@@ -45,10 +48,39 @@ class cleantalkSFW
 		'197.234.240.0/22',
 		'198.41.128.0/17',
 	);
+	/* @var \phpbb\template\template */
+	protected $template;
+
+	/* @var \phpbb\config\config */
+	protected $config;
+
+	/* @var \phpbb\user */
+	protected $user;
+
+	/* @var \phpbb\request\request */
+	protected $request;
+
+	/* @var \phpbb\db\driver\driver_interface */
+	protected $db;
 	
-	public function __construct()
-	{
-		global $db, $table_prefix;
+	/** @var string */
+	protected $table_prefix;
+
+	/**
+	* Constructor
+	*
+	* @param template		$template	Template object
+	* @param config			$config		Config object
+	* @param user			$user		User object
+	* @param request		$request	Request object
+	* @param driver_interface 	$db 		The database object
+	*/
+	public function __construct(template $template, config $config, user $user, request $request, driver_interface $db, $table_prefix)
+	{	
+		$this->template = $template;
+		$this->config = $config;
+		$this->user = $user;
+		$this->request = $request;		
 		$this->table_prefix = $table_prefix;
 		$this->db = $db;
 	}
@@ -78,27 +110,26 @@ class cleantalkSFW
 	*/
 	public function get_ip(){
 		
-		global $request;
 		$cdn = $this->cdn_cf;
 		$result = Array();
 		
 		// Getting IP
-		$result['remote_addr'] = filter_var( $request->server('REMOTE_ADDR'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+		$result['remote_addr'] = filter_var( $this->request->server('REMOTE_ADDR'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 		$this->ip_str_array[] = $result['remote_addr'];
 		$this->ip_array[]=sprintf("%u", ip2long($result['remote_addr']));
 		
 		// Getting test IP
-		$sfw_test_ip = $request->variable('sfw_test_ip', '');
+		$sfw_test_ip = $this->request->variable('sfw_test_ip', '');
 		if($sfw_test_ip){
 			$result['sfw_test_ip'] = filter_var( $sfw_test_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 			$this->ip_str_array[]=$result['sfw_test_ip'];
 			$this->ip_array[]=sprintf("%u", ip2long($result['sfw_test_ip']));
 		}
 		
-		if($request->server('HTTP_CF_CONNECTING_IP')){
+		if($this->request->server('HTTP_CF_CONNECTING_IP')){
 			foreach($cdn as $cidr){
 				if($this->ip_mask_match($result['remote_addr'], $cidr)){
-					$result['cf_connecting_ip'] = filter_var( $request->server('Cf_Connecting_Ip'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+					$result['cf_connecting_ip'] = filter_var( $this->request->server('Cf_Connecting_Ip'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 					$this->ip_array[] = sprintf("%u", ip2long($result['cf_connecting_ip']));
 					unset($result['remote_addr']);
 					break;
@@ -138,7 +169,49 @@ class cleantalkSFW
 			}
 		}
 	}
+	/**
+	* Check new visitors for SFW database
+	* @return void
+	*/
+	public function sfw_check(){
 		
+		if($this->config['cleantalk_antispam_sfw_enabled'] && $this->config['cleantalk_antispam_key_is_ok']){
+			
+			$is_sfw_check = true;
+
+			$ip = $this->cleantalk_sfw->get_ip();
+			
+			$cookie_prefix = $this->config['cookie_name']   ? $this->config['cookie_name'].'_'           : '';
+			$cookie_domain = $this->config['cookie_domain'] ? " domain={$this->config['cookie_domain']};" : ''; 
+			
+			$ct_sfw_pass_key 	= $this->request->variable($cookie_prefix.'ct_sfw_pass_key', '', false, \phpbb\request\request_interface::COOKIE);
+			$ct_sfw_passed 		= $this->request->variable($cookie_prefix.'ct_sfw_passed',   '', false, \phpbb\request\request_interface::COOKIE);
+			$is_sfw_check = true;
+			
+			foreach($ip as $ct_cur_ip){
+								
+				if($ct_sfw_pass_key == md5($ct_cur_ip.$this->config['cleantalk_antispam_apikey'])){
+					
+					$is_sfw_check = false;
+					if($ct_sfw_passed){
+						$this->cleantalk_sfw->sfw_update_logs($ct_cur_ip, 'passed');
+						$this->user->set_cookie('ct_sfw_passed', '0', 10);
+					}
+				}
+				
+			} unset($ct_cur_ip);
+			
+			if($is_sfw_check){
+				$this->cleantalk_sfw->check_ip();
+				if($this->cleantalk_sfw->result){
+					$this->cleantalk_sfw->sfw_update_logs($sfw->blocked_ip, 'blocked');
+					$this->cleantalk_sfw->sfw_die($this->config['cleantalk_antispam_apikey'], $cookie_prefix, $cookie_domain);
+				}else{
+					$this->user->set_cookie('ct_sfw_pass_key', md5($sfw->passed_ip.$this->config['cleantalk_antispam_apikey']), 0);
+				}
+			}			
+		}
+	}		
 	/*
 	*	Add entry to SFW log
 	*/
@@ -184,7 +257,7 @@ class cleantalkSFW
 	*/
 	public function sfw_update($ct_key){
 		
-		$result = self::get_2sBlacklistsDb($ct_key);
+		$result = $this->get_2sBlacklistsDb($ct_key);
 		
 		if(empty($result['error'])){
 			
@@ -234,7 +307,7 @@ class cleantalkSFW
 			unset($key, $value);
 			
 			//Sending the request
-			$result = self::sfwLogs($ct_key, $data);
+			$result = $this->sfwLogs($ct_key, $data);
 			
 			//Checking answer and deleting all lines from the table
 			if(empty($result['error'])){
@@ -257,26 +330,25 @@ class cleantalkSFW
 	* Stops script executing
 	*/	
 	public function sfw_die($api_key, $cookie_prefix = '', $cookie_domain = ''){
-		
-		global $request, $user;
-		$user->add_lang_ext('cleantalk/antispam', 'common');
+
+		$this->user->add_lang_ext('cleantalk/antispam', 'common');
 		
 		// File exists?
 		if(file_exists(dirname(__FILE__)."/sfw_die_page.html")){
 			$sfw_die_page = file_get_contents(dirname(__FILE__)."/sfw_die_page.html");
 		}else{
-			trigger_error($user->lang('SFW_DIE_NO_FILE'), E_USER_ERROR);
+			trigger_error($this->user->lang('SFW_DIE_NO_FILE'), E_USER_ERROR);
 		}
 		
 		// Translation
-		$sfw_die_page = str_replace('{SFW_DIE_NOTICE_IP}',              $user->lang('SFW_DIE_NOTICE_IP'),              $sfw_die_page);
-		$sfw_die_page = str_replace('{SFW_DIE_MAKE_SURE_JS_ENABLED}',   $user->lang('SFW_DIE_MAKE_SURE_JS_ENABLED'),   $sfw_die_page);
-		$sfw_die_page = str_replace('{SFW_DIE_CLICK_TO_PASS}',          $user->lang('SFW_DIE_CLICK_TO_PASS'),          $sfw_die_page);
-		$sfw_die_page = str_replace('{SFW_DIE_YOU_WILL_BE_REDIRECTED}', $user->lang('SFW_DIE_YOU_WILL_BE_REDIRECTED'), $sfw_die_page);
+		$sfw_die_page = str_replace('{SFW_DIE_NOTICE_IP}',              $this->user->lang('SFW_DIE_NOTICE_IP'),              $sfw_die_page);
+		$sfw_die_page = str_replace('{SFW_DIE_MAKE_SURE_JS_ENABLED}',   $this->user->lang('SFW_DIE_MAKE_SURE_JS_ENABLED'),   $sfw_die_page);
+		$sfw_die_page = str_replace('{SFW_DIE_CLICK_TO_PASS}',          $this->user->lang('SFW_DIE_CLICK_TO_PASS'),          $sfw_die_page);
+		$sfw_die_page = str_replace('{SFW_DIE_YOU_WILL_BE_REDIRECTED}', $this->user->lang('SFW_DIE_YOU_WILL_BE_REDIRECTED'), $sfw_die_page);
 		
 		// Service info
 		$sfw_die_page = str_replace('{REMOTE_ADDRESS}', $this->blocked_ip, $sfw_die_page);
-		$sfw_die_page = str_replace('{REQUEST_URI}', $request->server('REQUEST_URI'), $sfw_die_page);
+		$sfw_die_page = str_replace('{REQUEST_URI}', $this->request->server('REQUEST_URI'), $sfw_die_page);
 		$sfw_die_page = str_replace('{COOKIE_PREFIX}', $cookie_prefix, $sfw_die_page);
 		$sfw_die_page = str_replace('{COOKIE_DOMAIN}', $cookie_domain, $sfw_die_page);
 		$sfw_die_page = str_replace('{SFW_COOKIE}', md5($this->blocked_ip.$api_key), $sfw_die_page);
@@ -301,7 +373,7 @@ class cleantalkSFW
 	* 
 	* returns mixed STRING || array('error' => true, 'error_string' => STRING)
 	*/
-	static public function sfwLogs($api_key, $data, $do_check = true){
+	public function sfwLogs($api_key, $data, $do_check = true){
 		$url='https://api.cleantalk.org';
 		$request = array(
 			'auth_key' => $api_key,
@@ -310,8 +382,8 @@ class cleantalkSFW
 			'rows' => count($data),
 			'timestamp' => time()
 		);
-		$result = self::sendRawRequest($url, $request);
-		$result = $do_check ? self::checkRequestResult($result, 'sfw_logs') : $result;
+		$result = $this->sendRawRequest($url, $request);
+		$result = $do_check ? $this->checkRequestResult($result, 'sfw_logs') : $result;
 		
 		return $result;
 	}
@@ -321,15 +393,15 @@ class cleantalkSFW
 	* 
 	* returns mixed STRING || array('error' => true, 'error_string' => STRING)
 	*/
-	static public function get_2sBlacklistsDb($api_key, $do_check = true){
+	public function get_2sBlacklistsDb($api_key, $do_check = true){
 		$url='https://api.cleantalk.org';
 		$request = array(
 			'auth_key' => $api_key,
 			'method_name' => '2s_blacklists_db'
 		);
 		
-		$result = self::sendRawRequest($url, $request);
-		$result = $do_check ? self::checkRequestResult($result, '2s_blacklists_db') : $result;
+		$result = $this->sendRawRequest($url, $request);
+		$result = $do_check ? $this->checkRequestResult($result, '2s_blacklists_db') : $result;
 		
 		return $result;
 	}
@@ -343,7 +415,7 @@ class cleantalkSFW
 	 * @param integer connect timeout
 	 * @return type
 	 */
-	static public function sendRawRequest($url,$data,$isJSON=false,$timeout=3){
+	public function sendRawRequest($url,$data,$isJSON=false,$timeout=3){
 		
 		$result=null;
 		if(!$isJSON){
@@ -397,7 +469,7 @@ class cleantalkSFW
 	 * @param string result
 	 * @return mixed (array || array('error' => true, 'error_string' => STRING))
 	 */
-	static public function checkRequestResult($result, $method_name = null)
+	public function checkRequestResult($result, $method_name = null)
 	{
 		
 		// Errors handling

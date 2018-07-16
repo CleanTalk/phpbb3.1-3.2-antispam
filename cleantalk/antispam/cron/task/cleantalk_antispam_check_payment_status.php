@@ -7,17 +7,32 @@ class cleantalk_antispam_check_payment_status extends \phpbb\cron\task\base
 
 	protected $config;
 
-	public function __construct(\phpbb\config\config $config)
+	/* @var \cleantalk\antispam\model\CleantalkHelper */
+	protected $cleantalk_helper;
+
+	public function __construct(\phpbb\config\config $config, \cleantalk\antispam\model\CleantalkHelper $cleantalk_helper)
 	{
 		$this->config = $config;
+		$this->cleantalk_helper = $cleantalk_helper;
 	}
 		
 	public function run()
 	{
 		if ($this->should_run && $this->is_runnable)
 		{
-			\cleantalk\antispam\model\main_model::check_payment_status($this->config['cleantalk_antispam_apikey']);
-			$this->config->set('cleantalk_antispam_check_payment_status_last_gc', time());			
+			$result = $this->cleantalk_helper->noticePaidTill($this->config['cleantalk_antispam_apikey']);
+			if(empty($result['error']))
+			{
+				$this->config->set('cleantalk_antispam_show_notice', ($result['show_notice']) ? $result['show_notice'] : 0);
+				$this->config->set('cleantalk_antispam_renew',       ($result['renew']) ? $result['renew'] : 0);
+				$this->config->set('cleantalk_antispam_trial',       ($result['trial']) ? $result['trial'] : 0);
+				$this->config->set('cleantalk_antispam_user_token',  ($result['user_token']) ? $result['user_token'] : '');
+				$this->config->set('cleantalk_antispam_spam_count',  ($result['spam_count']) ? $result['spam_count'] : 0);
+				$this->config->set('cleantalk_antispam_moderate_ip', ($result['moderate_ip']) ? $result['moderate_ip'] : 0);
+				$this->config->set('cleantalk_antispam_ip_license',  ($result['ip_license']) ? $result['ip_license'] : 0);
+				$this->config->set('cleantalk_antispam_check_payment_status_last_gc', time());
+			}
+			
 		}
 	}
 	
@@ -32,6 +47,6 @@ class cleantalk_antispam_check_payment_status extends \phpbb\cron\task\base
 	{
 		return (int)$this->config['cleantalk_antispam_check_payment_status_last_gc'] < time() - (int)$this->config['cleantalk_antispam_check_payment_status_send_gc'];
 	}
-	
+		
 }
 

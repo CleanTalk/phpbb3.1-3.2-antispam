@@ -16,6 +16,8 @@ use phpbb\template\template;
 use phpbb\request\request;
 use phpbb\user;
 use phpbb\db\driver\driver_interface;
+use cleantalk\antispam\model\CleantalkSFW;
+use cleantalk\antispam\model\main_model;
 
 /**
 * Event listener
@@ -49,6 +51,12 @@ class main_listener implements EventSubscriberInterface
 	/* @var \phpbb\db\driver\driver_interface */
 	protected $db;
 
+	/* @var \cleantalk\antispam\model\CleantalkSFW */
+	protected $cleantalk_sfw;
+
+	/* @var \cleantalk\antispam\model\main_model */
+	protected $main_model;
+
 	/* @var array Stores result of spam checking of post or topic when needed*/
 	private $ct_comment_result;
 
@@ -61,13 +69,15 @@ class main_listener implements EventSubscriberInterface
 	* @param request		$request	Request object
 	* @param driver_interface 	$db 		The database object
 	*/
-	public function __construct(template $template, config $config, user $user, request $request, driver_interface $db)
+	public function __construct(template $template, config $config, user $user, request $request, driver_interface $db, CleantalkSFW $cleantalk_sfw, main_model $main_model)
 	{
 		$this->template = $template;
 		$this->config = $config;
 		$this->user = $user;
 		$this->request = $request;
 		$this->db = $db;
+		$this->cleantalk_sfw = $cleantalk_sfw;
+		$this->main_model = $main_model;
 	}
 	/**
 	* Loads language
@@ -95,8 +105,8 @@ class main_listener implements EventSubscriberInterface
 		if (empty($this->config['cleantalk_antispam_apikey'])){
 			return;
 		}
-		$this->template->assign_var('CT_JS_ADDON', \cleantalk\antispam\model\main_model::cleantalk_get_checkjs_code());
-		\cleantalk\antispam\model\main_model::set_cookie();	
+		$this->template->assign_var('CT_JS_ADDON', $this->main_model->cleantalk_get_checkjs_code());
+		$this->main_model->set_cookie();	
 
 	}
 	/**
@@ -191,7 +201,7 @@ class main_listener implements EventSubscriberInterface
 					$spam_check['message_title'] = $data['post_data']['post_subject'];
 				}
 				$spam_check['message_body'] = utf8_normalize_nfc($this->request->variable('message', '', true));
-				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
+				$result = $this->main_model->check_spam($spam_check);
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{ 
 					if ($result['stop_queue'] == 1)
@@ -262,22 +272,21 @@ class main_listener implements EventSubscriberInterface
 				if (array_key_exists('user_timezone', $data['user_row'])) {
 					$spam_check['timezone'] = $data['user_row']['user_timezone'];
 				}
-				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
+				$result = $this->main_model->check_spam($spam_check);
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{
 					trigger_error($result['ct_result_comment']);
 				}
 			}
 		}
-	}
-	
+	}	
 	/**
 	* Global checks
 	* @void
 	*/
 	public function global_check()
 	{
-		\cleantalk\antispam\model\main_model::sfw_check();
+		$this->cleantalk_sfw->sfw_check();
 		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->request->server('PHP_SELF',''), array('/adm/index.php','/ucp.php','/posting.php')) && $this->request->variable('submit',''))
 		{
 			
@@ -286,7 +295,7 @@ class main_listener implements EventSubscriberInterface
 			$spam_check = array();	
 
 			//Getting request params
-			$ct_temp_msg_data = \cleantalk\antispam\model\main_model::get_fields_any($this->request->get_super_global());
+			$ct_temp_msg_data = $this->main_model->get_fields_any($this->request->get_super_global());
 
 			$sender_email    = ($ct_temp_msg_data['email']    ? $ct_temp_msg_data['email']    : '');
 			$sender_nickname = ($ct_temp_msg_data['nickname'] ? $ct_temp_msg_data['nickname'] : '');
@@ -314,7 +323,7 @@ class main_listener implements EventSubscriberInterface
 			{
 				$spam_check['type'] = 'comment';
 
-				$result = \cleantalk\antispam\model\main_model::check_spam($spam_check);
+				$result = $this->main_model->check_spam($spam_check);
 
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{				 

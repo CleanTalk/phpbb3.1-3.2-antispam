@@ -79,8 +79,8 @@ class main_module
 					$config->set('cleantalk_antispam_key_is_ok', 1);
 					
 					if($config['cleantalk_antispam_sfw_enabled']){
-						\cleantalk\antispam\model\main_model::sfw_update($savekey);
-						\cleantalk\antispam\model\main_model::sfw_send_logs($savekey);
+						\cleantalk\antispam\model\CleantalkSFW::sfw_update($savekey);
+						\cleantalk\antispam\model\CleantalkSFW::send_logs($savekey);
 					}
 					
 					if(!$user_token_is_valid){
