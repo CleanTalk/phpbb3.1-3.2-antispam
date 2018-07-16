@@ -54,7 +54,6 @@ class main_model
 	/**
 	* Constructor
 	*
-	* @param template		$template	Template object
 	* @param config			$config		Config object
 	* @param user			$user		User object
 	* @param request		$request	Request object
