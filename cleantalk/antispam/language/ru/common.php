@@ -72,8 +72,6 @@ $lang = array_merge($lang, array(
 	'SFW_DIE_MAKE_SURE_JS_ENABLED'              => 'Что бы продолжить работу с сайтом, убедитесь что у вас включен JavaScript.',
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Нажмите ниже что снять блокировку',
 	'SFW_DIE_YOU_WILL_BE_REDIRECTED'            => 'Вы будете автоматически переадресовны на запрошенную вами страницу через 3 секунды.',
-	'SFW_DIE_NO_FILE'                           => 'Ваш IP похож на спамерский.',
-	'SFW_DIE_PAGE_GENERATED'					=> 'Страница была сгенерирована',
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'Ошибка работы с сервисом CleanTalk',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>Ошибка работы с сервисом CleanTalk</strong><br />%s',

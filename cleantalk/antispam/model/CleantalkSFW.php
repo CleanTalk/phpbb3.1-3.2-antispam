@@ -203,7 +203,7 @@ class CleantalkSFW
 				$this->check_ip();
 				if($this->result){
 					$this->sfw_update_logs($this->blocked_ip, 'blocked');
-					$this->sfw_die($this->config['cleantalk_antispam_apikey'], $cookie_prefix, $cookie_domain);
+					$this->sfw_die($cookie_prefix, $cookie_domain);
 				}else{
 					$this->user->set_cookie('ct_sfw_pass_key', md5($this->passed_ip.$this->config['cleantalk_antispam_apikey']), 0);
 				}
@@ -329,43 +329,33 @@ class CleantalkSFW
 	* 
 	* Stops script executing
 	*/	
-	public function sfw_die($api_key, $cookie_prefix = '', $cookie_domain = ''){
+	public function sfw_die($cookie_prefix = '', $cookie_domain = ''){
 
 		$this->user->add_lang_ext('cleantalk/antispam', 'common');
-		
-		// File exists?
-		if(file_exists(dirname(__FILE__)."/sfw_die_page.html")){
-			$sfw_die_page = file_get_contents(dirname(__FILE__)."/sfw_die_page.html");
-		}else{
-			trigger_error($this->user->lang('SFW_DIE_NO_FILE'), E_USER_ERROR);
-		}
-		
-		// Translation
-		$sfw_die_page = str_replace('{SFW_DIE_NOTICE_IP}',              $this->user->lang('SFW_DIE_NOTICE_IP'),              $sfw_die_page);
-		$sfw_die_page = str_replace('{SFW_DIE_MAKE_SURE_JS_ENABLED}',   $this->user->lang('SFW_DIE_MAKE_SURE_JS_ENABLED'),   $sfw_die_page);
-		$sfw_die_page = str_replace('{SFW_DIE_CLICK_TO_PASS}',          $this->user->lang('SFW_DIE_CLICK_TO_PASS'),          $sfw_die_page);
-		$sfw_die_page = str_replace('{SFW_DIE_YOU_WILL_BE_REDIRECTED}', $this->user->lang('SFW_DIE_YOU_WILL_BE_REDIRECTED'), $sfw_die_page);
-		
-		// Service info
-		$sfw_die_page = str_replace('{REMOTE_ADDRESS}', $this->blocked_ip, $sfw_die_page);
-		$sfw_die_page = str_replace('{REQUEST_URI}', $this->request->server('REQUEST_URI'), $sfw_die_page);
-		$sfw_die_page = str_replace('{COOKIE_PREFIX}', $cookie_prefix, $sfw_die_page);
-		$sfw_die_page = str_replace('{COOKIE_DOMAIN}', $cookie_domain, $sfw_die_page);
-		$sfw_die_page = str_replace('{SFW_COOKIE}', md5($this->blocked_ip.$api_key), $sfw_die_page);
-		
-		// Headers
-		if(headers_sent() === false){
-			header("Cache-Control: no-store, no-cache, must-revalidate");
-			header("Pragma: no-cache");
-			header("Last-Modified: " . gmdate("D, d M Y H:i:s") . "GMT");
-			header("Expires: 0");
-			header("HTTP/1.0 403 Forbidden");
-			$sfw_die_page = str_replace('{GENERATED}', "", $sfw_die_page);
-		}else{
-			$sfw_die_page = str_replace('{GENERATED}', "<h2 class='second'>{SFW_DIE_PAGE_GENERATED} ".date("D, d M Y H:i:s")."</h2>",$sfw_die_page);
-		}
+		$this->user->session_begin();
+		$this->user->setup();
 
-		trigger_error($sfw_die_page, E_USER_ERROR);
+		page_header();
+
+		$this->template->set_filenames ( array (
+			'body' => 'sfw_die_page.html' )
+		);
+		$this->template->assign_vars(array(
+			'SFW_DIE_NOTICE_IP'					=> $this->user->lang('SFW_DIE_NOTICE_IP'),
+			'SFW_DIE_MAKE_SURE_JS_ENABLED'		=> $this->user->lang('SFW_DIE_MAKE_SURE_JS_ENABLED'),
+			'SFW_DIE_CLICK_TO_PASS'				=> $this->user->lang('SFW_DIE_CLICK_TO_PASS'),
+			'SFW_DIE_YOU_WILL_BE_REDIRECTED'	=> $this->user->lang('SFW_DIE_YOU_WILL_BE_REDIRECTED'),
+			'REMOTE_ADDRESS'					=> $this->blocked_ip,
+			'REQUEST_URI'						=> $this->request->server('REQUEST_URI'),
+			'COOKIE_PREFIX'						=> $cookie_prefix,
+			'COOKIE_DOMAIN'						=> $cookie_domain,
+			'SFW_COOKIE'						=> md5($this->blocked_ip.$this->config['cleantalk_antispam_apikey']),
+			'CLEANTALK_ANTISPAM_REG_EMAIL'		=> $this->config['board_email'],
+			'CLEANTALK_ANTISPAM_REG_URL'		=> $this->request->server('SERVER_NAME'),			
+		));
+
+		page_footer();
+
 	}
 			
 }

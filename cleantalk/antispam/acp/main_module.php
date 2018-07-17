@@ -106,8 +106,9 @@ class main_module
 						}
 
 						$result = $db->sql_query("SELECT * FROM ".$table_prefix."cleantalk_sfw_logs");
-
 						$sfw_logs_data = $db->sql_fetchrowset($result);
+						$db->sql_freeresult($result);
+						
 						if(count($sfw_logs_data)){
 							
 							//Compile logs
@@ -115,8 +116,7 @@ class main_module
 							foreach($sfw_logs_data as $key => $value){
 								$data[] = array(trim($value['ip']), $value['all_entries'], $value['all_entries']-$value['blocked_entries'], $value['entries_timestamp']);
 							}
-							unset($key, $value);
-							
+							unset($key, $value);							
 							//Sending the request
 							$result =\cleantalk\antispam\model\CleantalkHelper::sfwLogs($savekey, $data);
 							
@@ -126,8 +126,7 @@ class main_module
 									$db->sql_query("DELETE FROM ".$table_prefix."cleantalk_sfw_logs");
 									$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
 								}
-							}
-								
+							}								
 						}						
 
 					}

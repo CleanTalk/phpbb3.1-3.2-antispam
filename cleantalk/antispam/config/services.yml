@@ -9,6 +9,7 @@ services:
             - @dbal.conn
             - @cleantalk.antispam.cleantalk_sfw
             - @cleantalk.antispam.main_model
+            - @symfony_request
             - '%core.php_ext%'                                            
         tags:
             - { name: event.listener }

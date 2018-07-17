@@ -346,7 +346,7 @@ class main_model
 		);
 				
 	   	foreach($skip_params as $value){
-	   		if(array_key_exists($value,$this->request->get_super_global()))
+	   		if($this->request->is_set_post($value))
 	   		{
 	   			$contact = false;
 	   		}

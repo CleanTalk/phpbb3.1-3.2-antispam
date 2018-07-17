@@ -74,8 +74,6 @@ $lang = array_merge($lang, array(
 	'SFW_DIE_MAKE_SURE_JS_ENABLED'              => 'To continue working with web site, please make sure that you have enabled JavaScript.',
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Please click bellow to pass protection,',
 	'SFW_DIE_YOU_WILL_BE_REDIRECTED'            => 'Or you will be automatically redirected to the requested page after 3 seconds.',
-	'SFW_DIE_NO_FILE'                           => 'You IP looks like spammer`s IP',
-	'SFW_DIE_PAGE_GENERATED'					=> 'La página se ha generado',	
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'Error al conectar con el servicio CleanTalk',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>Error al conectar con el servicio CleanTalk</strong><br />%s',

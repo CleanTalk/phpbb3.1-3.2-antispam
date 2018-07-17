@@ -18,6 +18,7 @@ use phpbb\user;
 use phpbb\db\driver\driver_interface;
 use cleantalk\antispam\model\CleantalkSFW;
 use cleantalk\antispam\model\main_model;
+use phpbb\symfony_request;
 
 /**
 * Event listener
@@ -57,6 +58,9 @@ class main_listener implements EventSubscriberInterface
 	/* @var \cleantalk\antispam\model\main_model */
 	protected $main_model;
 
+	/** @var \phpbb\symfony_request */
+	protected $symfony_request;
+
 	/** @var string php file extension  */
 	protected $php_ext;	
 
@@ -72,7 +76,7 @@ class main_listener implements EventSubscriberInterface
 	* @param request		$request	Request object
 	* @param driver_interface 	$db 		The database object
 	*/
-	public function __construct(template $template, config $config, user $user, request $request, driver_interface $db, CleantalkSFW $cleantalk_sfw, main_model $main_model, $php_ext)
+	public function __construct(template $template, config $config, user $user, request $request, driver_interface $db, CleantalkSFW $cleantalk_sfw, main_model $main_model, symfony_request $symfony_request, $php_ext)
 	{
 		$this->template = $template;
 		$this->config = $config;
@@ -81,6 +85,7 @@ class main_listener implements EventSubscriberInterface
 		$this->db = $db;
 		$this->cleantalk_sfw = $cleantalk_sfw;
 		$this->main_model = $main_model;
+		$this->symfony_request = $symfony_request;
 		$this->php_ext = $php_ext;
 	}
 	/**
@@ -291,9 +296,9 @@ class main_listener implements EventSubscriberInterface
 	public function global_check()
 	{
 		$this->cleantalk_sfw->sfw_check();
-		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->request->server('PHP_SELF',''), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
+
+		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->symfony_request->getScriptName(), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
 		{
-			
 			//Checking contact form
 			$this->ct_comment_result = null;
 			$spam_check = array();	
