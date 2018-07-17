@@ -14,6 +14,8 @@ use phpbb\request\request;
 use phpbb\user;
 use phpbb\log\log;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use cleantalk\antispam\model\Cleantalk;
+use cleantalk\antispam\model\CleantalkRequest;
 class main_model
 {
 	const JS_FIELD_NAME = 'ct_checkjs';
@@ -58,7 +60,7 @@ class main_model
 	* @param request		$request	Request object
 	* @param driver_interface 	$db 		The database object
 	*/
-	public function __construct(config $config, user $user, request $request, log $phpbb_log, \cleantalk\antispam\model\Cleantalk $cleantalk, \cleantalk\antispam\model\CleantalkRequest $cleantalk_request, ContainerBuilder $phpbb_container, $phpbb_root_path, $php_ext )
+	public function __construct(config $config, user $user, request $request, log $phpbb_log, Cleantalk $cleantalk, CleantalkRequest $cleantalk_request, ContainerBuilder $phpbb_container, $phpbb_root_path, $php_ext )
 	{	
 		$this->config = $config;
 		$this->user = $user;
