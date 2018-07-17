@@ -5,7 +5,7 @@
     "homepage": "https://cleantalk.org",
     "version": "5.6.8",
     "time": "2017-06-07",
-    "license": "GPL-2.0",
+    "license": "GPL-2.0-only",
     "authors": [
         {
             "name": "Alexey Znaev",
