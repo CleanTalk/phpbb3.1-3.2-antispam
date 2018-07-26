@@ -315,12 +315,6 @@ class Cleantalk
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
             // see http://stackoverflow.com/a/23322368
             curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-            
-            // Disabling CA cert verivication
-            // Disabling common name verification
-            // Disabling CA cert verivication and common name verification
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
             $result = curl_exec($ch);
             if (!$result) {
@@ -546,7 +540,7 @@ class Cleantalk
     }
 
     /**
-     * Function to get the message hash from Cleantalk.ru comment
+     * Function to get the message hash from Cleantalk.org comment
      * @param $message
      * @return null
      */
@@ -561,7 +555,7 @@ class Cleantalk
     }
 
     /**
-     * Function adds to the post comment Cleantalk.ru
+     * Function adds to the post comment Cleantalk.org
      * @param $message
      * @param $comment
      * @return string
@@ -572,7 +566,7 @@ class Cleantalk
     }
 
     /**
-     * Function deletes the comment Cleantalk.ru
+     * Function deletes the comment Cleantalk.org
      * @param $message
      * @return mixed
      */

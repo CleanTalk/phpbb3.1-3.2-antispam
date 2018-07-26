@@ -166,7 +166,7 @@ class CleantalkResponse
 			$this->received = (isset($obj->received)) ? $obj->received : -1;
 
             if ($this->errno !== 0 && $this->errstr !== null && $this->comment === null)
-                $this->comment = '*** ' . $this->errstr . ' Antispam service cleantalk.org ***'; 
+                $this->comment = $this->errstr; 
         }
     }
 }

@@ -41,7 +41,7 @@ services:
             - @log
             - @cleantalk.antispam.cleantalk
             - @cleantalk.antispam.cleantalk_request
-            - @service_container
+            - @config_text
             - '%core.root_path%'            
             - '%core.php_ext%'                                
 

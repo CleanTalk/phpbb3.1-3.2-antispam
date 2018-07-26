@@ -53,7 +53,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON'		=> 'Click here to get anti-spam statistics',
 
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'			=> 'Check users for spam',
-	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> "Anti-spam by CleanTalk will check all users against blacklists database and show you senders that have spam activity on other websites. Just click 'Check users for spam' to start.",
+	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> 'Anti-spam by CleanTalk will check all users against blacklists database and show you senders that have spam activity on other websites. Just click `Check users for spam` to start.',
 	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'Pages:',	
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'Check users for spam',
 	'ACP_CHECKUSERS_DONE_1'                     => 'Done. All users tested via blacklists database, please see result below.',
@@ -77,7 +77,7 @@ $lang = array_merge($lang, array(
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'Error while connecting to CleanTalk service',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>Error while connecting to CleanTalk service</strong><br />%s',
-	'CLEANTALK_ERROR_CURL'		                => 'CURL error: "%s"',
+	'CLEANTALK_ERROR_CURL'		                => 'CURL error: `%s`',
 	'CLEANTALK_ERROR_NO_CURL'		            => 'No CURL support compiled in',
 	'CLEANTALK_ERROR_ADDON'		                => ' or disabled allow_url_fopen in php.ini.',
 	'CLEANTALK_NOTIFICATION'					=> 'Are you sure?',

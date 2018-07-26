@@ -53,7 +53,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON'		=> 'Click here to get anti-spam statistics',
 	
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'			=> 'Comprobar usuarios de Spam',
-	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> "Anti-Spam por CleanTalk comprobará todos los usuarios de la base de datos contra las listas negras y le mostrará los remitentes de correo no deseado que tienen actividad en otros sitios web. Simplemente haga clic 'Comprobar usuarios de Spam' para comenzar.",
+	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> 'Anti-Spam por CleanTalk comprobará todos los usuarios de la base de datos contra las listas negras y le mostrará los remitentes de correo no deseado que tienen actividad en otros sitios web. Simplemente haga clic `Comprobar usuarios de Spam` para comenzar.',
 	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'Página:',	
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'Comprobar usuarios de Spam',
 	'ACP_CHECKUSERS_DONE_1' 					=> 'Hecho. Todos los usuarios de la base de datos han sido probados a través de listas negras, por favor vea el resultado a continuación.',
@@ -77,7 +77,7 @@ $lang = array_merge($lang, array(
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'Error al conectar con el servicio CleanTalk',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>Error al conectar con el servicio CleanTalk</strong><br />%s',
-	'CLEANTALK_ERROR_CURL'		                => 'CURL error: "%s"',
+	'CLEANTALK_ERROR_CURL'		                => 'CURL error: `%s`',
 	'CLEANTALK_ERROR_NO_CURL'		            => 'No CURL support compiled in',
 	'CLEANTALK_ERROR_ADDON'		                => ' or disabled allow_url_fopen in php.ini.',
 	'CLEANTALK_NOTIFICATION'					=> '¿Está usted seguro?',

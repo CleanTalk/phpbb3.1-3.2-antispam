@@ -114,7 +114,7 @@ class main_listener implements EventSubscriberInterface
 		if (empty($this->config['cleantalk_antispam_apikey'])){
 			return;
 		}
-		$this->template->assign_var('CT_JS_ADDON', $this->main_model->cleantalk_get_checkjs_code());
+		$this->template->assign_var('CT_JS_ADDON', addslashes($this->main_model->cleantalk_get_checkjs_code()));
 		$this->main_model->set_cookie();	
 
 	}
@@ -209,7 +209,7 @@ class main_listener implements EventSubscriberInterface
 				{
 					$spam_check['message_title'] = $data['post_data']['post_subject'];
 				}
-				$spam_check['message_body'] = utf8_normalize_nfc($this->request->variable('message', '', true));
+				$spam_check['message_body'] = $this->request->variable('message', '', true);
 				$result = $this->main_model->check_spam($spam_check);
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{ 

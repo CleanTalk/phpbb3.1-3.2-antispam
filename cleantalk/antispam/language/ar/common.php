@@ -53,7 +53,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON'		=> 'انقر هنا للحصول على احصائيات المُكافح',
 
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'			=> 'فحص الأعضاء المُزعجين',
-	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> "المكافح CleanTalk سوف يفحص جميع الأعضاء في قاعدة بيانات القوائم السوداء لديه , وسيعرض لك أسماء الأعضاء الذين لديهم نشاط مُزعج في المواقع الأخرى. فقط انقر على الزر 'فحص الأعضاء المُزعجين' لبدء عملية الفحص.",
+	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> 'المكافح CleanTalk سوف يفحص جميع الأعضاء في قاعدة بيانات القوائم السوداء لديه , وسيعرض لك أسماء الأعضاء الذين لديهم نشاط مُزعج في المواقع الأخرى. فقط انقر على الزر `فحص الأعضاء المُزعجين` لبدء عملية الفحص.',
 	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'صفحات',	
 	'ACP_CLEANTALK_CHECKUSERS_BUTTON'			=> 'فحص الأعضاء المُزعجين',
 	'ACP_CHECKUSERS_DONE_1'                     => 'تم فحص جميع الأعضاء بواسطة قاعدة بيانات القوائم السوداء. الرجاء الإطلاع على النتيجة أدناه :',
@@ -77,7 +77,7 @@ $lang = array_merge($lang, array(
 		
 	'CLEANTALK_ERROR_MAIL'		                => 'هناك خطأ أثناء عملية الإتصال بخدمة الـ CleanTalk',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>خطأ أثناء عملية الإتصال بخدمة الـ CleanTalk</strong><br />%s',
-	'CLEANTALK_ERROR_CURL'		                => 'CURL error: "%s"',
+	'CLEANTALK_ERROR_CURL'		                => 'CURL error: `%s`',
 	'CLEANTALK_ERROR_NO_CURL'		            => 'No CURL support compiled in',
 	'CLEANTALK_ERROR_ADDON'		                => ' or disabled allow_url_fopen in php.ini.',
 	'CLEANTALK_NOTIFICATION'					=> 'هل أنت متأكد ؟',

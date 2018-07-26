@@ -85,7 +85,7 @@ class main_module
 						
 						if(empty($result['error'])){
 							
-							$db->sql_query("DELETE FROM ".$table_prefix."cleantalk_sfw;");
+							$db->sql_query("DELETE FROM ".$table_prefix."cleantalk_sfw");
 										
 							// Cast result to int
 							foreach($result as $value){
@@ -214,11 +214,11 @@ class main_module
 			}
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
 				SET ct_marked=0';
-			$result = $db->sql_query($sql);
+			$db->sql_query($sql);
 			$sql = "SELECT user_id, username, user_regdate, user_lastvisit, user_ip, user_email
 				FROM " . USERS_TABLE . " 
 				WHERE user_password<>''
-				ORDER BY user_regdate DESC;";
+				ORDER BY user_regdate DESC";
 			$result = $db->sql_query($sql);
 			
 			$users  = array(0 => array());

@@ -156,7 +156,7 @@ class CleantalkSFW
 			$query = "SELECT 
 				COUNT(network) AS cnt
 				FROM ".$this->table_prefix."cleantalk_sfw
-				WHERE network = ".intval($this->ip_array[$i])." & mask;";
+				WHERE network = ".intval($this->ip_array[$i])." & mask";
 			$this->universal_query($query);
 			$this->universal_fetch();
 						
@@ -225,7 +225,7 @@ class CleantalkSFW
 		
 		$query = "SELECT COUNT(*) as cnt
 			FROM ".$this->table_prefix."cleantalk_sfw_logs
-			WHERE ip = '$ip';";
+			WHERE ip = '$ip'";
 		$this->universal_query($query);
 		$this->universal_fetch();
 
@@ -236,7 +236,7 @@ class CleantalkSFW
 					all_entries = all_entries + 1,
 					blocked_entries = blocked_entries".strval($blocked).",
 					entries_timestamp = $time
-				WHERE ip = '$ip';";
+				WHERE ip = '$ip'";
 			$this->universal_query($query);
 		}else{	
 			$query = "INSERT INTO ".$this->table_prefix."cleantalk_sfw_logs
@@ -244,7 +244,7 @@ class CleantalkSFW
 				ip = '$ip',
 				all_entries = 1,
 				blocked_entries = 1,
-				entries_timestamp = ".$time.";";
+				entries_timestamp = ".$time."";
 
 			$this->universal_query($query);
 		}
@@ -331,10 +331,10 @@ class CleantalkSFW
 	*/	
 	public function sfw_die($cookie_prefix = '', $cookie_domain = ''){
 
-		$this->user->add_lang_ext('cleantalk/antispam', 'common');
 		$this->user->session_begin();
 		$this->user->setup();
-
+		$this->user->add_lang_ext('cleantalk/antispam', 'common');
+		
 		page_header();
 
 		$this->template->set_filenames ( array (

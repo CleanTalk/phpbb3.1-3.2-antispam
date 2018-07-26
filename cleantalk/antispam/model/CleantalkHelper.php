@@ -198,7 +198,7 @@ class CleantalkHelper
 	* 
 	* returns mixed STRING || array('error' => true, 'error_string' => STRING)
 	*/
-	public function sfwLogs($api_key, $data, $do_check = true){
+	static public function sfwLogs($api_key, $data, $do_check = true){
 		$url='https://api.cleantalk.org';
 		$request = array(
 			'auth_key' => $api_key,
@@ -298,9 +298,7 @@ class CleantalkHelper
 			// resolve 'Expect: 100-continue' issue
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
             // see http://stackoverflow.com/a/23322368
-            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);            			
+            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);          			
 			$result = curl_exec($ch);
 			
 			if($result !== false){

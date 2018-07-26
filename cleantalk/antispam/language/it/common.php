@@ -76,7 +76,7 @@ $lang = array_merge($lang, array(
 	
 	'CLEANTALK_ERROR_MAIL'		                => 'L’errore di lavorare con il servizio CleanTalk',
 	'CLEANTALK_ERROR_LOG'		                => '<strong>L’errore di lavorare con il servizio CleanTalk</strong><br />%s',
-	'CLEANTALK_ERROR_CURL'		                => 'CURL errore: "%s"',
+	'CLEANTALK_ERROR_CURL'		                => 'CURL errore: `%s`',
 	'CLEANTALK_ERROR_NO_CURL'		            => 'Non c’è il supporto CURL',
 	'CLEANTALK_ERROR_ADDON'		                => ' o l’impostazione allow_url_fopen in php.ini.',
 	'CLEANTALK_NOTIFICATION'					=> 'Sei sicuro?',

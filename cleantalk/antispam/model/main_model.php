@@ -10,19 +10,17 @@
 
 namespace cleantalk\antispam\model;
 use phpbb\config\config;
+use phpbb\config\db_text;
 use phpbb\request\request;
 use phpbb\user;
 use phpbb\log\log;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use cleantalk\antispam\model\Cleantalk;
 use cleantalk\antispam\model\CleantalkRequest;
 class main_model
 {
 	const JS_FIELD_NAME = 'ct_checkjs';
 	const JS_TIME_ZONE_FIELD_NAME = 'ct_timezone';
-	const JS_POINTER_DATA_FIELD_NAME = 'ct_pointer_data';
 	const JS_PREVIOUS_REFERER = 'ct_prev_referer';
-	const JS_FKP_TIMESTAMP = 'ct_fkp_timestamp';
 	const JS_PS_TIMESTAMP = 'ct_ps_timestamp';
 
 	/* @var \phpbb\config\config */
@@ -49,8 +47,8 @@ class main_model
 	/* @var $phpbb_log \phpbb\log\log_interface */
 	protected $phpbb_log;
 
-	/** @var ContainerBuilder */
-	protected $phpbb_container;
+	/** @var \phpbb\config\db_text */
+	protected $config_text;
 
 	/**
 	* Constructor
@@ -60,13 +58,13 @@ class main_model
 	* @param request		$request	Request object
 	* @param driver_interface 	$db 		The database object
 	*/
-	public function __construct(config $config, user $user, request $request, log $phpbb_log, Cleantalk $cleantalk, CleantalkRequest $cleantalk_request, ContainerBuilder $phpbb_container, $phpbb_root_path, $php_ext )
+	public function __construct(config $config, user $user, request $request, log $phpbb_log, Cleantalk $cleantalk, CleantalkRequest $cleantalk_request, db_text $config_text, $phpbb_root_path, $php_ext )
 	{	
 		$this->config = $config;
 		$this->user = $user;
 		$this->request = $request;
 		$this->phpbb_log = $phpbb_log;
-		$this->phpbb_container = $phpbb_container;
+		$this->config_text = $config_text;
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;		
 		$this->cleantalk = $cleantalk;
@@ -88,16 +86,13 @@ class main_model
 		$this->cleantalk->server_url     = $this->config['cleantalk_antispam_server_url'];
 		$this->cleantalk->server_ttl     = $this->config['cleantalk_antispam_server_ttl'];
 		$this->cleantalk->server_changed = $this->config['cleantalk_antispam_server_changed'];
-		//Pointer data, Timezone from JS, First key press timestamp, Page set timestamp
-		$pointer_data 			= $this->request->variable(self::JS_POINTER_DATA_FIELD_NAME, 	"none", false, \phpbb\request\request_interface::COOKIE);
+		
+		//Timezone from JS, Page set timestamp
 		$page_set_timestamp 	= $this->request->variable(self::JS_PS_TIMESTAMP, 			"none", false, \phpbb\request\request_interface::COOKIE);
 		$js_timezone 			= $this->request->variable(self::JS_TIME_ZONE_FIELD_NAME, 	"none", false, \phpbb\request\request_interface::COOKIE);
-		$first_key_timestamp 	= $this->request->variable(self::JS_FKP_TIMESTAMP, 			"none", false, \phpbb\request\request_interface::COOKIE);
 		$previous_referer       = $this->request->variable($this->config['cookie_name'].'_'.self::JS_PREVIOUS_REFERER, "none", false, \phpbb\request\request_interface::COOKIE);
 		
-		$pointer_data 			= ($pointer_data 		=== "none" ? 0 : json_decode ($pointer_data));
 		$js_timezone 			= ($js_timezone 		=== "none" ? 0 : $js_timezone);
-		$first_key_timestamp 	= ($first_key_timestamp === "none" ? 0 : intval($first_key_timestamp));
 		$page_set_timestamp 	= ($page_set_timestamp 	=== "none" ? 0 : intval($page_set_timestamp));
 		$previous_referer       = ($previous_referer    === "none" ? 0 : $previous_referer);
 				
@@ -111,8 +106,6 @@ class main_model
 			'page_url'               => $page_url,
 			'USER_AGENT'             => $user_agent,
 			'js_timezone'            => $js_timezone,
-			'mouse_cursor_positions' => $pointer_data,
-			'key_press_timestamp'    => $first_key_timestamp,
 			'page_set_timestamp'     => $page_set_timestamp,
 			'REFFERRER_PREVIOUS'     => $previous_referer,
 			'fields_number'          => sizeof($spam_check),
@@ -532,11 +525,10 @@ class main_model
 	}
     public function cleantalk_get_checkjs_code()
     {
-		$config_text = $this->phpbb_container->get('config_text');
-		$config_text_data = $config_text->get_array(array(
+		$config_js_keys = $this->config_text->get_array(array(
 			'cleantalk_antispam_js_keys'
 		));
-		$js_keys = isset($config_text_data['cleantalk_antispam_js_keys']) ? json_decode($config_text_data['cleantalk_antispam_js_keys'], true) : null;
+		$js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
     	$api_key = isset($this->config['cleantalk_antispam_apikey']) ? $this->config['cleantalk_antispam_apikey'] : null;
     	if($js_keys == null){
 		
@@ -572,7 +564,7 @@ class main_model
 			}
 		
 			}
-					$config_text->set_array(array(
+					$this->config_text->set_array(array(
 					'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
 				));
 		return $js_key;	
@@ -587,12 +579,11 @@ class main_model
 	{
 		$ct_checkjs_val = $this->request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
 		if(isset($ct_checkjs_val)){
-			
-		$config_text = $this->phpbb_container->get('config_text');
-		$config_text_data = $config_text->get_array(array(
+
+		$config_js_keys = $this->config_text->get_array(array(
 			'cleantalk_antispam_js_keys'
 		));
-		$js_keys = isset($config_text_data['cleantalk_antispam_js_keys']) ? json_decode($config_text_data['cleantalk_antispam_js_keys'], true) : null;
+		$js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
 			if($js_keys){
 				$result = in_array($ct_checkjs_val, $js_keys['keys']);
 			}else{
