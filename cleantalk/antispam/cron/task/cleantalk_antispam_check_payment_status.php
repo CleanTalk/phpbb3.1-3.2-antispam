@@ -7,9 +7,6 @@ class cleantalk_antispam_check_payment_status extends \phpbb\cron\task\base
 
 	protected $config;
 
-	/* @var \cleantalk\antispam\model\CleantalkHelper */
-	protected $cleantalk_helper;
-
 	public function __construct(\phpbb\config\config $config)
 	{
 		$this->config = $config;
