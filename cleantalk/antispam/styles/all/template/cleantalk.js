@@ -1,4 +1,4 @@
-var ct_date = new Date(), 
+var ct_date = new Date();
 
 function ctSetCookie(c_name, value) {
 	document.cookie = c_name + "=" + encodeURIComponent(value) + "; path=/";

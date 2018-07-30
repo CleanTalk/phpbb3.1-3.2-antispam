@@ -28,12 +28,12 @@ class main_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.user_setup'				=> 'load_language_on_setup',
-			'core.page_header_after'        => 'add_js_to_head',
+			'core.user_setup'							=> 'load_language_on_setup',
+			'core.page_header_after'     			    => 'add_js_to_head',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                 => 'check_newuser',
-			'core.common'					=> 'global_check',
+			'core.common'								=> 'global_check',
 		);
 	}
 
@@ -303,34 +303,14 @@ class main_listener implements EventSubscriberInterface
 			$this->ct_comment_result = null;
 			$spam_check = array();	
 
-			//Getting request params
-			$ct_temp_msg_data = $this->main_model->get_fields_any($this->request->get_super_global());
-
-			$sender_email    = ($ct_temp_msg_data['email']    ? $ct_temp_msg_data['email']    : '');
-			$sender_nickname = ($ct_temp_msg_data['nickname'] ? $ct_temp_msg_data['nickname'] : '');
-			$subject         = ($ct_temp_msg_data['subject']  ? $ct_temp_msg_data['subject']  : '');
-			$message         = ($ct_temp_msg_data['message']  ? implode(',',$ct_temp_msg_data['message'])  : '');	
-
-			if ($sender_email)
-			{
-				$spam_check['sender_email'] = $sender_email;
-			}
-			if ($sender_nickname)
-			{
-				$spam_check['sender_nickname'] = $sender_nickname;
-			}
-			if ($subject)
-			{
-				$spam_check['message_title'] = $subject;
-			}
-			if ($message)
-			{
-				$spam_check['message_body'] = $message;
-			}
+			$spam_check['sender_email'] = $this->request->variable('email','');
+			$spam_check['sender_nickname'] = $this->request->variable('name','');
+			$spam_check['message_title'] = $this->request->variable('subject','');
+			$spam_check['message_body'] = $this->request->variable('message','');
 			
-			if (isset($spam_check['sender_email']) || isset($spam_check['message_title']) || isset($spam_check['message_body']) )
+			if ($spam_check['sender_email'] !== '' || $spam_check['message_title'] !== '' || $spam_check['message_body'] !== '' )
 			{
-				$spam_check['type'] = 'comment';
+				$spam_check['type'] = 'contact';
 
 				$result = $this->main_model->check_spam($spam_check);
 

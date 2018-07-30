@@ -138,20 +138,21 @@ class main_model
 		
 		switch ($spam_check['type'])
 		{
-		case 'comment':
-			$this->cleantalk_request->message = (array_key_exists('message_title', $spam_check) ? $spam_check['message_title'] : '' ).
-				" \n\n" .
-				(array_key_exists('message_body', $spam_check) ? $spam_check['message_body'] : '');
-			$ct_result = $this->cleantalk->isAllowMessage($this->cleantalk_request);
-			 break;
-		case 'register':
-			$this->cleantalk_request->tz = array_key_exists('timezone', $spam_check) ? $spam_check['timezone'] : '';
-			$ct_result = $this->cleantalk->isAllowUser($this->cleantalk_request);
-			break;
-		case 'send_feedback':
-			$this->cleantalk_request->feedback = $spam_check['feedback'];
-			$ct_result = $this->cleantalk->sendFeedback($this->cleantalk_request);
-			break;
+			case 'contact':
+			case 'comment':
+				$this->cleantalk_request->message = (array_key_exists('message_title', $spam_check) ? $spam_check['message_title'] : '' ).
+					" \n\n" .
+					(array_key_exists('message_body', $spam_check) ? $spam_check['message_body'] : '');
+				$ct_result = $this->cleantalk->isAllowMessage($this->cleantalk_request);
+				 break;
+			case 'register':
+				$this->cleantalk_request->tz = array_key_exists('timezone', $spam_check) ? $spam_check['timezone'] : '';
+				$ct_result = $this->cleantalk->isAllowUser($this->cleantalk_request);
+				break;
+			case 'send_feedback':
+				$this->cleantalk_request->feedback = $spam_check['feedback'];
+				$ct_result = $this->cleantalk->sendFeedback($this->cleantalk_request);
+				break;
 		}
 		$ret_val = array();
 		$ret_val['errno'] = 0;
@@ -267,215 +268,6 @@ class main_model
 		}
 		return $err_str;
 	}
-	/*
-	* Get data from an ARRAY recursively
-	* @return array
-	*/ 
-	public function get_fields_any($arr, $message=array(), $email = null, $nickname = array('nick' => '', 'first' => '', 'last' => ''), $subject = null, $contact = true, $prev_name = ''){
-		//Skip request if fields exists
-		$skip_params = array(
-		    'ipn_track_id', 	// PayPal IPN #
-		    'txn_type', 		// PayPal transaction type
-		    'payment_status', 	// PayPal payment status
-		    'ccbill_ipn', 		// CCBill IPN 
-			'ct_checkjs', 		// skip ct_checkjs field
-			'api_mode',         // DigiStore-API
-			'loadLastCommentId' // Plugin: WP Discuz. ticket_id=5571
-	    );
-		
-		// Fields to replace with ****
-	    $obfuscate_params = array(
-	        'password',
-	        'pass',
-	        'pwd',
-			'pswd'
-	    );
-		
-		// Skip feilds with these strings and known service fields
-		$skip_fields_with_strings = array( 
-			// Common
-			'ct_checkjs', //Do not send ct_checkjs
-			'nonce', //nonce for strings such as 'rsvp_nonce_name'
-			'security',
-			// 'action',
-			'http_referer',
-			'timestamp',
-			'captcha',
-			// Formidable Form
-			'form_key',
-			'submit_entry',
-			// Custom Contact Forms
-			'form_id',
-			'ccf_form',
-			'form_page',
-			// Qu Forms
-			'iphorm_uid',
-			'form_url',
-			'post_id',
-			'iphorm_ajax',
-			'iphorm_id',
-			// Fast SecureContact Froms
-			'fs_postonce_1',
-			'fscf_submitted',
-			'mailto_id',
-			'si_contact_action',
-			// Ninja Forms
-			'formData_id',
-			'formData_settings',
-			'formData_fields_\d+_id',
-			'formData_fields_\d+_files.*',		
-			// E_signature
-			'recipient_signature',
-			'output_\d+_\w{0,2}',
-			// Contact Form by Web-Settler protection
-	        '_formId',
-	        '_returnLink',
-			// Social login and more
-			'_save',
-			'_facebook',
-			'_social',
-			'user_login-',
-			'submit',
-			'form_token',
-			'creation_time',
-		);
-				
-	   	foreach($skip_params as $value){
-	   		if($this->request->is_set_post($value))
-	   		{
-	   			$contact = false;
-	   		}
-	   	} unset($value);
-			
-		if(count($arr)){
-			foreach($arr as $key => $value){
-				
-				if(gettype($value)=='string'){
-					$decoded_json_value = json_decode($value, true);
-					if($decoded_json_value !== null)
-					{
-						$value = $decoded_json_value;
-					}
-				}
-				
-				if(!is_array($value) && !is_object($value)){
-					
-					if (in_array($key, $skip_params, true) && $key != 0 && $key != '' || preg_match("/^ct_checkjs/", $key))
-					{
-						$contact = false;
-					}
-					
-					if($value === '')
-					{
-						continue;
-					}
-					
-					// Skipping fields names with strings from (array)skip_fields_with_strings
-					foreach($skip_fields_with_strings as $needle){
-						if (preg_match("/".$needle."/", $prev_name.$key) == 1){
-							continue(2);
-						}
-					}unset($needle);
-					// Obfuscating params
-					foreach($obfuscate_params as $needle){
-						if (strpos($key, $needle) !== false){
-							$value = $this->obfuscate_param($value);
-							continue(2);
-						}
-					}unset($needle);
-					
-
-					// Decodes URL-encoded data to string.
-					$value = urldecode($value);	
-
-					// Email
-					if (!$email && preg_match("/^\S+@\S+\.\S+$/", $value)){
-						$email = $value;
-						
-					// Names
-					}elseif (preg_match("/name/i", $key)){
-						
-						preg_match("/(first.?name)?(name.?first)?(forename)?/", $key, $match_forename);
-						preg_match("/(last.?name)?(family.?name)?(second.?name)?(surname)?/", $key, $match_surname);
-						preg_match("/(nick.?name)?(user.?name)?(nick)?/", $key, $match_nickname);
-						
-						if(count($match_forename) > 1)
-						{
-							$nickname['first'] = $value;
-						}
-						elseif(count($match_surname) > 1)
-						{
-							$nickname['last'] = $value;
-						}
-						elseif(count($match_nickname) > 1)
-						{
-							$nickname['nick'] = $value;
-						}
-						else
-						{
-							$message[$prev_name.$key] = $value;
-						}
-					
-					// Subject
-					}elseif ($subject === null && preg_match("/subject/i", $key)){
-						$subject = $value;
-					
-					// Message
-					}else{
-						$message[$prev_name.$key] = $value;					
-					}
-					
-				}elseif(!is_object($value)){
-					
-					$prev_name_original = $prev_name;
-					$prev_name = ($prev_name === '' ? $key.'_' : $prev_name.$key.'_');
-					
-					$temp = $this->get_fields_any($value, $message, $email, $nickname, $subject, $contact, $prev_name);
-					
-					$message 	= $temp['message'];
-					$email 		= ($temp['email'] 		? $temp['email'] : null);
-					$nickname 	= ($temp['nickname'] 	? $temp['nickname'] : null);				
-					$subject 	= ($temp['subject'] 	? $temp['subject'] : null);
-					if($contact === true)
-					{
-						$contact = ($temp['contact'] === false ? false : true);
-					}
-					$prev_name 	= $prev_name_original;
-				}
-			} unset($key, $value);
-		}
-				
-		//If top iteration, returns compiled name field. Example: "Nickname Firtsname Lastname".
-		if($prev_name === ''){
-			if(!empty($nickname)){
-				$nickname_str = '';
-				foreach($nickname as $value){
-					$nickname_str .= ($value ? $value." " : "");
-				}unset($value);
-			}
-			$nickname = $nickname_str;
-		}
-		
-	    $return_param = array(
-			'email' 	=> $email,
-			'nickname' 	=> $nickname,
-			'subject' 	=> $subject,
-			'contact' 	=> $contact,
-			'message' 	=> $message
-		);	
-		return $return_param;
-	}
-	/**
-	* Masks a value with asterisks (*)
-	* @return string
-	*/
-	public function obfuscate_param($value = null) {
-	    if ($value && (!is_object($value) || !is_array($value))) {
-	        $length = strlen($value);
-	        $value = str_repeat('*', $length);
-	    }
-	    return $value;
-	}
 	/**
 	* Sets cookie
 	*/	
@@ -530,43 +322,48 @@ class main_model
 		));
 		$js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
     	$api_key = isset($this->config['cleantalk_antispam_apikey']) ? $this->config['cleantalk_antispam_apikey'] : null;
-    	if($js_keys == null){
-		
-		$js_key = strval(md5($api_key . time()));
-		
-		$js_keys = array(
-			'keys' => array(
-				array(
-					time() => $js_key
-				)
-			), // Keys to do JavaScript antispam test 
-			'js_keys_amount' => 24, // JavaScript keys store days - 2 days now
-			'js_key_lifetime' => 86400, // JavaScript key life time in seconds - 1 day now
-		);
-		
-		}else{
+    	if($js_keys == null)
+    	{		
+			$js_key = strval(md5($api_key . time()));
 			
+			$js_keys = array(
+				'keys' => array(
+					array(
+						time() => $js_key
+					)
+				), // Keys to do JavaScript antispam test 
+				'js_keys_amount' => 24, // JavaScript keys store days - 2 days now
+				'js_key_lifetime' => 86400, // JavaScript key life time in seconds - 1 day now
+			);		
+		}
+		else
+		{			
 			$keys_times = array();
 			
-			foreach($js_keys['keys'] as $time => $key){
-				
+			foreach($js_keys['keys'] as $time => $key)
+			{		
 				if($time + $js_keys['js_key_lifetime'] < time())
+				{
 					unset($js_keys['keys'][$time]);
-				
+				}				
 				$keys_times[] = $time;
 			}unset($time, $key);
 			
-			if(max($keys_times) + 3600 < time()){
+			if(max($keys_times) + 3600 < time())
+			{
 				$js_key =  strval(md5($api_key . time()));
 				$js_keys['keys'][time()] = $js_key;
-			}else{
+			}
+			else
+			{
 				$js_key = $js_keys['keys'][max($keys_times)];
 			}
 		
-			}
-					$this->config_text->set_array(array(
-					'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
-				));
+		}
+		$this->config_text->set_array(array(
+			'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
+		));
+
 		return $js_key;	
 
     }  
@@ -578,20 +375,27 @@ class main_model
 	public function cleantalk_is_valid_js()
 	{
 		$ct_checkjs_val = $this->request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
-		if(isset($ct_checkjs_val)){
 
-		$config_js_keys = $this->config_text->get_array(array(
-			'cleantalk_antispam_js_keys'
-		));
-		$js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
-			if($js_keys){
+		if(isset($ct_checkjs_val))
+		{
+			$config_js_keys = $this->config_text->get_array(array('cleantalk_antispam_js_keys'));
+			$js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
+
+			if($js_keys)
+			{
 				$result = in_array($ct_checkjs_val, $js_keys['keys']);
-			}else{
+			}
+			else
+			{
 				$result = false;
 			}
 			
-		}else
+		}
+		else
+		{
 			$result = false;
+		}
+
 	    return  $result;
 	}
 		
