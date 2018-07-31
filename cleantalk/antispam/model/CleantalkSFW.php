@@ -338,7 +338,7 @@ class CleantalkSFW
 		page_header();
 
 		$this->template->set_filenames ( array (
-			'body' => 'sfw_die_page.html' )
+			'body' => '@cleantalk_antispam/sfw_die_page.html' )
 		);
 		$this->template->assign_vars(array(
 			'SFW_DIE_NOTICE_IP'					=> $this->user->lang('SFW_DIE_NOTICE_IP'),
