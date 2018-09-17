@@ -111,7 +111,8 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function add_js_to_footer($event)
 	{		
-		if (empty($this->config['cleantalk_antispam_apikey'])){
+		if (empty($this->config['cleantalk_antispam_apikey']))
+		{
 			return;
 		}
 		$this->template->assign_var('CT_JS_ADDON', $this->main_model->cleantalk_get_checkjs_code());
