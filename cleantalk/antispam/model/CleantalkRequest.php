@@ -170,9 +170,12 @@ class CleantalkRequest
      * Fill params with constructor
      * @param type $params
      */
-    public function __construct($params = null) {
-        if (is_array($params) && count($params) > 0) {
-            foreach ($params as $param => $value) {
+    public function __construct($params = null) 
+    {
+        if (is_array($params) && count($params) > 0) 
+        {
+            foreach ($params as $param => $value) 
+            {
                 $this->{$param} = $value;
             }
         }

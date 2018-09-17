@@ -126,12 +126,12 @@
 			<!-- BEGIN CT_SPAMMERS -->
 				<tr>
 				<td style="vertical-align: top;">{CT_SPAMMERS.USERNAME}</td>
-				<td style="vertical-align: top;"><a target='_blank' href='https://cleantalk.org/blacklists/{CT_SPAMMERS.USER_EMAIL}'>{CT_SPAMMERS.USER_EMAIL}</a></td>
-				<td style="vertical-align: top;"><a target='_blank' href='https://cleantalk.org/blacklists/{CT_SPAMMERS.USER_IP}'>{CT_SPAMMERS.USER_IP}</a></td>
+				<td style="vertical-align: top;"><a target="_blank" href="https://cleantalk.org/blacklists/{CT_SPAMMERS.USER_EMAIL}">{CT_SPAMMERS.USER_EMAIL}</a></td>
+				<td style="vertical-align: top;"><a target="_blank" href="https://cleantalk.org/blacklists/{CT_SPAMMERS.USER_IP}">{CT_SPAMMERS.USER_IP}</a></td>
 				<td style="vertical-align: top;">{CT_SPAMMERS.JOINED}</td>
 				<td style="vertical-align: top;">{CT_SPAMMERS.LAST_VISIT}</td>
-				<td style="vertical-align: top;"><a target='_blank' href='{CT_SPAMMERS.USER_POSTS_LINK}'>{CT_SPAMMERS.USER_POSTS}</a></td>
-				<td style="vertical-align: top;"><input type='checkbox' name=ct_del_user[{CT_SPAMMERS.USER_ID}] value='1' /></td>
+				<td style="vertical-align: top;"><a target="_blank" href="{CT_SPAMMERS.USER_POSTS_LINK}">{CT_SPAMMERS.USER_POSTS}</a></td>
+				<td style="vertical-align: top;"><input type="checkbox" name="ct_del_user[{CT_SPAMMERS.USER_ID}]" value="1" /></td>
 				</tr>
 			<!-- END CT_SPAMMERS -->
 			</tbody>
@@ -141,9 +141,9 @@
 		<p>
 			<ul>
 				<!-- IF CT_PAGES_TITLE -->
-				<li style='display: inline-block; padding: 3px 5px;'>{L_ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE}</li>
+				<li style="display: inline-block; padding: 3px 5px;">{L_ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE}</li>
 				<!-- BEGIN CT_PAGES_CHECKUSERS -->
-				<li style='display: inline-block; padding: 3px 5px;border-radius: 3px;{CT_PAGES_CHECKUSERS.PAGE_STYLE}'><a href ='{CT_PAGES_CHECKUSERS.PAGE_LINK}'>{CT_PAGES_CHECKUSERS.PAGE_NUMBER}</a></li>
+				<li style="display: inline-block; padding: 3px 5px;border-radius: 3px;{CT_PAGES_CHECKUSERS.PAGE_STYLE}"><a href ="{CT_PAGES_CHECKUSERS.PAGE_LINK}">{CT_PAGES_CHECKUSERS.PAGE_NUMBER}</a></li>
 				<!-- END CT_PAGES_CHECKUSERS -->
 				<!-- ENDIF -->
 			</ul>
@@ -151,8 +151,8 @@
 				
 		</div>
 		<p class="submit-buttons">
-		<input type=submit class="button2" name='ct_delete_checked' value='{L_ACP_CHECKUSERS_DELETESEL}' onclick="return confirm('{LA_CLEANTALK_NOTIFICATION}')">
-		<input type=submit class="button2" name='ct_delete_all' value='{L_ACP_CHECKUSERS_DELETEALL}' onclick="return confirm('{LA_CLEANTALK_NOTIFICATION}')">
+		<input type=submit class="button2" name="ct_delete_checked" value="{L_ACP_CHECKUSERS_DELETESEL}" onclick="return confirm('{LA_CLEANTALK_NOTIFICATION}')">
+		<input type=submit class="button2" name="ct_delete_all" value="{L_ACP_CHECKUSERS_DELETEALL}" onclick="return confirm('{LA_CLEANTALK_NOTIFICATION}')">
 		</p>
 		<br />{L_ACP_CHECKUSERS_DELETEALL_DESCR}
 		{S_FORM_TOKEN}

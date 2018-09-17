@@ -107,8 +107,8 @@ class CleantalkSFW
 	* 
 	*	reutrns array
 	*/
-	public function get_ip(){
-		
+	public function get_ip()
+	{	
 		$cdn = $this->cdn_cf;
 		$result = Array();
 		
@@ -119,15 +119,19 @@ class CleantalkSFW
 		
 		// Getting test IP
 		$sfw_test_ip = $this->request->variable('sfw_test_ip', '');
-		if($sfw_test_ip){
+		if($sfw_test_ip)
+		{
 			$result['sfw_test_ip'] = filter_var( $sfw_test_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 			$this->ip_str_array[]=$result['sfw_test_ip'];
 			$this->ip_array[]=sprintf("%u", ip2long($result['sfw_test_ip']));
 		}
 		
-		if($this->request->server('HTTP_CF_CONNECTING_IP')){
-			foreach($cdn as $cidr){
-				if($this->ip_mask_match($result['remote_addr'], $cidr)){
+		if($this->request->server('HTTP_CF_CONNECTING_IP'))
+		{
+			foreach($cdn as $cidr)
+			{
+				if($this->ip_mask_match($result['remote_addr'], $cidr))
+				{
 					$result['cf_connecting_ip'] = filter_var( $this->request->server('Cf_Connecting_Ip'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 					$this->ip_array[] = sprintf("%u", ip2long($result['cf_connecting_ip']));
 					unset($result['remote_addr']);
@@ -139,7 +143,8 @@ class CleantalkSFW
 		return array_unique($result);
 	}
 	
-	public function ip_mask_match($ip, $cidr){
+	public function ip_mask_match($ip, $cidr)
+	{
 		$exploded = explode ('/', $cidr);
 		$net = $exploded[0];
 		$mask = 4294967295 << (32 - $exploded[1]);
@@ -149,10 +154,10 @@ class CleantalkSFW
 	/*
 	*	Checks IP via Database
 	*/
-	public function check_ip(){		
-		
-		for($i=0, $arr_count = sizeof($this->ip_array); $i < $arr_count; $i++){
-			
+	public function check_ip()
+	{			
+		for($i=0, $arr_count = sizeof($this->ip_array); $i < $arr_count; $i++)
+		{	
 			$query = "SELECT 
 				COUNT(network) AS cnt
 				FROM ".$this->table_prefix."cleantalk_sfw
@@ -160,10 +165,13 @@ class CleantalkSFW
 			$this->universal_query($query);
 			$this->universal_fetch();
 						
-			if($this->db_result_data['cnt']){
+			if($this->db_result_data['cnt'])
+			{
 				$this->result = true;
 				$this->blocked_ip=$this->ip_str_array[$i];
-			}else{
+			}
+			else
+			{
 				$this->passed_ip = $this->ip_str_array[$i];
 			}
 		}
@@ -172,10 +180,10 @@ class CleantalkSFW
 	* Check new visitors for SFW database
 	* @return void
 	*/
-	public function sfw_check(){
-		
-		if($this->config['cleantalk_antispam_sfw_enabled'] && $this->config['cleantalk_antispam_key_is_ok']){
-			
+	public function sfw_check()
+	{	
+		if($this->config['cleantalk_antispam_sfw_enabled'] && $this->config['cleantalk_antispam_key_is_ok'])
+		{			
 			$is_sfw_check = true;
 
 			$ip = $this->get_ip();
@@ -185,26 +193,30 @@ class CleantalkSFW
 			
 			$ct_sfw_pass_key 	= $this->request->variable($cookie_prefix.'ct_sfw_pass_key', '', false, \phpbb\request\request_interface::COOKIE);
 			$ct_sfw_passed 		= $this->request->variable($cookie_prefix.'ct_sfw_passed',   '', false, \phpbb\request\request_interface::COOKIE);
-			$is_sfw_check = true;
 			
-			foreach($ip as $ct_cur_ip){
-								
-				if($ct_sfw_pass_key == md5($ct_cur_ip.$this->config['cleantalk_antispam_apikey'])){
-					
+			foreach($ip as $ct_cur_ip)
+			{								
+				if($ct_sfw_pass_key == md5($ct_cur_ip.$this->config['cleantalk_antispam_apikey']))
+				{	
 					$is_sfw_check = false;
-					if($ct_sfw_passed){
+					if($ct_sfw_passed)
+					{
 						$this->sfw_update_logs($ct_cur_ip, 'passed');
 						$this->user->set_cookie('ct_sfw_passed', '0', 10);
 					}
 				}
 				
 			} unset($ct_cur_ip);
-			if($is_sfw_check){
+			if($is_sfw_check)
+			{
 				$this->check_ip();
-				if($this->result){
+				if($this->result)
+				{
 					$this->sfw_update_logs($this->blocked_ip, 'blocked');
 					$this->sfw_die($cookie_prefix, $cookie_domain);
-				}else{
+				}
+				else
+				{
 					$this->user->set_cookie('ct_sfw_pass_key', md5($this->passed_ip.$this->config['cleantalk_antispam_apikey']), 0);
 				}
 			}			
@@ -213,9 +225,10 @@ class CleantalkSFW
 	/*
 	*	Add entry to SFW log
 	*/
-	public function sfw_update_logs($ip, $result){
-		
-		if($ip === NULL || $result === NULL){
+	public function sfw_update_logs($ip, $result)
+	{	
+		if($ip === NULL || $result === NULL)
+		{
 			return;
 		}
 		
@@ -225,20 +238,22 @@ class CleantalkSFW
 		
 		$query = "SELECT COUNT(*) as cnt
 			FROM ".$this->table_prefix."cleantalk_sfw_logs
-			WHERE ip = '$ip'";
+			WHERE ip = '".$this->db->sql_escape($ip)."'";
 		$this->universal_query($query);
 		$this->universal_fetch();
 
-		if($this->db_result_data['cnt'] > 0){
-
+		if($this->db_result_data['cnt'] > 0)
+		{
 			$query = "UPDATE ".$this->table_prefix."cleantalk_sfw_logs
 				SET
 					all_entries = all_entries + 1,
 					blocked_entries = blocked_entries".strval($blocked).",
 					entries_timestamp = $time
-				WHERE ip = '$ip'";
+				WHERE ip = '".$this->db->sql_escape($ip)."'";
 			$this->universal_query($query);
-		}else{	
+		}
+		else
+		{	
 			$query = "INSERT INTO ".$this->table_prefix."cleantalk_sfw_logs
 			SET 
 				ip = '$ip',
@@ -255,32 +270,37 @@ class CleantalkSFW
 	* 
 	* return mixed true || array('error' => true, 'error_string' => STRING)
 	*/
-	public function sfw_update($ct_key){
+	public function sfw_update($ct_key)
+	{		
+		$result =\cleantalk\antispam\model\CleantalkHelper::api_method__get_2s_blacklists_db($ct_key);
 		
-		$result =\cleantalk\antispam\model\CleantalkHelper::get_2sBlacklistsDb($ct_key);
-		
-		if(empty($result['error'])){
-			
+		if(empty($result['error']))
+		{	
 			$this->universal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw;");
 						
 			// Cast result to int
-			foreach($result as $value){
+			foreach($result as $value)
+			{
 				$value[0] = intval($value[0]);
 				$value[1] = intval($value[1]);
 			} unset($value);
 			$sql_ary = null;
-			for($i=0, $arr_count = count($result); $i < $arr_count; $i++){
+			for($i=0, $arr_count = count($result); $i < $arr_count; $i++)
+			{
 				$sql_ary[] = array(
 					'network' => $result[$i][0],
 					'mask'    => $result[$i][1],
 				);
 			}
-			if ($sql_ary !== null){
+			if ($sql_ary !== null)
+			{
 				$this->db->sql_multi_insert($this->table_prefix.'cleantalk_sfw',$sql_ary);	
 			}					
 			return true;
 			
-		}else{
+		}
+		else
+		{
 			return $result['error_string'];
 		}
 	}
@@ -290,36 +310,43 @@ class CleantalkSFW
 	* 
 	* returns mixed true || array('error' => true, 'error_string' => STRING)
 	*/
-	public function send_logs($ct_key){
-		
+	public function send_logs($ct_key)
+	{	
 		//Getting logs
 		$query = "SELECT * FROM ".$this->table_prefix."cleantalk_sfw_logs";
 		$this->universal_query($query);
 		$this->universal_fetch_all();
 		
-		if(count($this->db_result_data)){
-			
+		if(count($this->db_result_data))
+		{	
 			//Compile logs
 			$data = array();
-			foreach($this->db_result_data as $key => $value){
+			foreach($this->db_result_data as $key => $value)
+			{
 				$data[] = array(trim($value['ip']), $value['all_entries'], $value['all_entries']-$value['blocked_entries'], $value['entries_timestamp']);
 			}
 			unset($key, $value);
 			
 			//Sending the request
-			$result =\cleantalk\antispam\model\CleantalkHelper::sfwLogs($ct_key, $data);
+			$result =\cleantalk\antispam\model\CleantalkHelper::api_method__sfw_logs($ct_key, $data);
 			
 			//Checking answer and deleting all lines from the table
-			if(empty($result['error'])){
-				if($result['rows'] == count($data)){
+			if(empty($result['error']))
+			{
+				if($result['rows'] == count($data))
+				{
 					$this->universal_query("DELETE FROM ".$this->table_prefix."cleantalk_sfw_logs");
 					return true;
 				}
-			}else{
+			}
+			else
+			{
 				return $result['error_string'];
 			}
 				
-		}else{
+		}
+		else
+		{
 			return 'NO_LOGS_TO_SEND';
 		}
 	}
@@ -329,8 +356,8 @@ class CleantalkSFW
 	* 
 	* Stops script executing
 	*/	
-	public function sfw_die($cookie_prefix = '', $cookie_domain = ''){
-
+	public function sfw_die($cookie_prefix = '', $cookie_domain = '')
+	{
 		$this->user->session_begin();
 		$this->user->setup();
 		$this->user->add_lang_ext('cleantalk/antispam', 'common');

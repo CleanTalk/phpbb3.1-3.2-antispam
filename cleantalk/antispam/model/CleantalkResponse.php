@@ -136,12 +136,17 @@ class CleantalkResponse
      * @param type $response
      * @param type $obj
      */
-    function __construct($response = null, $obj = null) {
-        if ($response && is_array($response) && count($response) > 0) {
-            foreach ($response as $param => $value) {
+    function __construct($response = null, $obj = null) 
+    {
+        if ($response && is_array($response) && count($response) > 0) 
+        {
+            foreach ($response as $param => $value) 
+            {
                 $this->{$param} = $value;
             }
-        } else {
+        } 
+        else 
+        {
             $this->errno = $obj->errno;
             $this->errstr = $obj->errstr;
 			$this->curl_err = !empty($obj->curl_err) ? $obj->curl_err : false;
@@ -166,7 +171,9 @@ class CleantalkResponse
 			$this->received = (isset($obj->received)) ? $obj->received : -1;
 
             if ($this->errno !== 0 && $this->errstr !== null && $this->comment === null)
+            {
                 $this->comment = $this->errstr; 
+            }
         }
     }
 }

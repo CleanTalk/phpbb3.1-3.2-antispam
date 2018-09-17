@@ -133,7 +133,9 @@ class main_model
 		$this->cleantalk_request->post_info = $post_info;
 		$this->cleantalk_request->sender_email = array_key_exists('sender_email', $spam_check) ? $spam_check['sender_email'] : '';
 		$this->cleantalk_request->sender_nickname = array_key_exists('sender_nickname', $spam_check) ? $spam_check['sender_nickname'] : '';
-		$this->cleantalk_request->sender_ip = $this->cleantalk->cleantalk_get_real_ip();
+        $this->cleantalk_request->sender_ip = CleantalkHelper::ip_get(array('real'), false);
+        $this->cleantalk_request->x_forwarded_for = CleantalkHelper::ip_get(array('x_forwarded_for'), false);
+        $this->cleantalk_request->x_real_ip       = CleantalkHelper::ip_get(array('x_real_ip'), false);
 		$this->cleantalk_request->submit_time = ($page_set_timestamp !== 0) ? time() - $page_set_timestamp : null;
 		
 		switch ($spam_check['type'])

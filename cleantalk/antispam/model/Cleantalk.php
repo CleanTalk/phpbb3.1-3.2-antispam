@@ -345,7 +345,7 @@ class Cleantalk
             }
         }
         
-        if (!$result || !$this->cleantalk_is_JSON($result)) {
+        if (!$result || !CleantalkHelper::is_json($result)) {
             $response = null;
             $response['errno'] = 1;
             $response['errstr'] = true;
@@ -380,7 +380,7 @@ class Cleantalk
         
         $result = false;
         if($msg->method_name != 'send_feedback'){
-            $tmp = $this->request_headers();
+            $tmp = CleantalkHelper::request_headers();
             if ($tmp !== null)
             {
                 $msg->all_headers=json_encode($tmp);
@@ -470,7 +470,7 @@ class Cleantalk
      * @param $host
      * @return array
      */
-    public function get_servers_ip($host)
+    private function get_servers_ip($host)
     {
         $response = null;
         if (!isset($host))
@@ -537,66 +537,6 @@ class Cleantalk
         }
 
         return $response;
-    }
-
-    /**
-     * Function to get the message hash from Cleantalk.org comment
-     * @param $message
-     * @return null
-     */
-    public function getCleantalkCommentHash($message) {
-        $matches = array();
-        if (preg_match('/\n\n\*\*\*.+([a-z0-9]{32}).+\*\*\*$/', $message, $matches))
-            return $matches[1];
-        else if (preg_match('/\<br.*\>[\n]{0,1}\<br.*\>[\n]{0,1}\*\*\*.+([a-z0-9]{32}).+\*\*\*$/', $message, $matches))
-            return $matches[1];
-
-        return NULL;
-    }
-
-    /**
-     * Function adds to the post comment Cleantalk.org
-     * @param $message
-     * @param $comment
-     * @return string
-     */
-    public function addCleantalkComment($message, $comment) {
-        $comment = preg_match('/\*\*\*(.+)\*\*\*/', $comment, $matches) ? $comment : '*** ' . $comment . ' ***';
-        return $message . "\n\n" . $comment;
-    }
-
-    /**
-     * Function deletes the comment Cleantalk.org
-     * @param $message
-     * @return mixed
-     */
-    public function delCleantalkComment($message) {
-        $message = preg_replace('/\n\n\*\*\*.+\*\*\*$/', '', $message);
-
-        // DLE sign cut
-        $message = preg_replace('/<br\s?\/><br\s?\/>\*\*\*.+\*\*\*$/', '', $message);
-
-        $message = preg_replace('/\<br.*\>[\n]{0,1}\<br.*\>[\n]{0,1}\*\*\*.+\*\*\*$/', '', $message);
-        
-        return $message;
-    }
-
-    /**
-    *   Get user IP behind proxy server
-    */
-    public function ct_session_ip( $data_ip ) {
-        if (!$data_ip || !preg_match("/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/", $data_ip))
-            return $data_ip;
-        
-        return $this->cleantalk_get_real_ip();
-    }
-
-    /**
-    * From http://php.net/manual/en/function.ip2long.php#82397
-    */
-    public function net_match($CIDR,$IP) { 
-        list ($net, $mask) = explode ('/', $CIDR); 
-        return ( ip2long ($IP) & ~((1 << (32 - $mask)) - 1) ) == ip2long ($net); 
     } 
     
     /**
@@ -604,7 +544,7 @@ class Cleantalk
     * param string
     * @return int
     */
-    public function httpPing($host){
+    private function httpPing($host){
 
         // Skip localhost ping cause it raise error at fsockopen.
         // And return minimun value 
@@ -632,7 +572,7 @@ class Cleantalk
     * param string
     * @return string
     */
-    public function stringToUTF8($str, $data_codepage = null){
+    private function stringToUTF8($str, $data_codepage = null){
         if (!preg_match('//u', $str) && function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding'))
         {
             
@@ -653,78 +593,12 @@ class Cleantalk
     * param string
     * @return string
     */
-    public function stringFromUTF8($str, $data_codepage = null){
+    private function stringFromUTF8($str, $data_codepage = null){
         if (preg_match('//u', $str) && function_exists('mb_convert_encoding') && $data_codepage !== null)
         {
             return mb_convert_encoding($str, $data_codepage, 'UTF-8');
         }
         
         return $str;
-    }
-    
-    public function cleantalk_get_real_ip(){
-        
-        if ($this->request->server('X_FORWARDED_FOR'))
-        {
-            $ip = explode(",", trim($this->request->server('X_FORWARDED_FOR')));
-            $ip = trim($ip[0]);
-        }
-        elseif ($this->request->server('HTTP_X_FORWARDED_FOR'))
-        {
-            $ip = explode(",", trim($this->request->server('HTTP_X_FORWARDED_FOR')));
-            $ip = trim($ip[0]);
-        }
-        else
-        {
-            $ip = $this->request->server('REMOTE_ADDR');
-        }
-
-        // Validating IP
-        // IPv4
-        if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
-            $the_ip = $ip;
-            // IPv6
-        }elseif(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)){
-            $the_ip = $ip;
-            // Unknown
-        }else{
-            $the_ip = null;
-        }
-        
-        return $the_ip;
-    }
-    
-    public function cleantalk_is_JSON($string){
-        return ((is_string($string) && (is_object(json_decode($string)) || is_array(json_decode($string))))) ? true : false;
-    }
-    
-    /* 
-     * If Apache web server is missing then making
-     * Patch for apache_request_headers() 
-     */
-    public function request_headers(){
-
-        $headers['Host']  = $this->request->server('HTTP_HOST','');
-        $headers['X-Real-IP'] = $this->request->server('HTTP_X_REAL_IP','');
-        $headers['X-Forwarded-Proto'] = $this->request->server('HTTP_X_FORWARDED_PROTO','');
-        $headers['Connection'] = $this->request->server('HTTP_CONNECTION','');
-        $headers['Content-Length'] = $this->request->server('CONTENT_LENGTH','');
-        $headers['Cache-Control'] = $this->request->server('HTTP_CACHE_CONTROL','');
-        $headers['Origin'] = $this->request->server('HTTP_ORIGIN','');
-        $headers['Upgrade-Insecure-Requests'] = $this->request->server('HTTP_UPGRADE_INSECURE_REQUESTS','');
-        $headers['Content-Type'] = $this->request->server('CONTENT_TYPE','');
-        $headers['User-Agent'] = $this->request->server('HTTP_USER_AGENT','');
-        $headers['Accept'] = $this->request->server('HTTP_ACCEPT','');
-        $headers['Referer'] = $this->request->server('HTTP_REFERER','');
-        $headers['Accept-Encoding'] = $this->request->server('HTTP_ACCEPT_ENCODING','');
-        $headers['Accept-Language'] = $this->request->server('HTTP_ACCEPT_LANGUAGE',''); 
-        $headers['Cookie'] = preg_replace(array(
-                    '/\s{0,1}ct_checkjs=[a-z0-9]*[;|$]{0,1}/',
-                    '/\s{0,1}ct_timezone=.{0,1}\d{1,2}[;|$]/', 
-                    '/\s{0,1}ct_pointer_data=.*5D[;|$]{0,1}/', 
-                    '/;{0,1}\s{0,3}$/'
-                ), '', $this->request->server('HTTP_COOKIE',''));           
-
-        return $headers;
     }
 }
