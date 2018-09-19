@@ -17,14 +17,7 @@ namespace cleantalk\antispam\model;
 use phpbb\request\request;
 
 class Cleantalk
-{
-
-    /**
-     * Debug level
-     * @var int
-     */
-    public $debug = 0;
-    
+{    
     /**
     * Maximum data size in bytes
     * @var int
@@ -647,7 +640,8 @@ class Cleantalk
         if (!$file) 
         {
             $status = -1;  // Site is down
-        } else 
+        } 
+        else 
         {
             fclose($file);
             $status = ($stoptime - $starttime);
@@ -732,7 +726,8 @@ class Cleantalk
     * param string
     * @return boolean
     */
-    private function cleantalk_is_JSON($string){
+    private function cleantalk_is_JSON($string)
+    {
         return ((is_string($string) && (is_object(json_decode($string)) || is_array(json_decode($string))))) ? true : false;
     }
 
@@ -740,8 +735,8 @@ class Cleantalk
     * Function to get IP address
     * @return string
     */
-    public function cleantalk_get_real_ip(){
-        
+    public function cleantalk_get_real_ip()
+    {       
         if ($this->request->server('X_FORWARDED_FOR'))
         {
             $ip = explode(",", trim($this->request->server('X_FORWARDED_FOR')));
@@ -758,13 +753,18 @@ class Cleantalk
         }
          // Validating IP
         // IPv4
-        if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
+        if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))
+        {
             $the_ip = $ip;
             // IPv6
-        }elseif(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)){
+        }
+        elseif(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6))
+        {
             $the_ip = $ip;
             // Unknown
-        }else{
+        }
+        else
+        {
             $the_ip = null;
         }
         

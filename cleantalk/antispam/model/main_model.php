@@ -121,9 +121,12 @@ class main_model
 		);
 		$composer_json = json_decode(file_get_contents($this->phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
 
-		if(isset($spam_check['auth_key'])){
+		if(isset($spam_check['auth_key']))
+		{
 			$this->cleantalk_request->auth_key = $spam_check['auth_key'];
-		}else{
+		}
+		else
+		{
 			$this->cleantalk_request->auth_key = $this->config['cleantalk_antispam_apikey'];
 		}
 		
@@ -176,17 +179,22 @@ class main_model
 				$ret_val['errno'] = 1;
 				$ct_result->allow = 1;
 				
-				if (!empty($ct_result->errstr)){
-					
-					if($ct_result->curl_err){
+				if (!empty($ct_result->errstr))
+				{	
+					if($ct_result->curl_err)
+					{
 						$ct_result->errstr = $this->user->lang('CLEANTALK_ERROR_CURL', $ct_result->curl_err);
-					}else{
+					}
+					else
+					{
 						$ct_result->errstr = $this->user->lang('CLEANTALK_ERROR_NO_CURL');
 					}
 					$ct_result->errstr = $ct_result->errstr . " ". $this->user->lang('CLEANTALK_ERROR_ADDON');
 								
 					$ret_val['errstr'] = $this->filter_response($ct_result->errstr);
-				}else{
+				}
+				else
+				{
 					$ret_val['errstr'] = $this->filter_response($ct_result->comment);
 				}
 
@@ -222,7 +230,7 @@ class main_model
 
 				return $ret_val;
 			}
-			else if (!empty($ct_result->errstr) && $checkjs = 0)
+			elseif (!empty($ct_result->errstr) && $checkjs = 0)
 			{
 				$ct_result->allow = 0;
 			}
@@ -280,7 +288,8 @@ class main_model
 		);
 
 		// Pervious referer
-		if($this->request->server('HTTP_REFERER','') !== ''){
+		if($this->request->server('HTTP_REFERER','') !== '')
+		{
 			$this->user->set_cookie('ct_prev_referer', $this->request->server('HTTP_REFERER',''), 0);
 			$cookie_test_value['cookies_names'][] = 'ct_prev_referer';
 			$cookie_test_value['check_value'] .= $this->request->server('HTTP_REFERER','');
@@ -300,17 +309,22 @@ class main_model
             $cookie_test = json_decode(htmlspecialchars_decode($this->request->variable($this->config['cookie_name'].'_ct_cookies_test','', false, \phpbb\request\request_interface::COOKIE)),true);
             
             $check_srting = $this->config['cleantalk_antispam_apikey'];
-            foreach($cookie_test['cookies_names'] as $cookie_name){
+            foreach($cookie_test['cookies_names'] as $cookie_name)
+            {
                 $check_srting .= $this->request->variable($this->config['cookie_name'].'_'.$cookie_name,'', false, \phpbb\request\request_interface::COOKIE);
             } unset($cokie_name);
             
-            if($cookie_test['check_value'] == md5($check_srting)){
+            if($cookie_test['check_value'] == md5($check_srting))
+            {
                 return 1;
-            }else{
+            }
+            else
+            {
                 return 0;
             }
         }
-        else{
+        else
+        {
             return null;
         }
 

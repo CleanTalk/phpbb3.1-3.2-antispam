@@ -133,8 +133,7 @@ class CleantalkHelper
 	* returns mixed STRING || array('error' => true, 'error_string' => STRING)
 	*/
 	static public function sfwLogs($api_key, $data, $do_check = true)
-	{
-		
+	{		
 		$request = array(
 			'auth_key' => $api_key,
 			'method_name' => 'sfw_logs',
@@ -156,8 +155,8 @@ class CleantalkHelper
 	 * @param bool perform check flag
 	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
 	 */
-	static public function spamCheckCms($api_key, $data, $do_check = true){
-		
+	static public function spamCheckCms($api_key, $data, $do_check = true)
+	{	
 		$request = array(
 			'method_name' => 'spam_check_cms',
 			'auth_key' => $api_key,
@@ -228,7 +227,8 @@ class CleantalkHelper
 		// Errors handling
 		
 		// Bad connection
-		if(empty($result)){
+		if(empty($result))
+		{
 			return array(
 				'error' => true,
 				'error_string' => 'CONNECTION_ERROR'
@@ -237,7 +237,8 @@ class CleantalkHelper
 		
 		// JSON decode errors
 		$result = json_decode($result, true);
-		if(empty($result)){
+		if(empty($result))
+		{
 			return array(
 				'error' => true,
 				'error_string' => 'JSON_DECODE_ERROR'
@@ -245,7 +246,8 @@ class CleantalkHelper
 		}
 		
 		// Server errors
-		if($result && (isset($result['error_no']) || isset($result['error_message']))){
+		if($result && (isset($result['error_no']) || isset($result['error_message'])))
+		{
 			return array(
 				'error' => true,
 				'error_string' => "SERVER_ERROR NO: {$result['error_no']} MSG: {$result['error_message']}",
@@ -257,12 +259,14 @@ class CleantalkHelper
 		// Patches for different methods
 		
 		// mehod_name = notice_validate_key
-		if($method_name == 'notice_validate_key' && isset($result['valid'])){
+		if($method_name == 'notice_validate_key' && isset($result['valid']))
+		{
 			return $result;
 		}
 		
 		// Other methods
-		if(isset($result['data']) && is_array($result['data'])){
+		if(isset($result['data']) && is_array($result['data']))
+		{
 			return $result['data'];
 		}
 	}
@@ -276,20 +280,23 @@ class CleantalkHelper
 	 * @param integer connect timeout
 	 * @return type
 	 */
-	static public function sendRawRequest($url, $data, $isJSON = false, $timeout = 3){
-		
+	static public function sendRawRequest($url, $data, $isJSON = false, $timeout = 3)
+	{	
 		$result=null;
-		if(!$isJSON){
+		if(!$isJSON)
+		{
 			$data=http_build_query($data);
 			$data=str_replace("&amp;", "&", $data);
-		}else{
+		}
+		else
+		{
 			$data= json_encode($data);
 		}
 		
 		$curl_exec=false;
 		
-		if (function_exists('curl_init') && function_exists('json_decode')){
-		
+		if (function_exists('curl_init') && function_exists('json_decode'))
+		{	
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
 			curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
@@ -306,14 +313,15 @@ class CleantalkHelper
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);            			
 			$result = curl_exec($ch);
 			
-			if($result !== false){
+			if($result !== false)
+			{
 				$curl_exec=true;
 			}
 			
 			curl_close($ch);
 		}
-		if(!$curl_exec){
-			
+		if(!$curl_exec)
+		{	
 			$opts = array(
 				'http'=>array(
 					'method' => "POST",

@@ -53,8 +53,8 @@ class main_module
 					'phpbb31'
 				);
 				
-				if(empty($result['error'])){
-						
+				if(empty($result['error']))
+				{						
 					$config->set('cleantalk_antispam_apikey', $result['auth_key']);
 					$savekey = $result['auth_key'];
 					$key_is_valid = true;
@@ -120,11 +120,12 @@ class main_module
 						$result = $db->sql_query("SELECT * FROM ".$table_prefix."cleantalk_sfw_logs");
 						$sfw_logs_data = $db->sql_fetchrowset($result);
 						
-						if(count($sfw_logs_data)){
-							
+						if(count($sfw_logs_data))
+						{							
 							//Compile logs
 							$data = array();
-							foreach($sfw_logs_data as $key => $value){
+							foreach($sfw_logs_data as $key => $value)
+							{
 								$data[] = array(trim($value['ip']), $value['all_entries'], $value['all_entries']-$value['blocked_entries'], $value['entries_timestamp']);
 							}
 							unset($key, $value);							
@@ -133,7 +134,8 @@ class main_module
 							
 							//Checking answer and deleting all lines from the table
 							if(empty($result['error'])){
-								if($result['rows'] == count($data)){
+								if($result['rows'] == count($data))
+								{
 									$db->sql_query("DELETE FROM ".$table_prefix."cleantalk_sfw_logs");
 									$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
 								}
@@ -205,9 +207,7 @@ class main_module
 			{
 				include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
-			$sql = 'SELECT * 
-				FROM ' . USERS_TABLE . ' 
-				WHERE ct_marked=1';
+			$sql = 'SELECT * FROM ' . USERS_TABLE . ' WHERE ct_marked=1';
 			$result = $db->sql_query($sql);
 			while($row = $db->sql_fetchrow($result))
 			{
@@ -240,10 +240,7 @@ class main_module
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
 				SET ct_marked=0';
 			$db->sql_query($sql);
-			$sql = "SELECT user_id, username, user_regdate, user_lastvisit, user_ip, user_email
-				FROM " . USERS_TABLE . " 
-				WHERE user_password<>''
-				ORDER BY user_regdate DESC";
+			$sql = "SELECT user_id, username, user_regdate, user_lastvisit, user_ip, user_email FROM " . USERS_TABLE . " WHERE user_password<>'' ORDER BY user_regdate DESC";
 			$result = $db->sql_query($sql);
 			
 			$users  = array(0 => array());
@@ -331,15 +328,11 @@ class main_module
 			$start_entry = $request->variable('start_entry', 1);
 		}
 		$on_page = 20;
-		$sql = 'SELECT COUNT(user_id) AS user_count
-			FROM ' . USERS_TABLE . '
-			WHERE ct_marked = 1';
+		$sql = 'SELECT COUNT(user_id) AS user_count	FROM ' . USERS_TABLE . ' WHERE ct_marked = 1';
 		$db->sql_query($sql);
 		$spam_users_count = (int)$db->sql_fetchfield('user_count');
 
-		$sql = 'SELECT * 
-			FROM ' . USERS_TABLE . '
-			WHERE ct_marked = 1';
+		$sql = 'SELECT * FROM ' . USERS_TABLE . ' WHERE ct_marked = 1';
 		$result = $db->sql_query_limit($sql, $on_page, $start_entry);
 		$found = false;
 		while($row = $db->sql_fetchrow($result))
