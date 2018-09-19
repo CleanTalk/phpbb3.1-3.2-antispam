@@ -272,7 +272,7 @@ class CleantalkSFW
 	*/
 	public function sfw_update($ct_key)
 	{		
-		$result =\cleantalk\antispam\model\CleantalkHelper::api_method__get_2s_blacklists_db($ct_key);
+		$result =\cleantalk\antispam\model\CleantalkHelper::get2sBlacklistsDb($ct_key);
 		
 		if(empty($result['error']))
 		{	
@@ -328,7 +328,7 @@ class CleantalkSFW
 			unset($key, $value);
 			
 			//Sending the request
-			$result =\cleantalk\antispam\model\CleantalkHelper::api_method__sfw_logs($ct_key, $data);
+			$result =\cleantalk\antispam\model\CleantalkHelper::sfwLogs($ct_key, $data);
 			
 			//Checking answer and deleting all lines from the table
 			if(empty($result['error']))

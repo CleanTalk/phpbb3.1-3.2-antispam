@@ -383,7 +383,7 @@ class Cleantalk
             }
         }
         
-        if (!$result || !CleantalkHelper::is_json($result)) 
+        if (!$result || !$this->cleantalk_is_JSON($result)) 
         {
             $response = null;
             $response['errno'] = 1;
@@ -423,7 +423,7 @@ class Cleantalk
         $result = false;
         if($msg->method_name != 'send_feedback')
         {
-            $tmp = CleantalkHelper::request_headers();
+            $tmp = $this->request_headers();
             if ($tmp !== null)
             {
                 $msg->all_headers=json_encode($tmp);
@@ -697,4 +697,78 @@ class Cleantalk
         
         return $str;
     }
+
+    /* 
+     * If Apache web server is missing then making
+     * Patch for apache_request_headers() 
+     */
+    private function request_headers()
+    {   
+        $headers['Host']  = $this->request->server('HTTP_HOST','');
+        $headers['X-Real-IP'] = $this->request->server('HTTP_X_REAL_IP','');
+        $headers['X-Forwarded-Proto'] = $this->request->server('HTTP_X_FORWARDED_PROTO','');
+        $headers['Connection'] = $this->request->server('HTTP_CONNECTION','');
+        $headers['Content-Length'] = $this->request->server('CONTENT_LENGTH','');
+        $headers['Cache-Control'] = $this->request->server('HTTP_CACHE_CONTROL','');
+        $headers['Origin'] = $this->request->server('HTTP_ORIGIN','');
+        $headers['Upgrade-Insecure-Requests'] = $this->request->server('HTTP_UPGRADE_INSECURE_REQUESTS','');
+        $headers['Content-Type'] = $this->request->server('CONTENT_TYPE','');
+        $headers['User-Agent'] = $this->request->server('HTTP_USER_AGENT','');
+        $headers['Accept'] = $this->request->server('HTTP_ACCEPT','');
+        $headers['Referer'] = $this->request->server('HTTP_REFERER','');
+        $headers['Accept-Encoding'] = $this->request->server('HTTP_ACCEPT_ENCODING','');
+        $headers['Accept-Language'] = $this->request->server('HTTP_ACCEPT_LANGUAGE',''); 
+        $headers['Cookie'] = preg_replace(array(
+                    '/\s{0,1}ct_checkjs=[a-z0-9]*[;|$]{0,1}/',
+                    '/\s{0,1}ct_timezone=.{0,1}\d{1,2}[;|$]/', 
+                    '/\s{0,1}ct_pointer_data=.*5D[;|$]{0,1}/', 
+                    '/;{0,1}\s{0,3}$/'
+                ), '', $this->request->server('HTTP_COOKIE',''));           
+        return $headers;
+    }
+
+    /**
+    * Function to check  JSON string
+    * param string
+    * @return boolean
+    */
+    private function cleantalk_is_JSON($string){
+        return ((is_string($string) && (is_object(json_decode($string)) || is_array(json_decode($string))))) ? true : false;
+    }
+
+    /**
+    * Function to get IP address
+    * @return string
+    */
+    public function cleantalk_get_real_ip(){
+        
+        if ($this->request->server('X_FORWARDED_FOR'))
+        {
+            $ip = explode(",", trim($this->request->server('X_FORWARDED_FOR')));
+            $ip = trim($ip[0]);
+        }
+        elseif ($this->request->server('HTTP_X_FORWARDED_FOR'))
+        {
+            $ip = explode(",", trim($this->request->server('HTTP_X_FORWARDED_FOR')));
+            $ip = trim($ip[0]);
+        }
+        else
+        {
+            $ip = $this->request->server('REMOTE_ADDR');
+        }
+         // Validating IP
+        // IPv4
+        if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
+            $the_ip = $ip;
+            // IPv6
+        }elseif(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)){
+            $the_ip = $ip;
+            // Unknown
+        }else{
+            $the_ip = null;
+        }
+        
+        return $the_ip;
+    }    
+
 }

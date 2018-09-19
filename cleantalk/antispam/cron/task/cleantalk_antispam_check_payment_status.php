@@ -14,7 +14,7 @@ class cleantalk_antispam_check_payment_status extends \phpbb\cron\task\base
 		
 	public function run()
 	{
-		$result = \cleantalk\antispam\model\CleantalkHelper::api_method__notice_paid_till($this->config['cleantalk_antispam_apikey']);
+		$result = \cleantalk\antispam\model\CleantalkHelper::noticePaidTill($this->config['cleantalk_antispam_apikey']);
 		if(empty($result['error']))
 		{
 			$this->config->set('cleantalk_antispam_show_notice', ($result['show_notice']) ? $result['show_notice'] : 0);

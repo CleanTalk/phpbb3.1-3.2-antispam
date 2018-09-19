@@ -47,7 +47,7 @@ class main_module
 			if($request->is_set_post('get_key_auto'))
 			{
 							
-				$result = \cleantalk\antispam\model\CleantalkHelper::api_method__get_api_key(
+				$result = \cleantalk\antispam\model\CleantalkHelper::getApiKey(
 					$config['board_email'],
 					$request->server('SERVER_NAME'),
 					'phpbb31'
@@ -77,7 +77,7 @@ class main_module
 			{				
 				if(!$key_is_valid)
 				{
-					$result =\cleantalk\antispam\model\CleantalkHelper::api_method__notice_validate_key($savekey);
+					$result =\cleantalk\antispam\model\CleantalkHelper::noticeValidateKey($savekey);
 					if(empty($result['error']))
 					{
 						$key_is_valid = $result['valid'] ? true : false;
@@ -102,7 +102,7 @@ class main_module
 					}
 					if(!$user_token_is_valid)
 					{						
-						$result =\cleantalk\antispam\model\CleantalkHelper::api_method__notice_paid_till($savekey);
+						$result =\cleantalk\antispam\model\CleantalkHelper::noticePaidTill($savekey);
 						
 						if(empty($result['error']))
 						{
@@ -117,7 +117,7 @@ class main_module
 						}
 					}	
 						$composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
-						\cleantalk\antispam\model\CleantalkHelper::api_method_send_empty_feedback($savekey, 'phpbb31-' . preg_replace("/(\d+)\.(\d*)\.?(\d*)/", "$1$2$3", $composer_json->version));
+						\cleantalk\antispam\model\CleantalkHelper::sendEmptyFeedback($savekey, 'phpbb31-' . preg_replace("/(\d+)\.(\d*)\.?(\d*)/", "$1$2$3", $composer_json->version));
 				}
 				else
 				{
@@ -234,7 +234,7 @@ class main_module
 			for($i=0;$i<sizeof($users);$i++)
 			{
 				
-				$result = \cleantalk\antispam\model\CleantalkHelper::api_method__spam_check_cms($config['cleantalk_antispam_apikey'], $data[$i]);
+				$result = \cleantalk\antispam\model\CleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], $data[$i]);
 				
 				if(!empty($result['error']))
 				{					
