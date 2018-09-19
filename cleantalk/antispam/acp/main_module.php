@@ -50,7 +50,7 @@ class main_module
 				$result = \cleantalk\antispam\model\CleantalkHelper::api_method__get_api_key(
 					$config['board_email'],
 					$request->server('SERVER_NAME'),
-					'phpbb31',
+					'phpbb31'
 				);
 				
 				if(empty($result['error'])){
