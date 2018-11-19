@@ -115,7 +115,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			return;
 		}
-		$this->template->assign_var('CT_JS_VALUE', addslashes($this->main_model->cleantalk_get_checkjs_code()));
+		$this->template->assign_var('CT_JS_VALUE', $this->main_model->cleantalk_get_checkjs_code());
 		$this->main_model->set_cookie();	
 
 	}

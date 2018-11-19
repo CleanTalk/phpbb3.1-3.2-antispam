@@ -336,47 +336,37 @@ class main_model
 		));
 		$js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
     	$api_key = isset($this->config['cleantalk_antispam_apikey']) ? $this->config['cleantalk_antispam_apikey'] : null;
-    	if($js_keys == null)
-    	{		
-			$js_key = strval(md5($api_key . time()));
-			
-			$js_keys = array(
-				'keys' => array(
-					array(
-						time() => $js_key
-					)
-				), // Keys to do JavaScript antispam test 
-				'js_keys_amount' => 24, // JavaScript keys store days - 2 days now
-				'js_key_lifetime' => 86400, // JavaScript key life time in seconds - 1 day now
-			);		
-		}
-		else
-		{			
-			$keys_times = array();
-			
-			foreach($js_keys['keys'] as $time => $key)
-			{		
-				if($time + $js_keys['js_key_lifetime'] < time())
-				{
-					unset($js_keys['keys'][$time]);
-				}				
-				$keys_times[] = $time;
-			}unset($time, $key);
-			
-			if(max($keys_times) + 3600 < time())
-			{
-				$js_key =  strval(md5($api_key . time()));
-				$js_keys['keys'][time()] = $js_key;
-			}
-			else
-			{
-				$js_key = $js_keys['keys'][max($keys_times)];
-			}
-		
-		}
-		$this->config_text->set_array(array(
-			'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
-		));
+
+    	$keys = $js_keys['keys'];
+    	$keys_checksum = md5(json_encode($js_keys));
+
+        $key = null;
+        $latest_key_time = 0;
+        foreach ($js_keys as $k => $t) {
+
+            // Removing key if it's to old
+            if (time() - $t > 14 * 86400) {
+                unset($keys[$k]);
+                continue;
+            }
+
+            if ($t > $latest_key_time) {
+                $latest_key_time = $t;
+                $key = $k;
+            }
+        }
+        
+        // Get new key if the latest key is too old
+        if (time() - $latest_key_time > 86400) {
+            $key = rand();
+            $keys[$key] = time();
+        }
+        
+        if (md5(json_encode($keys)) != $keys_checksum) {
+			$this->config_text->set_array(array(
+				'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
+			));
+        }
 
 		return $js_key;	
 
