@@ -338,11 +338,11 @@ class main_model
     	$api_key = isset($this->config['cleantalk_antispam_apikey']) ? $this->config['cleantalk_antispam_apikey'] : null;
 
     	$keys = $js_keys['keys'];
-    	$keys_checksum = md5(json_encode($js_keys));
+    	$keys_checksum = md5(json_encode($keys));
 
         $key = null;
         $latest_key_time = 0;
-        foreach ($js_keys as $k => $t) {
+        foreach ($keys as $k => $t) {
 
             // Removing key if it's to old
             if (time() - $t > 14 * 86400) {
@@ -363,6 +363,7 @@ class main_model
         }
         
         if (md5(json_encode($keys)) != $keys_checksum) {
+        	$js_keys['keys'] = $keys;
 			$this->config_text->set_array(array(
 				'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
 			));
