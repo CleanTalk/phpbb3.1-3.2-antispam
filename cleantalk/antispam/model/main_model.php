@@ -70,13 +70,13 @@ class main_model
 		$this->cleantalk = $cleantalk;
 		$this->cleantalk_request = $cleantalk_request;
 	}
+
 	/**
-	* Checks user registration to spam
+	* Checks data to spam
 	*
 	* @param array	$spam_check		array with values to check
 	* @return array				array with result flags
-	*/
-	
+	*/	
 	public function check_spam( $spam_check )
 	{
 		$this->user->add_lang('acp/common');
@@ -276,6 +276,7 @@ class main_model
 		}
 		return $err_str;
 	}
+
 	/**
 	* Sets cookie
 	*/	
@@ -298,6 +299,7 @@ class main_model
 		$cookie_test_value['check_value'] = md5($cookie_test_value['check_value']);
 		$this->user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), 0);		
 	} 
+
 	/**
 	* Test cookie
 	*/
@@ -329,36 +331,41 @@ class main_model
         }
 
 	}
+
+	/** Return array of JS-keys for checking
+	*
+	* @return array
+	*/	
     public function cleantalk_get_checkjs_code()
     {
 		$config_js_keys = $this->config_text->get_array(array(
 			'cleantalk_antispam_js_keys'
 		));
 		$js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
-    	$api_key = isset($this->config['cleantalk_antispam_apikey']) ? $this->config['cleantalk_antispam_apikey'] : null;
-
     	$keys = $js_keys['keys'];
     	$keys_checksum = md5(json_encode($keys));
 
-        $key = null;
+        $key = rand();
         $latest_key_time = 0;
-        foreach ($keys as $k => $t) {
+        if ($keys)
+        {
+	        foreach ($keys as $k => $t) {
 
-            // Removing key if it's to old
-            if (time() - $t > 14 * 86400) {
-                unset($keys[$k]);
-                continue;
-            }
+	            // Removing key if it's to old
+	            if (time() - $t > 14 * 86400) {
+	                unset($keys[$k]);
+	                continue;
+	            }
 
-            if ($t > $latest_key_time) {
-                $latest_key_time = $t;
-                $key = $k;
-            }
-        }
-        
+	            if ($t > $latest_key_time) {
+	                $latest_key_time = $t;
+	                $key = $k;
+	            }
+	        }
+	    }
+	        
         // Get new key if the latest key is too old
         if (time() - $latest_key_time > 86400) {
-            $key = rand();
             $keys[$key] = time();
         }
         
@@ -367,13 +374,13 @@ class main_model
 			$this->config_text->set_array(array(
 				'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
 			));
-        }
+        }        	
 
-		return $js_key;	
+		return $key;	
 
     }  
 	
-	/** Return array of JS-keys for checking
+	/** Validating js key
 	*
 	* @return array
 	*/
@@ -388,7 +395,7 @@ class main_model
 
 			if($js_keys)
 			{
-				$result = in_array($ct_checkjs_val, $js_keys['keys']);
+				$result = array_key_exists($ct_checkjs_val, $js_keys['keys']);
 			}
 			else
 			{

@@ -126,7 +126,8 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function check_comment($event)
 	{
-		if (empty($this->config['cleantalk_antispam_apikey']))
+		$data = $event->get_data();
+		if (empty($this->config['cleantalk_antispam_apikey']) || $data['submit'] != 1)
 		{
 			return;
 		}
@@ -177,7 +178,6 @@ class main_listener implements EventSubscriberInterface
 
 		if ($moderate)
 		{
-			$data = $event->get_data();
 			if (
 				array_key_exists('post_data', $data) &&
 				is_array($data['post_data']) &&
@@ -212,6 +212,7 @@ class main_listener implements EventSubscriberInterface
 				}
 				$spam_check['message_body'] = $this->request->variable('message', '', true);
 				$result = $this->main_model->check_spam($spam_check);
+
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{ 
 					if ($result['stop_queue'] == 1)
