@@ -185,7 +185,7 @@ class CleantalkHelper
 			'feedback' => 0 . ':' . $agent_version
 		);
 		
-		$result = self::sendRawRequest(self::URL, $request);
+		$result = self::sendRawRequest(self::URL, $request, false, 15);
 		$result = $do_check ? $result = self::checkRequestResult($result, 'send_feedback') : $result;
 		
 		return $result;
