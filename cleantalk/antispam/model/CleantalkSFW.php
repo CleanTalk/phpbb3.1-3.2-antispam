@@ -358,10 +358,8 @@ class CleantalkSFW
 	*/	
 	public function sfw_die($cookie_prefix = '', $cookie_domain = '')
 	{
-		$this->user->session_begin();
-		$this->user->setup();
 		$this->user->add_lang_ext('cleantalk/antispam', 'common');
-		
+
 		page_header();
 
 		$this->template->set_filenames ( array (

@@ -29,6 +29,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		return array(
 			'core.user_setup'							=> 'load_language_on_setup',
+			'core.user_setup_after'						=> 'sfw_check',
 			'core.page_footer_after'     			    => 'add_js_to_footer',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
@@ -94,7 +95,7 @@ class main_listener implements EventSubscriberInterface
 	* @param array	$event		array with event variable values
 	*/
 	public function load_language_on_setup($event)
-	{
+	{		
 		$lang_set_ext = $event['lang_set_ext'];
 		$lang_set_ext[] = array(
 			'ext_name' => 'cleantalk/antispam',
@@ -103,7 +104,15 @@ class main_listener implements EventSubscriberInterface
 		$event['lang_set_ext'] = $lang_set_ext;
 
 	}
-
+	/**
+	* SpamFirewallCheck
+	*
+	* @param array	$event		array with event variable values
+	*/
+	public function sfw_check($event)
+	{
+		$this->cleantalk_sfw->sfw_check();
+	}
 	/**
 	* Fills tamplate variable by generated JS-code with unique hash
 	*
@@ -297,8 +306,6 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function global_check()
 	{
-		$this->cleantalk_sfw->sfw_check();
-
 		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->symfony_request->getScriptName(), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
 		{
 			//Checking contact form
