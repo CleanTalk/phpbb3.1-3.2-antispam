@@ -29,7 +29,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		return array(
 			'core.user_setup'							=> 'load_language_on_setup',
-			'core.user_setup_after'						=> 'sfw_check',
+			'core.user_setup_after'						=> 'sfw_ccf_check',
 			'core.page_footer_after'     			    => 'add_js_to_footer',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
@@ -105,13 +105,38 @@ class main_listener implements EventSubscriberInterface
 
 	}
 	/**
-	* SpamFirewallCheck
+	* SpamFirewall and CCF Check
 	*
 	* @param array	$event		array with event variable values
 	*/
-	public function sfw_check($event)
+	public function sfw_ccf_check($event)
 	{
 		$this->cleantalk_sfw->sfw_check();
+
+		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->symfony_request->getScriptName(), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
+		{
+			//Checking contact form
+			$this->ct_comment_result = null;
+			$spam_check = array();	
+
+			$spam_check['sender_email'] = $this->request->variable('email','');
+			$spam_check['sender_nickname'] = $this->request->variable('name','');
+			$spam_check['message_title'] = $this->request->variable('subject','');
+			$spam_check['message_body'] = $this->request->variable('message','');
+			
+			if ($spam_check['sender_email'] !== '' || $spam_check['message_title'] !== '' || $spam_check['message_body'] !== '' )
+			{
+				$spam_check['type'] = 'contact';
+
+				$result = $this->main_model->check_spam($spam_check);
+
+				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
+				{				 
+					// Output error
+					trigger_error($result['ct_result_comment']);
+				}
+			}
+		}		
 	}
 	/**
 	* Fills tamplate variable by generated JS-code with unique hash
@@ -300,35 +325,4 @@ class main_listener implements EventSubscriberInterface
 			}
 		}
 	}	
-	/**
-	* Global checks
-	* @void
-	*/
-	public function global_check()
-	{
-		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->symfony_request->getScriptName(), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
-		{
-			//Checking contact form
-			$this->ct_comment_result = null;
-			$spam_check = array();	
-
-			$spam_check['sender_email'] = $this->request->variable('email','');
-			$spam_check['sender_nickname'] = $this->request->variable('name','');
-			$spam_check['message_title'] = $this->request->variable('subject','');
-			$spam_check['message_body'] = $this->request->variable('message','');
-			
-			if ($spam_check['sender_email'] !== '' || $spam_check['message_title'] !== '' || $spam_check['message_body'] !== '' )
-			{
-				$spam_check['type'] = 'contact';
-
-				$result = $this->main_model->check_spam($spam_check);
-
-				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
-				{				 
-					// Output error
-					trigger_error($result['ct_result_comment']);
-				}
-			}
-		}			
-	}
 }
