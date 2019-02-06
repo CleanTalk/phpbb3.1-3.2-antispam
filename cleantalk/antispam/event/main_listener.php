@@ -34,7 +34,6 @@ class main_listener implements EventSubscriberInterface
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                 => 'check_newuser',
-			'core.common'								=> 'global_check',
 		);
 	}
 
@@ -113,7 +112,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		$this->cleantalk_sfw->sfw_check();
 		$this->main_model->set_cookie();
-		
+
 		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->symfony_request->getScriptName(), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
 		{
 			//Checking contact form
