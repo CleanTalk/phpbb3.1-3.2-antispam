@@ -112,7 +112,8 @@ class main_listener implements EventSubscriberInterface
 	public function sfw_ccf_check($event)
 	{
 		$this->cleantalk_sfw->sfw_check();
-
+		$this->main_model->set_cookie();
+		
 		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->symfony_request->getScriptName(), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
 		{
 			//Checking contact form
@@ -150,8 +151,6 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 		$this->template->assign_var('CT_JS_VALUE', $this->main_model->cleantalk_get_checkjs_code());
-		$this->main_model->set_cookie();	
-
 	}
 	/**
 	* Checks post or topic to spam
