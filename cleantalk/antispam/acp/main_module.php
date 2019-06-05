@@ -119,6 +119,7 @@ class main_module
 
 						$result = $db->sql_query("SELECT * FROM ".$table_prefix."cleantalk_sfw_logs");
 						$sfw_logs_data = $db->sql_fetchrowset($result);
+ 						$db->sql_freeresult($result);
 						
 						if(count($sfw_logs_data))
 						{							
@@ -140,8 +141,7 @@ class main_module
 									$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
 								}
 							}								
-						}						
- 						$db->sql_freeresult($result);												
+						}
 					}
 					if(!$user_token_is_valid)
 					{						
