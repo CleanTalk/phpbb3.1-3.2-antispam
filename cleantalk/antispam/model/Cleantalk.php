@@ -711,13 +711,7 @@ class Cleantalk
         $headers['Accept'] = $this->request->server('HTTP_ACCEPT','');
         $headers['Referer'] = $this->request->server('HTTP_REFERER','');
         $headers['Accept-Encoding'] = $this->request->server('HTTP_ACCEPT_ENCODING','');
-        $headers['Accept-Language'] = $this->request->server('HTTP_ACCEPT_LANGUAGE',''); 
-        $headers['Cookie'] = preg_replace(array(
-                    '/\s{0,1}ct_checkjs=[a-z0-9]*[;|$]{0,1}/',
-                    '/\s{0,1}ct_timezone=.{0,1}\d{1,2}[;|$]/', 
-                    '/\s{0,1}ct_pointer_data=.*5D[;|$]{0,1}/', 
-                    '/;{0,1}\s{0,3}$/'
-                ), '', $this->request->server('HTTP_COOKIE',''));           
+        $headers['Accept-Language'] = $this->request->server('HTTP_ACCEPT_LANGUAGE','');            
         return $headers;
     }
 

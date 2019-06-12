@@ -29,11 +29,12 @@ class main_listener implements EventSubscriberInterface
 	{
 		return array(
 			'core.user_setup'							=> 'load_language_on_setup',
+			'core.user_setup_after'						=> 'sfw_check',
 			'core.page_footer_after'     			    => 'add_js_to_footer',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                 => 'check_newuser',
-			'core.common'								=> 'global_check',
+			'core.common'								=> 'ccf_check',
 		);
 	}
 
@@ -94,7 +95,7 @@ class main_listener implements EventSubscriberInterface
 	* @param array	$event		array with event variable values
 	*/
 	public function load_language_on_setup($event)
-	{
+	{		
 		$lang_set_ext = $event['lang_set_ext'];
 		$lang_set_ext[] = array(
 			'ext_name' => 'cleantalk/antispam',
@@ -103,7 +104,15 @@ class main_listener implements EventSubscriberInterface
 		$event['lang_set_ext'] = $lang_set_ext;
 
 	}
-
+	/**
+	* SpamFirewall Check
+	*
+	* @param array	$event		array with event variable values
+	*/
+	public function sfw_check($event)
+	{
+		$this->cleantalk_sfw->sfw_check();		
+	}
 	/**
 	* Fills tamplate variable by generated JS-code with unique hash
 	*
@@ -116,8 +125,6 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 		$this->template->assign_var('CT_JS_VALUE', $this->main_model->cleantalk_get_checkjs_code());
-		$this->main_model->set_cookie();	
-
 	}
 	/**
 	* Checks post or topic to spam
@@ -230,7 +237,6 @@ class main_listener implements EventSubscriberInterface
 			}
 		}
 	}
-
 	/**
 	* Marks soft-spam post or comment as manual approvement needed
 	*
@@ -253,7 +259,6 @@ class main_listener implements EventSubscriberInterface
 			$event->set_data($data);
 		}
 	}
-
 	/**
 	* Checks user registration to spam
 	*
@@ -290,14 +295,15 @@ class main_listener implements EventSubscriberInterface
 				}
 			}
 		}
-	}	
+	}
 	/**
-	* Global checks
-	* @void
+	* CCF check
+	*
+	* @param array	$event		array with event variable values
 	*/
-	public function global_check()
+	public function ccf_check($event)
 	{
-		$this->cleantalk_sfw->sfw_check();
+		$this->main_model->set_cookie();
 
 		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->symfony_request->getScriptName(), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
 		{
@@ -322,6 +328,6 @@ class main_listener implements EventSubscriberInterface
 					trigger_error($result['ct_result_comment']);
 				}
 			}
-		}			
-	}
+		}
+	}	
 }
