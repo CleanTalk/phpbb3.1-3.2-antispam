@@ -409,6 +409,5 @@ class main_model
 		}
 
 	    return  $result;
-	}
-		
+	}		
 }

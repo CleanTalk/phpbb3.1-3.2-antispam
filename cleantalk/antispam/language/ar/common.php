@@ -51,7 +51,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_APIKEY_GET_AUTO_BUTTON_LABEL'=> 'الحصول على مفتاح الدخول تلقائياً',
 	'ACP_CLEANTALK_APIKEY_GET_MANUALLY_BUTTON_LABEL'	=> 'الحصول على مفتاح الدخول يدوياً',
 	'ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON'		=> 'انقر هنا للحصول على احصائيات المُكافح',
-
+	'ACP_CLEANTALK_ACCOUNT_NAME_OB'				=> 'الحساب at cleantalk.org هو',
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'			=> 'فحص الأعضاء المُزعجين',
 	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> 'المكافح CleanTalk سوف يفحص جميع الأعضاء في قاعدة بيانات القوائم السوداء لديه , وسيعرض لك أسماء الأعضاء الذين لديهم نشاط مُزعج في المواقع الأخرى. فقط انقر على الزر `فحص الأعضاء المُزعجين` لبدء عملية الفحص.',
 	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'صفحات',	
@@ -69,7 +69,7 @@ $lang = array_merge($lang, array(
 	'ACP_CHECKUSERS_DELETEALL'                  => 'حذف الجميع',
 	'ACP_CHECKUSERS_DELETEALL_DESCR'            => 'سيتم أيضاً حذف جميع المشاركات للأعضاء المحذوفين.',
 	'ACP_CHECKUSERS_DELETESEL'                  => 'حذف المُحدد',
-	
+	'ACP_CLEANTALK_MODERATE_IP'					=> 'خدمة مكافحة الرسائل المزعجة مدفوعة من قبل مزود استضافتك الرخصة #',	
 	'SFW_DIE_NOTICE_IP'                         => 'SpamFireWall is activated for your IP ',
 	'SFW_DIE_MAKE_SURE_JS_ENABLED'              => 'To continue working with web site, please make sure that you have enabled JavaScript.',
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Please click bellow to pass protection,',

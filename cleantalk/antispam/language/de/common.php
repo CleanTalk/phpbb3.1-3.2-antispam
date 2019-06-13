@@ -51,7 +51,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_APIKEY_GET_AUTO_BUTTON_LABEL'		=> 'Get Access key automatically',
 	'ACP_CLEANTALK_APIKEY_GET_MANUALLY_BUTTON_LABEL'	=> 'Get Access manually',
 	'ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON'		=> 'Click here to get anti-spam statistics',
-	
+	'ACP_CLEANTALK_ACCOUNT_NAME_OB'				=> 'Konto bei cleantalk.org ist',
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'			=> 'Prüfe Benutzer auf SPAM',
 	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> 'Antispam von CleanTalk wird Benutzer in der Sperrlisten-Daten prüfen und alle anzeigen, welche SPAM-Aktivitäten auf anderen Webseiten gezeigt haben. Klicke auf `Prüfe Benutzer auf SPAM`, um den Vorgang zu starten.',
 	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'Seite:',		
@@ -69,7 +69,7 @@ $lang = array_merge($lang, array(
 	'ACP_CHECKUSERS_DELETEALL'                  => 'Lösche alle Benutzer',
 	'ACP_CHECKUSERS_DELETEALL_DESCR'            => 'Alle Beiträge der gelöschten Benutzer werden auch gelöscht.',
 	'ACP_CHECKUSERS_DELETESEL'                  => 'Lösche ausgewählte Benutzer',
-	
+	'ACP_CLEANTALK_MODERATE_IP'					=> 'Der Anti-spam-Dienst wird von Ihrem hosting-Anbieter bezahlt. Lizenz #',	
 	'SFW_DIE_NOTICE_IP'                         => 'SpamFireWall is activated for your IP ',
 	'SFW_DIE_MAKE_SURE_JS_ENABLED'              => 'To continue working with web site, please make sure that you have enabled JavaScript.',
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Please click bellow to pass protection,',

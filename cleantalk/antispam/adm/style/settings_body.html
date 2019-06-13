@@ -75,6 +75,12 @@
 				<!-- IF CLEANTALK_ANTISPAM_KEY_IS_OK -->
 					<span style="color: green;">{L_ACP_CLEANTALK_APIKEY_IS_OK_LABEL}</span>
 					<br>
+					<!-- IF CLEANTALK_ANTISPAM_MODERATE_IP -->
+					<b>{L_ACP_CLEANTALK_MODERATE_IP} {CLEANTALK_ANTISPAM_IP_LICENSE}</b>
+					<!-- ELSE -->
+					<b>{L_ACP_CLEANTALK_ACCOUNT_NAME_OB} {CLEANTALK_ANTISPAM_ACCOUNT_NAME_OB}</b>					
+					<!-- ENDIF -->
+					<br>
 					<a href="https://www.cleantalk.org/my?user_token={CLEANTALK_ANTISPAM_USER_TOKEN}">{L_ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON}</a>
 				<!-- ENDIF -->
 			</dd>

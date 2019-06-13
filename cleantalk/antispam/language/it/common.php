@@ -50,7 +50,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_APIKEY_GET_AUTO_BUTTON_LABEL'		=> 'Ottenere la chiave automaticamente',
 	'ACP_CLEANTALK_APIKEY_GET_MANUALLY_BUTTON_LABEL'	=> 'Ottenere la chiave manualmente',
 	'ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON'		=> 'Vai in pannello di controllo CleanTalk',
-
+	'ACP_CLEANTALK_ACCOUNT_NAME_OB'				=> 'Account at cleantalk.org è',
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'		    => 'Verificare utenti spam',
 	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> 'Antispam da CleanTalk controllerà tutti gli utenti in lista nera e vi mostrerà chi ha dimostrato di spam attività su altri siti.',
 	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'Pagina:',
@@ -68,7 +68,7 @@ $lang = array_merge($lang, array(
 	'ACP_CHECKUSERS_DELETEALL'                  => 'Rimuovere tutti i',
 	'ACP_CHECKUSERS_DELETEALL_DESCR'            => 'Tutti i post di utenti selezionati saranno cancellati',
 	'ACP_CHECKUSERS_DELETESEL'                  => 'Rimuovi selezionati',
-	
+	'ACP_CLEANTALK_MODERATE_IP'					=> 'Il servizio anti-spam è pagato dal vostro fornitore di hosting. Licenza #',	
 	'SFW_DIE_NOTICE_IP'                         => 'SpamFireWall incluso per il vostro IP',
 	'SFW_DIE_MAKE_SURE_JS_ENABLED'              => 'Che sarebbe continuare con il sito web, assicurarsi che avete abilitato JavaScript.',
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Clicca qui sotto che togliere il blocco',

@@ -49,7 +49,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_APIKEY_GET_AUTO_BUTTON_LABEL'		=> 'Получить ключ автоматически',
 	'ACP_CLEANTALK_APIKEY_GET_MANUALLY_BUTTON_LABEL'	=> 'Получить ключ вручную',
 	'ACP_CLEANTALK_APIKEY_CP_LINK_BUTTON'		=> 'Перейти в панель управления CleanTalk',
-
+	'ACP_CLEANTALK_ACCOUNT_NAME_OB'				=> 'Аккаунт на cleantalk.org',
 	'ACP_CLEANTALK_CHECKUSERS_TITLE'		    => 'Проверить пользователей на спам',
 	'ACP_CLEANTALK_CHECKUSERS_DESCRIPTION'		=> 'Антиспам от CleanTalk проверит всех пользователей по черным спискам и покажет вам тех, кто проявил спам-активность на других сайтах. ',
 	'ACP_CLEANTALK_CHECKUSERS_PAGES_TITLE'      => 'Страницы:',
@@ -67,7 +67,7 @@ $lang = array_merge($lang, array(
 	'ACP_CHECKUSERS_DELETEALL'                  => 'Удалить всех',
 	'ACP_CHECKUSERS_DELETEALL_DESCR'            => 'Все посты выбранных пользователей будут тоже удалены',
 	'ACP_CHECKUSERS_DELETESEL'                  => 'Удалить выбранных',
-	
+	'ACP_CLEANTALK_MODERATE_IP'					=> 'Антиспам сервис оплачен вашим хостин провайдером. Лицензия #',	
 	'SFW_DIE_NOTICE_IP'                         => 'SpamFireWall включен для вашего IP',
 	'SFW_DIE_MAKE_SURE_JS_ENABLED'              => 'Что бы продолжить работу с сайтом, убедитесь что у вас включен JavaScript.',
 	'SFW_DIE_CLICK_TO_PASS'                     => 'Нажмите ниже что снять блокировку',
