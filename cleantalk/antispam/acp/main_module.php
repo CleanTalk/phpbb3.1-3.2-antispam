@@ -119,7 +119,6 @@ class main_module
 
 						$result = $db->sql_query("SELECT * FROM ".$table_prefix."cleantalk_sfw_logs");
 						$sfw_logs_data = $db->sql_fetchrowset($result);
- 						$db->sql_freeresult($result);
 						
 						if(count($sfw_logs_data))
 						{							
@@ -141,7 +140,8 @@ class main_module
 									$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
 								}
 							}								
-						}
+						}						
+ 						$db->sql_freeresult($result);												
 					}
 					if(!$user_token_is_valid)
 					{						
@@ -159,6 +159,8 @@ class main_module
 							$config->set('cleantalk_antispam_check_payment_status_last_gc', time());
 						}
 					}	
+						$composer_json = json_decode(file_get_contents($phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
+						\cleantalk\antispam\model\CleantalkHelper::sendEmptyFeedback($savekey, 'phpbb31-' . preg_replace("/(\d+)\.(\d*)\.?(\d*)/", "$1$2$3", $composer_json->version));
 				}
 				else
 				{
@@ -192,10 +194,9 @@ class main_module
 		$user->add_lang_ext('cleantalk/antispam', 'common');
 
 		$ct_del_user = $request->variable('ct_del_user',   array(0), false, \phpbb\request\request_interface::POST);
-		$ct_del_all  = $request->variable('ct_delete_all', '', false, \phpbb\request\request_interface::POST);
-		$delete_user_ids = array();		
-		
-		if($ct_del_all != '')
+		$ct_del_all  = $request->variable('ct_delete_all', '',       false, \phpbb\request\request_interface::POST);
+				
+		if($ct_del_all!='')
 		{
 			if (!check_form_key('cleantalk/antispam'))
 			{
@@ -206,18 +207,16 @@ class main_module
 			{
 				include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
-			$sql = 'SELECT user_id FROM ' . USERS_TABLE . ' WHERE ct_marked=1';
+			$sql = 'SELECT * FROM ' . USERS_TABLE . ' WHERE ct_marked=1';
 			$result = $db->sql_query($sql);
-			
 			while($row = $db->sql_fetchrow($result))
 			{
-				$delete_user_ids[] = $row['user_id'];
+				user_delete('remove', $row['user_id']);
 			}
-
 			$db->sql_freeresult($result);
 		}
 		
-		if (sizeof($ct_del_user) > 0)
+		if(sizeof($ct_del_user)>0)
 		{
 			if (!check_form_key('cleantalk/antispam'))
 			{
@@ -229,14 +228,10 @@ class main_module
 			}
 			foreach($ct_del_user as $key=>$value)
 			{
-				$delete_user_ids[] = $key;
+				user_delete('remove', $key);
 			}
 		}
-		if (!empty($delete_user_ids))
-		{
-			user_delete('remove', $delete_user_ids);
-		}		
-		if ($request->variable('check_spam', '', false, \phpbb\request\request_interface::POST))
+		if($request->variable('check_spam', '',       false, \phpbb\request\request_interface::POST))
 		{
 			if (!check_form_key('cleantalk/antispam'))
 			{
@@ -336,7 +331,6 @@ class main_module
 		$sql = 'SELECT COUNT(user_id) AS user_count	FROM ' . USERS_TABLE . ' WHERE ct_marked = 1';
 		$db->sql_query($sql);
 		$spam_users_count = (int)$db->sql_fetchfield('user_count');
-		$db->sql_freeresult($result);
 
 		$sql = 'SELECT * FROM ' . USERS_TABLE . ' WHERE ct_marked = 1';
 		$result = $db->sql_query_limit($sql, $on_page, $start_entry);
@@ -357,7 +351,7 @@ class main_module
 		}
 		$db->sql_freeresult($result);
 		$pages = ceil($spam_users_count / $on_page); 
-		$server_uri = append_sid($phpbb_root_path.'index.'.$phpEx,array('i'=>$request->variable('i','1')));
+		$server_uri = append_sid('index.'.$phpEx,array('i'=>$request->variable('i','1')));
 		if ($pages>1)
 		{
 			$template->assign_var('CT_PAGES_TITLE',1);

@@ -185,7 +185,7 @@ class CleantalkHelper
 			'feedback' => 0 . ':' . $agent_version
 		);
 		
-		$result = self::sendRawRequest(self::URL, $request, false, 15);
+		$result = self::sendRawRequest(self::URL, $request);
 		$result = $do_check ? $result = self::checkRequestResult($result, 'send_feedback') : $result;
 		
 		return $result;
@@ -309,7 +309,8 @@ class CleantalkHelper
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
             // see http://stackoverflow.com/a/23322368
             curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-           			
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);            			
 			$result = curl_exec($ch);
 			
 			if($result !== false)
