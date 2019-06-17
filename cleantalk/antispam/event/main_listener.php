@@ -126,7 +126,7 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function add_js_to_footer($event)
 	{		
-		if (empty($this->config['cleantalk_antispam_apikey']))
+		if (!$this->config['cleantalk_antispam_key_is_ok'])
 		{
 			return;
 		}
@@ -140,7 +140,7 @@ class main_listener implements EventSubscriberInterface
 	public function check_comment($event)
 	{
 		$data = $event->get_data();
-		if (empty($this->config['cleantalk_antispam_apikey']) || $data['submit'] != 1)
+		if (!$this->config['cleantalk_antispam_key_is_ok'] || $data['submit'] != 1)
 		{
 			return;
 		}
@@ -250,7 +250,7 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function change_comment_approve($event)
 	{
-		if (empty($this->config['cleantalk_antispam_apikey']))
+		if (!$this->config['cleantalk_antispam_key_is_ok'])
 		{
 			return;
 		}
@@ -272,7 +272,7 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function check_newuser($event)
 	{
-		if (empty($this->config['cleantalk_antispam_apikey']))
+		if (!$this->config['cleantalk_antispam_key_is_ok'])
 		{
 			return;
 		}
