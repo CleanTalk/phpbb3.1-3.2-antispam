@@ -314,7 +314,7 @@ class main_module
 		}
 		$on_page = 20;
 		$sql = 'SELECT COUNT(user_id) AS user_count	FROM ' . USERS_TABLE . ' WHERE ct_marked = 1';
-		$db->sql_query($sql);
+		$result = $db->sql_query($sql);
 		$spam_users_count = (int)$db->sql_fetchfield('user_count');
 		$db->sql_freeresult($result);
 
