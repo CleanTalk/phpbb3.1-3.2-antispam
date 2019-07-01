@@ -154,7 +154,7 @@ class CleantalkHelper
 			'data' => implode(',',$data),
 		);
 		
-		$result = self::sendRawRequest(self::URL, $request);
+		$result = self::sendRawRequest(self::URL, $request, false, 15);
 		$result = $do_check ? $result = self::checkRequestResult($result, 'spam_check_cms') : $result;
 		
 		return $result;
