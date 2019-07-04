@@ -302,10 +302,6 @@ class main_module
 			{
 				$template->assign_var('CT_ERROR', $error);
 			}
-			else
-			{
-				$template->assign_var('CT_ACP_CHECKUSERS_DONE_1',1);
-			}
 		}
 		$start_entry = 0;		
 		if($request->is_set('start_entry', \phpbb\request\request_interface::GET))
@@ -337,7 +333,7 @@ class main_module
 		}
 		$db->sql_freeresult($result);
 		$pages = ceil($spam_users_count / $on_page); 
-		$server_uri = append_sid($phpbb_root_path.'index.'.$phpEx,array('i'=>$request->variable('i','1')));
+		$server_uri = append_sid($phpbb_root_path.'adm/index.'.$phpEx,array('i'=>$request->variable('i','1')));
 		if ($pages>1)
 		{
 			$template->assign_var('CT_PAGES_TITLE',1);
