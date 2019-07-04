@@ -225,40 +225,26 @@ class main_module
 			$sql = 'UPDATE ' . USERS_TABLE . ' 
 				SET ct_marked=0';
 			$db->sql_query($sql);
-			$sql = "SELECT user_id, username, user_regdate, user_lastvisit, user_ip, user_email FROM " . USERS_TABLE . " WHERE user_password<>'' ORDER BY user_regdate DESC";
+			$sql = "SELECT user_ip, user_email FROM " . USERS_TABLE . " WHERE user_password<>'' ORDER BY user_regdate DESC";
 			$result = $db->sql_query($sql);
 			
-			$users  = array(0 => array());
-			$data   = array(0 => array());
-			$cnt    = 0;
+			$data   = array();
+
 			while($row = $db->sql_fetchrow($result))
 			{
-				$users[$cnt][] = array(
-					'name'   => $row['username'],
-					'id'     => $row['user_id'],
-					'email'  => $row['user_email'],
-					'ip'     => $row['user_ip'],
-					'joined' => $row['user_regdate'],
-					'visit'  => $row['user_lastvisit'],
-				);
-				$data[$cnt][]=$row['user_email'];
-				$data[$cnt][]=$row['user_ip'];
-				
-				if(sizeof($users[$cnt])>450)
-				{
-					$cnt++;
-					$users[$cnt]=array();
-					$data[$cnt]=array();
-				}
+				if (!empty($row['user_email']) && !in_array($row['user_email'], $data))
+					$data[] = $row['user_email'];
+				if (!empty($row['user_ip']) && !in_array($row['user_ip'], $data))
+					$data[] = $row['user_ip'];
 			}
-			
+
 			$db->sql_freeresult($result);
 			$error="";
-			for($i=0;$i<sizeof($users);$i++)
+			
+			if ($data && count($data) > 0)
 			{
-				
-				$result = \cleantalk\antispam\model\CleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], $data[$i]);
-				
+				$result = \cleantalk\antispam\model\CleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], $data);
+
 				if(!empty($result['error']))
 				{					
 					if($result['error_string'] == 'CONNECTION_ERROR')
@@ -295,9 +281,8 @@ class main_module
 							}
 						}
 					}
-				}
+				}				
 			}
-
 			if($error!='')
 			{
 				$template->assign_var('CT_ERROR', $error);
@@ -314,7 +299,7 @@ class main_module
 		$spam_users_count = (int)$db->sql_fetchfield('user_count');
 		$db->sql_freeresult($result);
 
-		$sql = 'SELECT * FROM ' . USERS_TABLE . ' WHERE ct_marked = 1';
+		$sql = 'SELECT user_id, username, user_regdate, user_posts, user_colour, user_email, user_ip, user_lastvisit FROM ' . USERS_TABLE . ' WHERE ct_marked = 1';
 		$result = $db->sql_query_limit($sql, $on_page, $start_entry);
 		$found = false;
 		while($row = $db->sql_fetchrow($result))
@@ -327,7 +312,7 @@ class main_module
 			    'USERNAME'			=> get_username_string('username', $row['user_id'], $row['username'], $row['user_colour']),
 			    'JOINED'			=> (!$row['user_regdate']) ? ' - ' : $user->format_date(intval($row['user_regdate'])),
 			    'USER_EMAIL'		=> $row['user_email'],
-			    'USER_IP'			=> $row['user_ip'],
+			    'USER_IP'			=> (!$row['user_ip']) ? ' - ' : $row['user_ip'],
 			    'LAST_VISIT'		=> (!$row['user_lastvisit']) ? ' - ' : $user->format_date(intval($row['user_lastvisit'])),
 			));
 		}
