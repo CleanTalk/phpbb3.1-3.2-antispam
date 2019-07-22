@@ -243,45 +243,55 @@ class main_module
 			
 			if ($data && count($data) > 0)
 			{
-				$result = \cleantalk\antispam\model\CleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], $data);
-
-				if(!empty($result['error']))
-				{					
-					if($result['error_string'] == 'CONNECTION_ERROR')
-					{
-						$error = $user->lang('ACP_CHECKUSERS_DONE_3');
-					}
-					else 
-					{
-						$error = $result['error_message'];
-					}
-				}
-				else
+				$api_check_limit = 1000;
+				$offset = 0;
+				for ($i=0;$i < count($data);$i++)
 				{
-					foreach($result as $key => $value)
+					if ($i % $api_check_limit == 0)
 					{
-						if($key === filter_var($key, FILTER_VALIDATE_IP))
-						{
-							if(strval($value['appears']) == 1)
+						$result = \cleantalk\antispam\model\CleantalkHelper::spamCheckCms($config['cleantalk_antispam_apikey'], array_slice($data, $offset, $api_check_limit));
+						$offset+=$api_check_limit;
+
+						if(!empty($result['error']))
+						{					
+							if($result['error_string'] == 'CONNECTION_ERROR')
 							{
-								$sql = "UPDATE " . USERS_TABLE . " 
-								SET ct_marked=1 
-								WHERE user_ip='".$db->sql_escape($key)."'";
-								$db->sql_query($sql);
+								$error = $user->lang('ACP_CHECKUSERS_DONE_3');
+							}
+							else 
+							{
+								$error = $result['error_message'];
 							}
 						}
 						else
 						{
-							if(strval($value['appears']) == 1)
+							foreach($result as $key => $value)
 							{
-								$sql = "UPDATE " . USERS_TABLE . "
-									SET ct_marked=1 
-									WHERE user_email='".$db->sql_escape($key)."'";
-								$db->sql_query($sql);
+								if($key === filter_var($key, FILTER_VALIDATE_IP))
+								{
+									if(strval($value['appears']) == 1)
+									{
+										$sql = "UPDATE " . USERS_TABLE . " 
+										SET ct_marked=1 
+										WHERE user_ip='".$db->sql_escape($key)."'";
+										$db->sql_query($sql);
+									}
+								}
+								else
+								{
+									if(strval($value['appears']) == 1)
+									{
+										$sql = "UPDATE " . USERS_TABLE . "
+											SET ct_marked=1 
+											WHERE user_email='".$db->sql_escape($key)."'";
+										$db->sql_query($sql);
+									}
+								}
 							}
 						}
 					}
-				}				
+				}
+				
 			}
 			if($error!='')
 			{
