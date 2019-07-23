@@ -171,11 +171,10 @@ class main_module
 
 		$user->add_lang_ext('cleantalk/antispam', 'common');
 
-		$ct_del_user = $request->variable('ct_del_user',   array(0), false, \phpbb\request\request_interface::POST);
-		$ct_del_all  = $request->variable('ct_delete_all', '', false, \phpbb\request\request_interface::POST);
+		$table_action = $request->variable('table_actions', '', false, \phpbb\request\request_interface::POST);
 		$delete_user_ids = array();		
-		
-		if($ct_del_all != '')
+
+		if($table_action == 'ct_delete_all')
 		{
 			if (!check_form_key('cleantalk/antispam'))
 			{
@@ -197,7 +196,7 @@ class main_module
 			$db->sql_freeresult($result);
 		}
 		
-		if (sizeof($ct_del_user) > 0)
+		if ($table_action == 'ct_delete_checked')
 		{
 			if (!check_form_key('cleantalk/antispam'))
 			{
@@ -207,9 +206,13 @@ class main_module
 			{
 				include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
-			foreach($ct_del_user as $key=>$value)
+			$ct_del_user = $request->variable('ct_del_user',   array(0), false, \phpbb\request\request_interface::POST);
+			if (sizeof($ct_del_user) > 0)
 			{
-				$delete_user_ids[] = $key;
+				foreach($ct_del_user as $key=>$value)
+				{
+					$delete_user_ids[] = $key;
+				}				
 			}
 		}
 		if (!empty($delete_user_ids))
