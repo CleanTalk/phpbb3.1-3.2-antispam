@@ -31,7 +31,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_GUESTS_LABEL'		        => 'Moderiere Gäste',
 	'ACP_CLEANTALK_GUESTS_DESCR'		        => 'Beiträge und Themen von Gästen werden auf SPAM geprüft. SPAM wird abgelehnt oder zur Prüfung weitergeleitet.',
 	
-	'ACP_CLEANTALK_NUSERS_LABEL'		        => 'Moderiere neu registrierte Benutzer Newly Registered Users',
+	'ACP_CLEANTALK_NUSERS_LABEL'		        => 'Moderiere neu registrierte Benutzer',
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'Beiträge und Themen von neuen Benutzern werden auf SPAM geprüft. SPAM wird abgelehnt oder zur Prüfung weitergeleitet.',
 
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Kontaktformulare überprüfen',
