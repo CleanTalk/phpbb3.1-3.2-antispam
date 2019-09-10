@@ -151,7 +151,7 @@ class main_module
 			
 			trigger_error($user->lang('ACP_CLEANTALK_SETTINGS_SAVED') . adm_back_link($this->u_action));
 		}
-		
+
 		$template->assign_vars(array(
 			'U_ACTION'				=> $this->u_action,
 			'CLEANTALK_ANTISPAM_REGS'		=> $config['cleantalk_antispam_regs'] ? true : false,
@@ -218,19 +218,46 @@ class main_module
 		if (!empty($delete_user_ids))
 		{
 			user_delete('remove', $delete_user_ids);
-		}		
+		}
+
 		if ($request->variable('check_spam', '', false, \phpbb\request\request_interface::POST))
 		{
 			if (!check_form_key('cleantalk/antispam'))
 			{
 				trigger_error('FORM_INVALID');
 			}
-			$sql = 'UPDATE ' . USERS_TABLE . ' 
-				SET ct_marked=0';
-			$db->sql_query($sql);
-			$sql = "SELECT user_ip, user_email FROM " . USERS_TABLE . " WHERE user_password<>'' ORDER BY user_regdate DESC";
+
+            $error="";
+            $check_spam_number = $request->variable('check_spam_number', '', false, \phpbb\request\request_interface::POST);
+
+            $sql = 'UPDATE ' . USERS_TABLE . ' SET ct_marked=0 WHERE ct_marked=1';
+            $db->sql_query($sql);
+
+			if( ! is_numeric($check_spam_number) && '' !== $check_spam_number )
+			{
+			    $error = 'Please provide a right number to check.';
+                $template->assign_var('CT_ERROR', $error);
+            }
+
+			if( '' !== $check_spam_number )
+			{
+                $limit = " LIMIT " . (int) $check_spam_number;
+                $config->set('check_spam_number', $check_spam_number);
+
+            }
+			else
+            {
+                $sql = 'UPDATE ' . USERS_TABLE . ' SET ct_marked=0';
+                $db->sql_query($sql);
+
+                $limit = '';
+                $config->set('check_spam_number', '');
+            }
+
+            $template->assign_var('CLEANTALK_CHECKUSERS_NUMBER', $config['check_spam_number'] ? $config['check_spam_number'] : '');
+
+			$sql = "SELECT user_ip, user_email FROM " . USERS_TABLE . " WHERE user_password<>'' AND ct_marked<>2 ORDER BY user_regdate DESC" . $limit;
 			$result = $db->sql_query($sql);
-			
 			$data   = array();
 
 			while($row = $db->sql_fetchrow($result))
@@ -242,7 +269,6 @@ class main_module
 			}
 
 			$db->sql_freeresult($result);
-			$error="";
 			
 			if ($data && count($data) > 0)
 			{
@@ -289,6 +315,13 @@ class main_module
 											WHERE user_email='".$db->sql_escape($key)."'";
 										$db->sql_query($sql);
 									}
+									else
+									{
+                                        $sql = "UPDATE " . USERS_TABLE . "
+											SET ct_marked=2 
+											WHERE user_email='".$db->sql_escape($key)."'";
+                                        $db->sql_query($sql);
+                                    }
 								}
 							}
 						}

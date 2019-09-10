@@ -96,10 +96,16 @@
 <fieldset style="text-align: center;">
 	<form method="post">
 	<h1>{L_ACP_CLEANTALK_CHECKUSERS_TITLE}</h1><br />
-	<dl>
 		<dt>{L_ACP_CLEANTALK_CHECKUSERS_DESCRIPTION}</dt>
 		<dd style="text-align:left; margin-top: 5px;">
-			<input class="button1" type="submit" name="check_spam" value="{L_ACP_CLEANTALK_CHECKUSERS_BUTTON}" />
+			<div>
+				<input size="10" maxlength="60" type="text" name="check_spam_number" value="{CLEANTALK_CHECKUSERS_NUMBER}" />
+				{L_ACP_CLEANTALK_CHECKUSERS_NUMBER_DESCRIPTION}
+				<br>
+			</div>
+			<div>
+				<input class="button1" type="submit" name="check_spam" value="{L_ACP_CLEANTALK_CHECKUSERS_BUTTON}" />
+			</div>
 		</dd>
 	</dl>
 	{S_FORM_TOKEN}
