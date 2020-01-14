@@ -79,6 +79,20 @@ class main_model
 	*/	
 	public function check_spam( $spam_check )
 	{
+		
+		// Exclusions
+		$exclusion_urls = array(
+			'^[a-zA-Z0-9\/\.]*\/adm\/index\.php',
+		);
+		
+		if($this->exclusions_check__url($exclusion_urls, true)){
+			return array(
+				'errno' => 0,
+				'allow' => 1,
+			);
+		}
+		//End of exclusions
+		
 		$this->user->add_lang('acp/common');
 		$checkjs = $this->cleantalk_is_valid_js() ? 1 : 0;
 	
@@ -157,6 +171,7 @@ class main_model
 				$ct_result = $this->cleantalk->sendFeedback($this->cleantalk_request);
 				break;
 		}
+		
 		$ret_val = array();
 		$ret_val['errno'] = 0;
 		$ret_val['allow'] = 1;
@@ -409,5 +424,29 @@ class main_model
 		}
 
 	    return  $result;
-	}		
+	}
+	
+	/**
+	 * Checks if reuqest URI is in exclusion list
+	 *
+	 * @return bool
+	 */
+	public function exclusions_check__url( $exclusions, $is_regexp = false ){
+		
+		$haystack = $this->request->server('SERVER_NAME').$this->request->server('REQUEST_URI');
+		
+		foreach ( $exclusions as $exclusion )
+		{
+			
+			if(
+				( $is_regexp && preg_match( '/' . $exclusion . '/', $haystack ) === 1 ) ||
+				stripos( $haystack, $exclusion ) !== false
+			)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }
