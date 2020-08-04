@@ -29,4 +29,25 @@ class release_5_7_3 extends \phpbb\db\migration\migration
 			array('config.add', array('check_spam_number', '')),			
 		);
 	}
+
+	public function update_schema()
+	{
+		return array(
+			'add_columns'	=> array(
+				$this->table_prefix . 'cleantalk_sfw' => array(
+					'status'	=> array('TINT:1', 0, 'after' => 'mask'),
+				),
+			),
+		);
+	}
+	public function revert_schema()
+	{
+		return array(
+			'drop_columns' => array(
+				$this->table_prefix . 'cleantalk_sfw'	=> array(
+					'status'
+				)
+			)
+		);
+	}
 }

@@ -449,4 +449,67 @@ class main_model
 		
 		return false;
 	}
+
+	/**
+	 * SpamFireWall update function
+	 *
+	 */
+	public function sfw_update($access_key) {
+
+		global $request, $config;
+
+	    $file_urls = !empty($request->variable('file_urls', '')) ? urldecode( $request->variable('file_urls', '') ) : null;
+	    $file_urls = isset($file_urls) ? explode(',', $file_urls) : null;
+	    
+	    if (!$file_urls) {
+			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
+	    } else {
+			if (is_array($file_urls) && count($file_urls)) {
+
+				$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update($file_urls[0]);
+
+				if(empty($result['error'])){
+
+					array_shift($file_urls);	
+
+					if (count($file_urls)) {
+						\cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
+							($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''), 
+							array(
+								'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
+								'spbc_remote_call_action' => 'sfw_update',
+								'plugin_name'             => 'apbct',
+								'file_urls'               => implode(',', $file_urls),
+							),
+							array('get', 'async')
+						);							
+					} else {
+						//Files array is empty update sfw time
+						$config->set('cleantalk_antispam_sfw_update_last_gc', time());
+
+						return $result;
+					}
+				} else 
+					return array('error' => 'ERROR_WHILE_INSERTING_SFW_DATA');
+			}	    	
+	    }
+	    return $result;
+	}
+
+	/**
+	 * SpamFireWall send logs function
+	 *
+	 */	
+	public function sfw_send_logs($access_key) {
+
+		global $config;
+
+		$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
+
+		if (empty($result['error']) {
+			$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
+		}
+
+		return $result;
+	}	
 }
