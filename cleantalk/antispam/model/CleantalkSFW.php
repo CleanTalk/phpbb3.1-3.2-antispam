@@ -401,7 +401,7 @@ class CleantalkSFW
 		$sfw_logs_data = $db->sql_fetchrowset($result);
 		$db->sql_freeresult($result);		
 
-		if(count($sfw_logs_data))
+		if(is_array($sfw_logs_data) && count($sfw_logs_data))
 		{	
 			//Compile logs
 			$data = array();

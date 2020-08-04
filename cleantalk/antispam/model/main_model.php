@@ -504,9 +504,9 @@ class main_model
 
 		global $config;
 
-		$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
+		$result = \cleantalk\antispam\model\CleantalkSFW::send_logs($access_key);
 
-		if (empty($result['error']) {
+		if (!isset($result['error'])) {
 			$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
 		}
 
