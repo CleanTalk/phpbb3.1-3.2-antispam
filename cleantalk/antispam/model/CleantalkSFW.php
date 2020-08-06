@@ -429,10 +429,6 @@ class CleantalkSFW
 			}
 				
 		}
-		else
-		{
-			return array('error' => 'NO_LOGS_TO_SEND');
-		}
 	}
 	
 	/*

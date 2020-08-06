@@ -161,7 +161,7 @@ class CleantalkHelper
 			'data' => implode(',',$data),
 		);
 		
-		$result = self::sendRawRequest(self::URL, $request, null, array(), false, 15);
+		$result = self::sendRawRequest(self::URL, $request);
 		$result = $do_check ? $result = self::checkRequestResult($result, 'spam_check_cms') : $result;
 		
 		return $result;
@@ -265,13 +265,9 @@ class CleantalkHelper
 	 * @param integer connect timeout
 	 * @return type
 	 */
-	static public function sendRawRequest($url, $data = array(), $presets = null, $opts = array(), $isJSON = false, $timeout = 3)
+	static public function sendRawRequest($url, $data = array(), $presets = null, $opts = array(), $timeout = 3)
 	{	
-		$result=null;
-		
-		$curl_exec=false;
-
-		if (function_exists('curl_init') && function_exists('json_decode'))
+		if (function_exists('curl_init'))
 		{	
 			$ch = curl_init();
 
@@ -347,10 +343,9 @@ class CleantalkHelper
            	curl_setopt_array($ch, $opts);		
 			$result = curl_exec($ch);
 
-			if($result !== false)
-			{
-				$curl_exec=true;
-			}
+			// RETURN if async request
+			if(in_array('async', $presets))
+				return true;
 			
 			if($result){
 				
@@ -368,19 +363,6 @@ class CleantalkHelper
 				$out = array('error' => curl_error($ch));
 		} else {
 			$out = array('error' => 'CURL_NOT_INSTALLED');
-		}
-		
-		if(!$curl_exec)
-		{	
-			$opts = array(
-				'http'=>array(
-					'method' => "POST",
-					'timeout'=> $timeout,
-					'content' => $data
-				)
-			);
-			$context = stream_context_create($opts);
-			$out = @file_get_contents($url, 0, $context);
 		}
 
 		/**

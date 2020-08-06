@@ -94,11 +94,11 @@ class main_module
 					{
 						$sfw_update = \cleantalk\antispam\model\main_model::sfw_update($savekey);
 						if (isset($sfw_update['error'])) {
-							//ToDo display error
+							trigger_error($sfw_update['error']);
 						}
 						$sfw_send_logs = \cleantalk\antispam\model\main_model::sfw_send_logs($savekey);
 						if (isset($sfw_send_logs['error'])) {
-							//ToDo display error
+							trigger_error($sfw_send_logs['error']);
 						}
 					}						
 				}																										

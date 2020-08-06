@@ -19,8 +19,6 @@ class cleantalk_antispam_sfw_logs_send extends \phpbb\cron\task\base
 	public function run()
 	{
 		$this->main_model->sfw_send_logs($this->config['cleantalk_antispam_apikey']);
-		$this->config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
-
 	}
 	
 	// Is allow to run?
