@@ -458,39 +458,39 @@ class main_model
 
 		global $request, $config;
 
-	    $file_urls = !empty($request->variable('file_urls', '')) ? urldecode( $request->variable('file_urls', '') ) : null;
-	    $file_urls = isset($file_urls) ? explode(',', $file_urls) : null;
+		$file_url_hash = !empty($request->variable('file_url_hash')) ? urldecode($request->variable('file_url_hash')) : null;
+        
+        $file_url_nums = !empty($request->variable('file_url_nums')) ? urldecode($request->variable('file_url_nums')) : null;
+		$file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
 	    
-	    if (!$file_urls) {
+	    if( ! isset( $file_url_hash, $file_url_nums ) ){
 			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
-	    } else {
-			if (is_array($file_urls) && count($file_urls)) {
+	    } elseif( $file_url_hash && is_array( $file_url_nums ) && count( $file_url_nums ) ){
 
-				$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update($file_urls[0]);
+			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update($file_url_hash, $file_urls[0]);
 
-				if(empty($result['error'])){
+			if(empty($result['error'])){
 
-					array_shift($file_urls);	
+				array_shift($file_urls);	
 
-					if (count($file_urls)) {
-						\cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
-							($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''), 
-							array(
-								'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
-								'spbc_remote_call_action' => 'sfw_update',
-								'plugin_name'             => 'apbct',
-								'file_urls'               => implode(',', $file_urls),
-							),
-							array('get', 'async')
-						);							
-					} else {
-						//Files array is empty update sfw time
-						$config->set('cleantalk_antispam_sfw_update_last_gc', time());
+				if (count($file_urls)) {
+					\cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
+						($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''), 
+						array(
+							'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
+							'spbc_remote_call_action' => 'sfw_update',
+							'plugin_name'             => 'apbct',
+		                    'file_url_hash'           => $file_url_hash,
+		                    'file_url_nums'           => implode(',', $file_url_nums),
+						),
+						array('get', 'async')
+					);							
+				} else {
+					//Files array is empty update sfw time
+					$config->set('cleantalk_antispam_sfw_update_last_gc', time());
 
-						return $result;
-					}
-				} else 
-					return array('error' => 'ERROR_WHILE_INSERTING_SFW_DATA');
+					return $result;
+				}
 			}	    	
 	    }
 	    return $result;

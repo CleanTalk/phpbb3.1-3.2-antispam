@@ -269,15 +269,15 @@ class CleantalkSFW
 	* 
 	* return mixed true || array('error' => true, 'error_string' => STRING)
 	*/
-	public function sfw_update($file_url = null)
+	public function sfw_update( $file_url_hash = null, $file_url_num = null )
 	{	
 		global $config, $request, $db, $table_prefix;
 
-		if(!$file_url) {
-
-			sleep(3);
+		if( ! isset( $file_url_hash, $file_url_num ) ){
 
 			$result = \cleantalk\antispam\model\CleantalkHelper::get2sBlacklistsDb($config['cleantalk_antispam_apikey'], 'multifiles', '2_0');
+
+			sleep(3);
 
 			if(empty($result['error'])) {
 			
@@ -298,12 +298,16 @@ class CleantalkSFW
 
 								if ($gf) {
 
-									$file_urls = array();
+									$file_url_nums = array();
 
-									while(!gzeof($gf))
-										$file_urls[] = trim(gzgets($gf, 1024));			
-
-									gzclose($gf);
+									while(!gzeof($gf)){
+										$file_url       = trim( gzgets( $gf, 1024 ) );
+										$file_url_nums[] = preg_replace( '@(https://.*)\.(\d*)(\.csv\.gz)@', '$2', $file_url );
+										
+										if( ! $file_url_hash )
+											$file_url_hash = preg_replace( '@(https://.*)\.(\d*)(\.csv\.gz)@', '$1', $file_url );
+										
+									}
 
 									return \cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
 										$base_host_url, 
@@ -311,7 +315,8 @@ class CleantalkSFW
 											'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
 											'spbc_remote_call_action' => 'sfw_update',
 											'plugin_name'             => 'apbct',
-											'file_urls'               => implode(',', $file_urls),
+											'file_url_hash'           => $file_url_hash,
+											'file_url_nums'           => implode(',', $file_url_nums),
 										),
 										$pattenrs
 									);								
@@ -335,7 +340,9 @@ class CleantalkSFW
 					return array('error' => 'BAD_RESPONSE');
 			} else
 				return $result;
-		} else {
+		} elseif( isset( $file_url_hash, $file_url_num ) ) {
+			
+			$file_url = $file_url_hash . '.' . $file_url_num . '.csv.gz';
 						
 			if(\cleantalk\antispam\model\CleantalkHelper::sendRawRequest($file_url, array(), 'get_code') === 200) { // Check if it's there
 		
