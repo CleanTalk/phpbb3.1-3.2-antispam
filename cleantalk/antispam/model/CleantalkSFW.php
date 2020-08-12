@@ -308,7 +308,6 @@ class CleantalkSFW
 											$file_url_hash = preg_replace( '@(https://.*)\.(\d*)(\.csv\.gz)@', '$1', $file_url );
 										
 									}
-
 									return \cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
 										$base_host_url, 
 										array(
@@ -321,21 +320,12 @@ class CleantalkSFW
 										$pattenrs
 									);								
 								}
-							}else {
-								return \cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
-									$base_host_url, 
-									array(
-										'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
-										'spbc_remote_call_action' => 'sfw_update',
-										'plugin_name'             => 'apbct',
-										'file_urls'               => $result['file_url'],
-									),
-									$pattenrs
-								);								
-							}
+							} else 
+								return array('error' => 'COULD_NOT_GET_MULTIFILE');			
 						} else
 							return array('error' => 'ERROR_ALLOW_URL_FOPEN_DISABLED');
-					}				
+					} else
+						return array('error' => 'MULTIFILE_BAD_RESPONSE_CODE');	
 				} else
 					return array('error' => 'BAD_RESPONSE');
 			} else

@@ -458,22 +458,21 @@ class main_model
 
 		global $request, $config;
 
-		$file_url_hash = !empty($request->variable('file_url_hash')) ? urldecode($request->variable('file_url_hash')) : null;
-        
-        $file_url_nums = !empty($request->variable('file_url_nums')) ? urldecode($request->variable('file_url_nums')) : null;
+		$file_url_hash = !empty($request->variable('file_url_hash', '')) ? urldecode($request->variable('file_url_hash', '')) : null;
+        $file_url_nums = !empty($request->variable('file_url_nums', '')) ? urldecode($request->variable('file_url_nums', '')) : null;
 		$file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
-	    
+		
 	    if( ! isset( $file_url_hash, $file_url_nums ) ){
 			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
 	    } elseif( $file_url_hash && is_array( $file_url_nums ) && count( $file_url_nums ) ){
 
-			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update($file_url_hash, $file_urls[0]);
+			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update($file_url_hash, $file_url_nums[0]);
 
 			if(empty($result['error'])){
 
-				array_shift($file_urls);	
+				array_shift($file_url_nums);	
 
-				if (count($file_urls)) {
+				if (count($file_url_nums)) {
 					\cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
 						($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''), 
 						array(
