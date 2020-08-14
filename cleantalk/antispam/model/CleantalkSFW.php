@@ -157,15 +157,16 @@ class CleantalkSFW
 	public function check_ip()
 	{			
 		for($i=0, $arr_count = sizeof($this->ip_array); $i < $arr_count; $i++)
-		{	
+		{
 			$query = "SELECT 
-				COUNT(network) AS cnt
+				network, mask, status
 				FROM ".$this->table_prefix."cleantalk_sfw
-				WHERE network = ".intval($this->ip_array[$i])." & mask";
+				WHERE network = ".intval($this->ip_array[$i])." & mask
+				ORDER BY status DESC LIMIT 1";
 			$this->universal_query($query);
 			$this->universal_fetch();
-						
-			if($this->db_result_data['cnt'])
+
+			if($this->db_result_data && $this->db_result_data['status'] == 0)
 			{
 				$this->result = true;
 				$this->blocked_ip=$this->ip_str_array[$i];
@@ -394,7 +395,7 @@ class CleantalkSFW
 		global $db, $table_prefix;
 
 		//Getting logs
-		$db->sql_query("SELECT * FROM ".$table_prefix."cleantalk_sfw_logs");
+		$result = $db->sql_query("SELECT * FROM ".$table_prefix."cleantalk_sfw_logs");
 		$sfw_logs_data = $db->sql_fetchrowset($result);
 		$db->sql_freeresult($result);		
 
@@ -410,7 +411,7 @@ class CleantalkSFW
 			
 			//Sending the request
 			$result =\cleantalk\antispam\model\CleantalkHelper::sfwLogs($ct_key, $data);
-			
+
 			//Checking answer and deleting all lines from the table
 			if(empty($result['error']))
 			{
