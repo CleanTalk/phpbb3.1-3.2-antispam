@@ -209,7 +209,14 @@ class CleantalkHelper
 				'error_string' => 'CONNECTION_ERROR'
 			);
 		}
-		
+
+		if (!is_string($result)) {
+			return array(
+				'error' => true,
+				'error_string' => 'WRONG FORMAT'
+			);
+		}	
+			
 		// JSON decode errors
 		$result = json_decode($result, true);
 		if(empty($result))
