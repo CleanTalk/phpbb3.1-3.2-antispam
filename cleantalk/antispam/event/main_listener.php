@@ -334,11 +334,15 @@ class main_listener implements EventSubscriberInterface
 	                        die('OK');
 	                    // SFW update
 	                    }elseif($this->request->variable('spbc_remote_call_action','') == 'sfw_update'){   
-	                        $result = $this->main_model->sfw_update($this->config['cleantalk_antispam_apikey']);           
+	                        $result = $this->main_model->sfw_update($this->config['cleantalk_antispam_apikey']);
+		                    if( ! empty( $result['error'] ) )
+			                    error_log( 'Cleantalk Antispam error while updating SFW: ' . $result['error'] );
 	                        die(empty($result['error']) ? 'OK' : 'FAIL '.json_encode(array('error' => $result['error_string'])));
 	                    // SFW send logs
 	                    }elseif($this->request->variable('spbc_remote_call_action','') == 'sfw_send_logs'){  
-	                        $result = $this->main_model->sfw_send_logs($this->config['cleantalk_antispam_apikey']);              
+	                        $result = $this->main_model->sfw_send_logs($this->config['cleantalk_antispam_apikey']);
+		                    if( ! empty( $result['error'] ) )
+			                    error_log( 'Cleantalk Antispam error while sending SFW logs: ' . $result['error'] );
 	                        die(empty($result['error']) ? 'OK' : 'FAIL '.json_encode(array('error' => $result['error_string'])));
 	                    // Update plugin
 	                    }elseif($this->request->variable('spbc_remote_call_action','') == 'update_plugin'){

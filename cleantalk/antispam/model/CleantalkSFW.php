@@ -271,7 +271,7 @@ class CleantalkSFW
 	* return mixed true || array('error' => true, 'error_string' => STRING)
 	*/
 	public function sfw_update( $file_url_hash = null, $file_url_num = null )
-	{	
+	{
 		global $config, $request, $db, $table_prefix;
 
 		if( ! isset( $file_url_hash, $file_url_num ) ){
@@ -283,50 +283,56 @@ class CleantalkSFW
 			if(empty($result['error'])) {
 			
 				if( !empty($result['file_url']) ){
-
-					if(\cleantalk\antispam\model\CleantalkHelper::sendRawRequest($result['file_url'], array(), 'get_code') === 200) {
-
-						if(ini_get('allow_url_fopen')) {
-
-							$pattenrs = array();
-							$pattenrs = array('get', 'async');		
-							$base_host_url = ($request->server('HTTPS') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST');
-							$db->sql_query("TRUNCATE TABLE `".$table_prefix."cleantalk_sfw`");
-							
-							if (preg_match('/multifiles/', $result['file_url'])) {
+					
+					$response_code = \cleantalk\antispam\model\CleantalkHelper::sendRawRequest($result['file_url'], array(), 'get_code');
+					
+					if( empty( $response_code['error'] ) ) {
+					
+						if( $response_code == 200 || $response_code == 501 ) {
+	
+							if(ini_get('allow_url_fopen')) {
+	
+								$pattenrs = array();
+								$pattenrs = array('get', 'async');
+								$base_host_url = ($request->server('HTTPS') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST');
+								$db->sql_query("TRUNCATE TABLE `".$table_prefix."cleantalk_sfw`");
 								
-								$gf = gzopen($result['file_url'], 'rb');
-
-								if ($gf) {
-
-									$file_url_nums = array();
-
-									while(!gzeof($gf)){
-										$file_url       = trim( gzgets( $gf, 1024 ) );
-										$file_url_nums[] = preg_replace( '@(https://.*)\.(\d*)(\.csv\.gz)@', '$2', $file_url );
-										
-										if( ! $file_url_hash )
-											$file_url_hash = preg_replace( '@(https://.*)\.(\d*)(\.csv\.gz)@', '$1', $file_url );
-										
+								if (preg_match('/multifiles/', $result['file_url'])) {
+									
+									$gf = gzopen($result['file_url'], 'rb');
+	
+									if ($gf) {
+	
+										$file_url_nums = array();
+	
+										while(!gzeof($gf)){
+											$file_url       = trim( gzgets( $gf, 1024 ) );
+											$file_url_nums[] = preg_replace( '@(https://.*)\.(\d*)(\.csv\.gz)@', '$2', $file_url );
+											
+											if( ! $file_url_hash )
+												$file_url_hash = preg_replace( '@(https://.*)\.(\d*)(\.csv\.gz)@', '$1', $file_url );
+											
+										}
+										return \cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
+											$base_host_url,
+											array(
+												'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
+												'spbc_remote_call_action' => 'sfw_update',
+												'plugin_name'             => 'apbct',
+												'file_url_hash'           => $file_url_hash,
+												'file_url_nums'           => implode(',', $file_url_nums),
+											),
+											$pattenrs
+										);
 									}
-									return \cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
-										$base_host_url, 
-										array(
-											'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
-											'spbc_remote_call_action' => 'sfw_update',
-											'plugin_name'             => 'apbct',
-											'file_url_hash'           => $file_url_hash,
-											'file_url_nums'           => implode(',', $file_url_nums),
-										),
-										$pattenrs
-									);								
-								}
-							} else 
-								return array('error' => 'COULD_NOT_GET_MULTIFILE');			
-						} else
-							return array('error' => 'ERROR_ALLOW_URL_FOPEN_DISABLED');
-					} else
-						return array('error' => 'MULTIFILE_BAD_RESPONSE_CODE');	
+								} else
+									return array('error' => 'COULD_NOT_GET_MULTIFILE');
+							} else
+								return array('error' => 'ERROR_ALLOW_URL_FOPEN_DISABLED');
+						}else
+							return array('error' => 'MULTIFILE_BAD_RESPONSE_CODE: '. (int) $response_code );
+					}else
+						return array('error' => 'MULTIFILE_COULD_NOT_GET_RESPONSE_CODE: '. $response_code['error'] );
 				} else
 					return array('error' => 'BAD_RESPONSE');
 			} else
@@ -334,9 +340,13 @@ class CleantalkSFW
 		} elseif( isset( $file_url_hash, $file_url_num ) ) {
 			
 			$file_url = $file_url_hash . '.' . $file_url_num . '.csv.gz';
-						
-			if(\cleantalk\antispam\model\CleantalkHelper::sendRawRequest($file_url, array(), 'get_code') === 200) { // Check if it's there
-		
+			
+			$response_code = \cleantalk\antispam\model\CleantalkHelper::sendRawRequest($file_url, array(), 'get_code');
+			
+			if( empty( $response_code['error'] ) ) {
+			
+				if( $response_code == 200 || $response_code == 501 ) {
+					
 					$gf = gzopen($file_url, 'rb');
 
 					if($gf){
@@ -380,8 +390,10 @@ class CleantalkSFW
 							return array('error' => 'ERROR_GZ_EMPTY');
 					} else
 						return array('error' => 'ERROR_OPEN_GZ_FILE');
-			} else
-				return array('error' => 'NO_REMOTE_FILE_FOUND');
+				}else
+					return array('error' => 'FILE_BAD_RESPONSE_CODE: '. (int) $response_code );
+			}else
+				return array('error' => 'FILE_COULD_NOT_GET_RESPONSE_CODE: '. $response_code['error'] );
 		}		
 	}
 	
