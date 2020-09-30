@@ -123,8 +123,10 @@ class main_module
 			'CLEANTALK_ANTISPAM_ACCOUNT_NAME_OB' => $config['cleantalk_antispam_account_name_ob'],
 			'CLEANTALK_ANTISPAM_MODERATE_IP'=> $config['cleantalk_antispam_moderate_ip'],
 			'CLEANTALK_ANTISPAM_IP_LICENSE' => $config['cleantalk_antispam_ip_license'],
+			'CLEANTALK_STATS__SFW_NETS'     => $config['cleantalk_stats__sfw_nets'],
+			'CLEANTALK_DEBUG'               => $config['cleantalk_debug'] ? $config['cleantalk_debug'] :'',
 		));
-
+		
 		$user->add_lang_ext('cleantalk/antispam', 'common');
 
 		$table_action = $request->variable('table_actions', '', false, \phpbb\request\request_interface::POST);

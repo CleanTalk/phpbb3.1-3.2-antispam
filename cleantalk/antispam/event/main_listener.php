@@ -312,7 +312,7 @@ class main_listener implements EventSubscriberInterface
 		$this->main_model->set_cookie();
 
 		//Remote calls
-		if ($this->request->variable('spbc_remote_call_token', '') && $this->request->variable('spbc_remote_call_action','') && $this->request->variable('plugin_name', '') && in_array($this->request->variable('plugin_name',''), array('antispam','anti-spam', 'apbct')))
+		if ($this->request->variable('spbc_remote_call_token', '') && $this->request->variable('spbc_remote_call_action','') && in_array($this->request->variable('plugin_name',''), array('antispam','anti-spam', 'apbct')))
 		{
 	        $remote_calls_config = $this->config_text->get_array(array('cleantalk_antispam_remote_calls'));
 	        $remote_calls = isset($remote_calls_config['cleantalk_antispam_remote_calls']) ? json_decode($remote_calls_config['cleantalk_antispam_remote_calls'],true) : null;

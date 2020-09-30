@@ -453,24 +453,30 @@ class main_model
 	/**
 	 * SpamFireWall update function
 	 *
+	 * @param null $access_key
+	 *
+	 * @return array|bool|type|int|mixed|string[]
 	 */
-	public function sfw_update($access_key) {
+	public function sfw_update( $access_key = null ){
 
 		global $request, $config;
 
-		$file_url_hash = !empty($request->variable('file_url_hash', '')) ? urldecode($request->variable('file_url_hash', '')) : null;
+		$api_server    = !empty($request->variable('api_server', ''))    ? urldecode($request->variable('api_server', ''))    : null;
+		$data_id       = !empty($request->variable('data_id', ''))       ? urldecode($request->variable('data_id', ''))       : null;
         $file_url_nums = !empty($request->variable('file_url_nums', '')) ? urldecode($request->variable('file_url_nums', '')) : null;
 		$file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
 		
-	    if( ! isset( $file_url_hash, $file_url_nums ) ){
+	    if( ! isset( $api_server, $data_id, $file_url_nums ) ){
+	    
 			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
-	    } elseif( $file_url_hash && is_array( $file_url_nums ) && count( $file_url_nums ) ){
+			
+	    } elseif( $api_server && $data_id && is_array( $file_url_nums ) && count( $file_url_nums ) ){
 
-			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update($file_url_hash, $file_url_nums[0]);
+			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update( $api_server, $data_id, $file_url_nums[0] );
 
 			if(empty($result['error'])){
 
-				array_shift($file_url_nums);	
+				array_shift($file_url_nums);
 
 				if (count($file_url_nums)) {
 					\cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
@@ -479,7 +485,8 @@ class main_model
 							'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
 							'spbc_remote_call_action' => 'sfw_update',
 							'plugin_name'             => 'apbct',
-		                    'file_url_hash'           => $file_url_hash,
+							'api_server'              => $api_server,
+							'data_id'                 => $data_id,
 		                    'file_url_nums'           => implode(',', $file_url_nums),
 						),
 						array('get', 'async')
@@ -491,8 +498,8 @@ class main_model
 					return $result;
 				}
 			}	    	
-	    }
-	    return $result;
+	    }else
+	        return true;
 	}
 
 	/**
