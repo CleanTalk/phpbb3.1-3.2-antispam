@@ -321,7 +321,7 @@ class main_listener implements EventSubscriberInterface
 
 	        if(array_key_exists($remote_action, $remote_calls)){
   
-	            if(time() - $remote_calls[$remote_action]['last_call'] > self::APBCT_REMOTE_CALL_SLEEP || ($remote_action == 'sfw_update' && !empty($this->request->variable('file_url_hash', '')))){
+	            if(time() - $remote_calls[$remote_action]['last_call'] > self::APBCT_REMOTE_CALL_SLEEP || ($remote_action == 'sfw_update' && !empty($this->request->variable('data_id', '')))){
 
 	                $remote_calls[$remote_action]['last_call'] = time();
 	                $this->config_text->set_array(array(
