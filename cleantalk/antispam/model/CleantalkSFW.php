@@ -309,7 +309,7 @@ class CleantalkSFW
 								
 								$base_host_url = ($request->server('HTTPS') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST');
 								
-								$db->sql_query("TRUNCATE TABLE `".$table_prefix."cleantalk_sfw`");
+								$db->sql_query("TRUNCATE TABLE ".$table_prefix."cleantalk_sfw");
 								
 								if (preg_match('/multifiles/', $result['file_url'])) {
 									
