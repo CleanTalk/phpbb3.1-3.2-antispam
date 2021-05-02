@@ -539,7 +539,7 @@ class Cleantalk
      */
     private function get_servers_ip($host)
     {
-        $response = null;
+        $response = array();
         if (!isset($host))
         {
             return $response;
