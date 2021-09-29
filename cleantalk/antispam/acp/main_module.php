@@ -13,6 +13,19 @@ namespace cleantalk\antispam\acp;
 class main_module
 {
 
+	/* @var \cleantalk\antispam\model\main_model */
+	protected $main_model;
+
+	/**
+	* Constructor
+	*
+	* @param main_model			$main_model		main_model
+	*/
+	public function __construct(\cleantalk\antispam\model\main_model $main_model)
+	{	
+		$this->main_model = $main_model;
+	}
+
 	function main($id, $mode)
 	{
 		global $user, $template, $request, $config, $db, $table_prefix, $phpbb_root_path, $phpEx;
@@ -92,11 +105,11 @@ class main_module
 
 					if ($config['cleantalk_antispam_sfw_enabled'])
 					{
-						$sfw_update = \cleantalk\antispam\model\main_model::sfw_update($savekey);
+						$sfw_update = $this->main_model->sfw_update($savekey);
 						if (isset($sfw_update['error'])) {
 							trigger_error($sfw_update['error']);
 						}
-						$sfw_send_logs = \cleantalk\antispam\model\main_model::sfw_send_logs($savekey);
+						$sfw_send_logs = $this->main_model->sfw_send_logs($savekey);
 						if (isset($sfw_send_logs['error'])) {
 							trigger_error($sfw_send_logs['error']);
 						}
