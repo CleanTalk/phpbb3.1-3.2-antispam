@@ -12,20 +12,6 @@ namespace cleantalk\antispam\acp;
 
 class main_module
 {
-
-	/* @var \cleantalk\antispam\model\main_model */
-	protected $main_model;
-
-	/**
-	* Constructor
-	*
-	* @param main_model			$main_model		main_model
-	*/
-	public function __construct(\cleantalk\antispam\model\main_model $main_model)
-	{	
-		$this->main_model = $main_model;
-	}
-
 	function main($id, $mode)
 	{
 		global $user, $template, $request, $config, $db, $table_prefix, $phpbb_root_path, $phpEx;
@@ -105,11 +91,11 @@ class main_module
 
 					if ($config['cleantalk_antispam_sfw_enabled'])
 					{
-						$sfw_update = $this->main_model->sfw_update($savekey);
+						$sfw_update = $this->sfw_update($savekey);
 						if (isset($sfw_update['error'])) {
 							trigger_error($sfw_update['error']);
 						}
-						$sfw_send_logs = $this->main_model->sfw_send_logs($savekey);
+						$sfw_send_logs = $this->sfw_send_logs($savekey);
 						if (isset($sfw_send_logs['error'])) {
 							trigger_error($sfw_send_logs['error']);
 						}
@@ -357,5 +343,62 @@ class main_module
 		{
 			$template->assign_var('CT_ACP_CHECKUSERS_DONE_2', '1');
 		}
+	}
+
+	function sfw_update( $access_key = null ){
+
+		global $request, $config;
+
+		$api_server    = !empty($request->variable('api_server', ''))    ? urldecode($request->variable('api_server', ''))    : null;
+		$data_id       = !empty($request->variable('data_id', ''))       ? urldecode($request->variable('data_id', ''))       : null;
+        $file_url_nums = !empty($request->variable('file_url_nums', '')) ? urldecode($request->variable('file_url_nums', '')) : null;
+		$file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
+		
+	    if( ! isset( $api_server, $data_id, $file_url_nums ) ){
+	    
+			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
+			
+	    } elseif( $api_server && $data_id && is_array( $file_url_nums ) && count( $file_url_nums ) ){
+
+			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update( $api_server, $data_id, $file_url_nums[0] );
+
+			if(empty($result['error'])){
+
+				array_shift($file_url_nums);
+
+				if (count($file_url_nums)) {
+					\cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
+						($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''), 
+						array(
+							'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
+							'spbc_remote_call_action' => 'sfw_update',
+							'plugin_name'             => 'apbct',
+							'api_server'              => $api_server,
+							'data_id'                 => $data_id,
+		                    'file_url_nums'           => implode(',', $file_url_nums),
+						),
+						array('get', 'async')
+					);							
+				} else {
+					//Files array is empty update sfw time
+					$config->set('cleantalk_antispam_sfw_update_last_gc', time());
+
+					return $result;
+				}
+			}	    	
+	    }else
+	        return true;
+	}
+	function sfw_send_logs($access_key) {
+
+		global $config;
+
+		$result = \cleantalk\antispam\model\CleantalkSFW::send_logs($access_key);
+
+		if (!isset($result['error'])) {
+			$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
+		}
+
+		return $result;
 	}
 }

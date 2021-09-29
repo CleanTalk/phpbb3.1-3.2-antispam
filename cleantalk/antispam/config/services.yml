@@ -32,11 +32,6 @@ services:
 
     cleantalk.antispam.cleantalk_request:
         class: cleantalk\antispam\model\CleantalkRequest  
-        
-    cleantalk.antispam.main_module:
-        class: cleantalk\antispam\acp\main_module
-        argument:
-            - '@cleantalk.antispam.main_model'
 
     cleantalk.antispam.main_model:
         class: cleantalk\antispam\model\main_model
