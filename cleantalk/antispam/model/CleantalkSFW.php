@@ -424,7 +424,7 @@ class CleantalkSFW
 	* 
 	* returns mixed true || array('error' => true, 'error_string' => STRING)
 	*/
-	public function send_logs($ct_key)
+	public static function send_logs($ct_key)
 	{	
 		global $db, $table_prefix;
 
