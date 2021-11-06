@@ -198,7 +198,7 @@ class main_module
 
 			if( '' !== $check_spam_number )
 			{
-                $limit = " LIMIT " . (int) $check_spam_number;
+                $limit = (int) $check_spam_number;
                 $config->set('check_spam_number', $check_spam_number);
 
             }
@@ -207,14 +207,22 @@ class main_module
                 $sql = 'UPDATE ' . USERS_TABLE . ' SET ct_marked=0';
                 $db->sql_query($sql);
 
-                $limit = '';
+                $limit = 0;
                 $config->set('check_spam_number', '');
             }
 
             $template->assign_var('CLEANTALK_CHECKUSERS_NUMBER', $config['check_spam_number'] ? $config['check_spam_number'] : '');
 
-			$sql = "SELECT user_ip, user_email FROM " . USERS_TABLE . " WHERE user_password<>'' AND ct_marked<>2 ORDER BY user_regdate DESC" . $limit;
-			$result = $db->sql_query($sql);
+			$sql = "SELECT user_ip, user_email FROM " . USERS_TABLE . " WHERE user_password<>'' AND ct_marked<>2 ORDER BY user_regdate DESC";
+			if( $limit )
+			{
+				$result = $db->sql_query_limit($sql, $limit);
+			}
+			else
+			{
+				$result = $db->sql_query($sql);
+			}
+
 			$data   = array();
 
 			while($row = $db->sql_fetchrow($result))
