@@ -14,6 +14,9 @@ CleanTalk Antispam extension for phpbb v3.1.X & v3.2.X .
   * Stops spam bots posts.
   * Allow guests posting without CAPTCHA.
 
+## Requirements.
+  * PHP 5.6+
+
 ## Technical support.
 https://cleantalk.org/forum/
 
