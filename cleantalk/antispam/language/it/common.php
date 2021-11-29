@@ -86,4 +86,6 @@ $lang = array_merge($lang, array(
     'ACP_CLEANTALK_STATS__AVERAGE_REQUEST_TIME' => 'Average request time for past 7 days (seconds)',
     'ACP_CLEANTALK_STATS__LAST_SFW_BLOCK_IP' => 'Last time SpamFireWall was triggered for IP',
     'ACP_CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => 'Last time SpamFireWall was triggered at',
+    'ACP_CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => 'SpamFireWall was updated at',
+    'ACP_CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => 'SpamFireWall sent logs at',
 ));

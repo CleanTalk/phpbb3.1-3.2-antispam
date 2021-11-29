@@ -132,6 +132,8 @@ class main_module
                                        : 'unknown',
             'CLEANTALK_STATS__LAST_SFW_BLOCK_IP' => isset($config['last_sfw_block_ip']) ? $config['last_sfw_block_ip'] : 'unknown',
             'CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => isset($config['last_sfw_block_time']) ? date('M d Y H:i:s', $config['last_sfw_block_time']) : 'unknown',
+            'CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => isset($config['cleantalk_stats__sfw_last_time_updated']) ? date('M d Y H:i:s', $config['cleantalk_stats__sfw_last_time_updated']) : 'unknown',
+            'CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => isset($config['cleantalk_antispam_sfw_logs_send_last_gc']) ? date('M d Y H:i:s', $config['cleantalk_antispam_sfw_logs_send_last_gc']) : 'unknown',
 		));
 		
 		$user->add_lang_ext('cleantalk/antispam', 'common');

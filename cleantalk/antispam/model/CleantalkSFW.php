@@ -414,6 +414,7 @@ class CleantalkSFW
 							gzclose($gf);
 							global $config;
 							$config->set('cleantalk_stats__sfw_nets', (int)$config['cleantalk_stats__sfw_nets'] + (int)$count_result );
+                            $config->set('cleantalk_stats__sfw_last_time_updated', time() );
 							return $count_result;
 							
 						} else
