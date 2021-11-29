@@ -107,6 +107,8 @@ class main_module
 			trigger_error($user->lang('ACP_CLEANTALK_SETTINGS_SAVED') . adm_back_link($this->u_action));
 		}
 
+        $stat_requests = isset($config['cleantalk_stats__requests']) ? json_decode($config['cleantalk_stats__requests'], true) : null;
+		
 		$template->assign_vars(array(
 			'U_ACTION'				=> $this->u_action,
 			'CLEANTALK_ANTISPAM_REGS'		=> $config['cleantalk_antispam_regs'] ? true : false,
@@ -125,6 +127,9 @@ class main_module
 			'CLEANTALK_STATS__SFW_NETS'     => $config['cleantalk_stats__sfw_nets'],
 			'CLEANTALK_DEBUG'               => $config['cleantalk_debug'] ? $config['cleantalk_debug'] :'',
             'CLEANTALK_STATS__LAST_SPAM_REQUEST_TIME' => $config['cleantalk_stats__last_spam_request_time'] ? date('M d Y H:i:s', $config['cleantalk_stats__last_spam_request_time']) : 'unknown',
+            'CLEANTALK_STATS__AVERAGE_REQUEST_TIME' => ($stat_requests && $stat_requests[min(array_keys($stat_requests))]['average_time'])
+                                       ? round($stat_requests[min(array_keys($stat_requests))]['average_time'], 3)
+                                       : 'unknown',
 		));
 		
 		$user->add_lang_ext('cleantalk/antispam', 'common');

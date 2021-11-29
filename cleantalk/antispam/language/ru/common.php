@@ -81,5 +81,6 @@ $lang = array_merge($lang, array(
 	'CLEANTALK_ERROR_ADDON'		                => ' или выключена настройка allow_url_fopen в php.ini.',
 	'CLEANTALK_NOTIFICATION'					=> 'Вы уверены?',
 
-    'ACP_CLEANTALK_STATS__LAST_SPAM_REQUEST_TIME' => 'Последний запрос проверки спама на сервере был произведен'
+    'ACP_CLEANTALK_STATS__LAST_SPAM_REQUEST_TIME' => 'Последний запрос проверки спама на сервере был произведен',
+    'ACP_CLEANTALK_STATS__AVERAGE_REQUEST_TIME' => 'Среднее время запроса за последние 7 дней (в секундах)',
 ));
