@@ -124,6 +124,7 @@ class main_module
 			'CLEANTALK_ANTISPAM_IP_LICENSE' => $config['cleantalk_antispam_ip_license'],
 			'CLEANTALK_STATS__SFW_NETS'     => $config['cleantalk_stats__sfw_nets'],
 			'CLEANTALK_DEBUG'               => $config['cleantalk_debug'] ? $config['cleantalk_debug'] :'',
+            'CLEANTALK_STATS__LAST_SPAM_REQUEST_TIME' => $config['cleantalk_stats__last_spam_request_time'] ? date('M d Y H:i:s', $config['cleantalk_stats__last_spam_request_time']) : 'unknown',
 		));
 		
 		$user->add_lang_ext('cleantalk/antispam', 'common');

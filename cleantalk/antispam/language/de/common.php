@@ -82,4 +82,6 @@ $lang = array_merge($lang, array(
 	'CLEANTALK_ERROR_NO_CURL'		            => 'Keine CURL-Unterstützung in kompiliert',
 	'CLEANTALK_ERROR_ADDON'		                => 'oder deaktiviere allow_url_fopen in der php.ini.',
 	'CLEANTALK_NOTIFICATION'					=> 'Sind Sie sicher?',
+
+    'ACP_CLEANTALK_STATS__LAST_SPAM_REQUEST_TIME' => 'Last spam check request to server was at'
 ));

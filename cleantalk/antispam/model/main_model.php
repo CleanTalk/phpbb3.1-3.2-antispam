@@ -177,6 +177,9 @@ class main_model
 		$ret_val['allow'] = 1;
 		$ret_val['ct_request_id'] = $ct_result->id;
 
+        // Last spam check time
+        $this->config->set('cleantalk_stats__last_spam_request_time', time());
+
 		if ($this->cleantalk->server_change)
 		{
 			$this->config->set('cleantalk_antispam_work_url',   $this->cleantalk->work_url);
