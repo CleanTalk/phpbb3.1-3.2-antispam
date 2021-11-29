@@ -478,6 +478,11 @@ class CleantalkSFW
 	*/	
 	public function sfw_die($cookie_prefix = '', $cookie_domain = '')
 	{
+        global $config;
+
+        $config->set('last_sfw_block_ip', $this->blocked_ip);
+        $config->set('last_sfw_block_time', time());
+
 		$this->user->add_lang_ext('cleantalk/antispam', 'common');
 
 		page_header();

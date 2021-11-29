@@ -130,6 +130,8 @@ class main_module
             'CLEANTALK_STATS__AVERAGE_REQUEST_TIME' => ($stat_requests && $stat_requests[min(array_keys($stat_requests))]['average_time'])
                                        ? round($stat_requests[min(array_keys($stat_requests))]['average_time'], 3)
                                        : 'unknown',
+            'CLEANTALK_STATS__LAST_SFW_BLOCK_IP' => isset($config['last_sfw_block_ip']) ? $config['last_sfw_block_ip'] : 'unknown',
+            'CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => isset($config['last_sfw_block_time']) ? date('M d Y H:i:s', $config['last_sfw_block_time']) : 'unknown',
 		));
 		
 		$user->add_lang_ext('cleantalk/antispam', 'common');
