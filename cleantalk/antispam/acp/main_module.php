@@ -79,10 +79,10 @@ class main_module
 
                 // Key is not valid
                 if (isset($result['valid']) && (int)$result['valid'] === 0) {
-                    $key_is_ok = false;
+                    $config->set('cleantalk_antispam_key_is_ok', 0);
                     trigger_error($user->lang('ACP_CLEANTALK_APIKEY_IS_BAD_LABEL') . adm_back_link($this->u_action));
                 } elseif (!empty($result['error'])) {
-                    $key_is_ok = false;
+                    $config->set('cleantalk_antispam_key_is_ok', 0);
                     trigger_error($result['error'] . adm_back_link($this->u_action));
                 } else {
                     $key_is_ok = true;
