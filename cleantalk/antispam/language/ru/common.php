@@ -80,4 +80,11 @@ $lang = array_merge($lang, array(
 	'CLEANTALK_ERROR_NO_CURL'		            => 'Нет поддержки CURL',
 	'CLEANTALK_ERROR_ADDON'		                => ' или выключена настройка allow_url_fopen в php.ini.',
 	'CLEANTALK_NOTIFICATION'					=> 'Вы уверены?',
+
+    'ACP_CLEANTALK_STATS__LAST_SPAM_REQUEST_TIME' => 'Последний спам запрос на сервер был',
+    'ACP_CLEANTALK_STATS__AVERAGE_REQUEST_TIME' => 'Среднее время запроса за последние 7 дней (в секундах)',
+    'ACP_CLEANTALK_STATS__LAST_SFW_BLOCK_IP' => 'В последний раз SpamFireWall сработал на IP',
+    'ACP_CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => 'В последний раз SpamFireWall сработал в',
+    'ACP_CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => 'SpamFireWall был обновлен',
+    'ACP_CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => 'SpamFireWall отправил логи',
 ));

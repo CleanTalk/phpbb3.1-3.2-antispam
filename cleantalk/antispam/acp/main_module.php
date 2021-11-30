@@ -10,6 +10,8 @@
 
 namespace cleantalk\antispam\acp;
 
+use cleantalk\antispam\library\Cleantalk\Common\API;
+
 class main_module
 {
 	function main($id, $mode)
@@ -67,63 +69,82 @@ class main_module
 				$result =\cleantalk\antispam\model\CleantalkHelper::apbct_key_is_correct($savekey);
 				$key_is_valid = ($result) ? true: false;
 			}
-			
-			if($key_is_valid)
-			{
-				$result =\cleantalk\antispam\model\CleantalkHelper::noticePaidTill($savekey);
 
-				if(empty($result['error']))
-				{
-					$key_is_ok = true;
-					
-					$config->set('cleantalk_antispam_show_notice', ($result['show_notice']) ? $result['show_notice'] : 0);
-					$config->set('cleantalk_antispam_renew',       ($result['renew']) ? $result['renew'] : 0);
-					$config->set('cleantalk_antispam_trial',       ($result['trial']) ? $result['trial'] : 0);
-					$config->set('cleantalk_antispam_user_token',  ($result['user_token']) ? $result['user_token'] : '');
-					$config->set('cleantalk_antispam_spam_count',  ($result['spam_count']) ? $result['spam_count'] : 0);
-					$config->set('cleantalk_antispam_moderate_ip', ($result['moderate_ip']) ? $result['moderate_ip'] : 0);
-					$config->set('cleantalk_antispam_moderate', ($result['moderate']) ? $result['moderate'] : 0);
-					$config->set('cleantalk_antispam_show_review', ($result['show_review']) ? $result['show_review'] : 0);
-					$config->set('cleantalk_antispam_service_id', ($result['service_id']) ? $result['service_id'] : 0);
-					$config->set('cleantalk_antispam_ip_license',  ($result['ip_license']) ? $result['ip_license'] : 0);
-					$config->set('cleantalk_antispam_check_payment_status_last_gc', time());
-					$config->set('cleantalk_antispam_account_name_ob', ($result['account_name_ob']) ? $result['account_name_ob'] : '');
+            if($key_is_valid)
+            {
+                $result = API::methodNoticePaidTill(
+                    $savekey,
+                    $config['server_name']
+                );
 
-					if ($config['cleantalk_antispam_sfw_enabled'])
-					{
-						$sfw_update = $this->sfw_update($savekey);
-						if (isset($sfw_update['error'])) {
-							trigger_error($sfw_update['error']);
-						}
-						$sfw_send_logs = $this->sfw_send_logs($savekey);
-						if (isset($sfw_send_logs['error'])) {
-							trigger_error($sfw_send_logs['error']);
-						}
-					}						
-				}																										
-			}				
-			$config->set('cleantalk_antispam_key_is_ok', ($key_is_ok) ? 1 : 0);
+                // Key is not valid
+                if (isset($result['valid']) && (int)$result['valid'] === 0) {
+                    $config->set('cleantalk_antispam_key_is_ok', 0);
+                    trigger_error($user->lang('ACP_CLEANTALK_APIKEY_IS_BAD_LABEL') . adm_back_link($this->u_action));
+                } elseif (!empty($result['error'])) {
+                    $config->set('cleantalk_antispam_key_is_ok', 0);
+                    trigger_error($result['error'] . adm_back_link($this->u_action));
+                } else {
+                    $key_is_ok = true;
+
+                    $config->set('cleantalk_antispam_show_notice', ($result['show_notice']) ? $result['show_notice'] : 0);
+                    $config->set('cleantalk_antispam_renew',       ($result['renew']) ? $result['renew'] : 0);
+                    $config->set('cleantalk_antispam_trial',       ($result['trial']) ? $result['trial'] : 0);
+                    $config->set('cleantalk_antispam_user_token',  ($result['user_token']) ? $result['user_token'] : '');
+                    $config->set('cleantalk_antispam_spam_count',  ($result['spam_count']) ? $result['spam_count'] : 0);
+                    $config->set('cleantalk_antispam_moderate_ip', ($result['moderate_ip']) ? $result['moderate_ip'] : 0);
+                    $config->set('cleantalk_antispam_moderate', ($result['moderate']) ? $result['moderate'] : 0);
+                    $config->set('cleantalk_antispam_show_review', ($result['show_review']) ? $result['show_review'] : 0);
+                    $config->set('cleantalk_antispam_service_id', ($result['service_id']) ? $result['service_id'] : 0);
+                    $config->set('cleantalk_antispam_ip_license',  ($result['ip_license']) ? $result['ip_license'] : 0);
+                    $config->set('cleantalk_antispam_check_payment_status_last_gc', time());
+                    $config->set('cleantalk_antispam_account_name_ob', ($result['account_name_ob']) ? $result['account_name_ob'] : '');
+
+                    if ($config['cleantalk_antispam_sfw_enabled'])
+                    {
+                        $sfw_update = $this->sfw_update($savekey);
+                        if (isset($sfw_update['error'])) {
+                            trigger_error($sfw_update['error']);
+                        }
+                        $sfw_send_logs = $this->sfw_send_logs($savekey);
+                        if (isset($sfw_send_logs['error'])) {
+                            trigger_error($sfw_send_logs['error']);
+                        }
+                    }
+                }
+            }
+            $config->set('cleantalk_antispam_key_is_ok', ($key_is_ok) ? 1 : 0);
 			
 			trigger_error($user->lang('ACP_CLEANTALK_SETTINGS_SAVED') . adm_back_link($this->u_action));
 		}
 
+        $stat_requests = isset($config['cleantalk_stats__requests']) ? json_decode($config['cleantalk_stats__requests'], true) : null;
+		
 		$template->assign_vars(array(
 			'U_ACTION'				=> $this->u_action,
-			'CLEANTALK_ANTISPAM_REGS'		=> $config['cleantalk_antispam_regs'] ? true : false,
-			'CLEANTALK_ANTISPAM_GUESTS'		=> $config['cleantalk_antispam_guests'] ? true : false,
-			'CLEANTALK_ANTISPAM_NUSERS'		=> $config['cleantalk_antispam_nusers'] ? true : false,
-			'CLEANTALK_ANTISPAM_CCF'		=> $config['cleantalk_antispam_ccf'] ? true: false,
-			'CLEANTALK_ANTISPAM_SFW_ENABLED'=> $config['cleantalk_antispam_sfw_enabled'] ? true : false,
-			'CLEANTALK_ANTISPAM_APIKEY'		=> $config['cleantalk_antispam_apikey'],
-			'CLEANTALK_ANTISPAM_KEY_IS_OK'	=> $config['cleantalk_antispam_key_is_ok'] ? true : false,
-			'CLEANTALK_ANTISPAM_USER_TOKEN'	=> $config['cleantalk_antispam_user_token'],
-			'CLEANTALK_ANTISPAM_REG_EMAIL'	=> $config['board_email'],
+			'CLEANTALK_ANTISPAM_REGS'		=> isset($config['cleantalk_antispam_regs']) ? true : false,
+			'CLEANTALK_ANTISPAM_GUESTS'		=> isset($config['cleantalk_antispam_guests']) ? true : false,
+			'CLEANTALK_ANTISPAM_NUSERS'		=> isset($config['cleantalk_antispam_nusers']) ? true : false,
+			'CLEANTALK_ANTISPAM_CCF'		=> isset($config['cleantalk_antispam_ccf']) ? true: false,
+			'CLEANTALK_ANTISPAM_SFW_ENABLED'=> isset($config['cleantalk_antispam_sfw_enabled']) ? true : false,
+			'CLEANTALK_ANTISPAM_APIKEY'		=> isset($config['cleantalk_antispam_apikey']),
+			'CLEANTALK_ANTISPAM_KEY_IS_OK'	=> isset($config['cleantalk_antispam_key_is_ok']) ? true : false,
+			'CLEANTALK_ANTISPAM_USER_TOKEN'	=> isset($config['cleantalk_antispam_user_token']),
+			'CLEANTALK_ANTISPAM_REG_EMAIL'	=> isset($config['board_email']),
 			'CLEANTALK_ANTISPAM_REG_URL'	=> $request->server('SERVER_NAME'),
-			'CLEANTALK_ANTISPAM_ACCOUNT_NAME_OB' => $config['cleantalk_antispam_account_name_ob'],
-			'CLEANTALK_ANTISPAM_MODERATE_IP'=> $config['cleantalk_antispam_moderate_ip'],
-			'CLEANTALK_ANTISPAM_IP_LICENSE' => $config['cleantalk_antispam_ip_license'],
-			'CLEANTALK_STATS__SFW_NETS'     => $config['cleantalk_stats__sfw_nets'],
-			'CLEANTALK_DEBUG'               => $config['cleantalk_debug'] ? $config['cleantalk_debug'] :'',
+			'CLEANTALK_ANTISPAM_ACCOUNT_NAME_OB' => isset($config['cleantalk_antispam_account_name_ob']),
+			'CLEANTALK_ANTISPAM_MODERATE_IP'=> isset($config['cleantalk_antispam_moderate_ip']),
+			'CLEANTALK_ANTISPAM_IP_LICENSE' => isset($config['cleantalk_antispam_ip_license']),
+			'CLEANTALK_STATS__SFW_NETS'     => isset($config['cleantalk_stats__sfw_nets']),
+			'CLEANTALK_DEBUG'               => isset($config['cleantalk_debug']) ? $config['cleantalk_debug'] :'',
+            'CLEANTALK_STATS__LAST_SPAM_REQUEST_TIME' => isset($config['cleantalk_stats__last_spam_request_time']) ? date('M d Y H:i:s', $config['cleantalk_stats__last_spam_request_time']) : 'unknown',
+            'CLEANTALK_STATS__AVERAGE_REQUEST_TIME' => ($stat_requests && $stat_requests[min(array_keys($stat_requests))]['average_time'])
+                                       ? round($stat_requests[min(array_keys($stat_requests))]['average_time'], 3)
+                                       : 'unknown',
+            'CLEANTALK_STATS__LAST_SFW_BLOCK_IP' => isset($config['last_sfw_block_ip']) ? $config['last_sfw_block_ip'] : 'unknown',
+            'CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => isset($config['last_sfw_block_time']) ? date('M d Y H:i:s', $config['last_sfw_block_time']) : 'unknown',
+            'CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => isset($config['cleantalk_stats__sfw_last_time_updated']) ? date('M d Y H:i:s', $config['cleantalk_stats__sfw_last_time_updated']) : 'unknown',
+            'CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => isset($config['cleantalk_antispam_sfw_logs_send_last_gc']) ? date('M d Y H:i:s', $config['cleantalk_antispam_sfw_logs_send_last_gc']) : 'unknown',
 		));
 		
 		$user->add_lang_ext('cleantalk/antispam', 'common');

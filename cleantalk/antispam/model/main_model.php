@@ -152,7 +152,8 @@ class main_model
 		$this->cleantalk_request->sender_nickname = array_key_exists('sender_nickname', $spam_check) ? $spam_check['sender_nickname'] : '';
         $this->cleantalk_request->sender_ip = $this->cleantalk->cleantalk_get_real_ip();
 		$this->cleantalk_request->submit_time = ($page_set_timestamp !== 0) ? time() - $page_set_timestamp : null;
-		
+
+        $start = microtime(true);
 		switch ($spam_check['type'])
 		{
 			case 'contact':
@@ -171,11 +172,18 @@ class main_model
 				$ct_result = $this->cleantalk->sendFeedback($this->cleantalk_request);
 				break;
 		}
+        $exec_time = microtime(true) - $start;
 		
 		$ret_val = array();
 		$ret_val['errno'] = 0;
 		$ret_val['allow'] = 1;
 		$ret_val['ct_request_id'] = $ct_result->id;
+
+        // Last spam check time
+        $this->config->set('cleantalk_stats__last_spam_request_time', time());
+
+        // Average request time
+        $this->averageRequestTime($exec_time);
 
 		if ($this->cleantalk->server_change)
 		{
@@ -517,5 +525,33 @@ class main_model
 		}
 
 		return $result;
-	}	
+	}
+
+    /**
+     * Update and rotate statistics with requests execution time
+     *
+     * @param $exec_time
+     */
+    private function averageRequestTime($exec_time)
+    {
+        $requests = isset($this->config['cleantalk_stats__requests']) ? json_decode($this->config['cleantalk_stats__requests'], true) : null;
+
+        // Delete old stats
+        if ( $requests && min(array_keys($requests)) < time() - (86400 * 7) ) {
+            unset($requests[min(array_keys($requests))]);
+        }
+
+        // Create new if newest older than 1 day
+        if ( !$requests || max(array_keys($requests)) < time() - (86400 * 1) ) {
+            $requests[time()] = array('amount' => 0, 'average_time' => 0);
+        }
+
+        // Update all existing stats
+        foreach ( $requests as &$weak_stat ) {
+            $weak_stat['average_time'] = ($weak_stat['average_time'] * $weak_stat['amount'] + $exec_time) / ++$weak_stat['amount'];
+        }
+        unset($weak_stat);
+
+        $this->config->set('cleantalk_stats__requests', json_encode($requests));
+    }
 }
