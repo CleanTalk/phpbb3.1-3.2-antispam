@@ -1,5 +1,17 @@
 <!-- INCLUDE overall_header.html -->
-<!-- INCLUDECSS @cleantalk_antispam/sfw_page_style.css -->
+<style>
+	html{font-size: 14pt;}
+	h1,h3{text-align:center}
+	h1.main{margin-top: 1em;margin-bottom: 3em; color:#666;}
+	div.container {text-align:center; color:#666;}
+	div.container p.js_notice{width: 60%; display: inline-block;}
+	div.footer {color: #666; position: absolute; bottom: 1em; text-align: center; width: 100%;}
+	div.footer a {color: #666; vertical-align:bottom; text-align: center;}
+	div#js_passed {display:none;}
+
+	@media (max-width: 600px) {
+	}
+</style>
 <div class='container'>
     <h1 class='main'>{SFW_DIE_NOTICE_IP} <a href='https://cleantalk.org/blacklists/{REMOTE_ADDRESS}' target='_blank'>{REMOTE_ADDRESS}</a></h1>
     
