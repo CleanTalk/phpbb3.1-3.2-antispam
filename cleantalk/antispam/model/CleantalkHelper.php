@@ -64,26 +64,6 @@ class CleantalkHelper
 		
 		return $result;
 	}
-
-	/**
-	 * Function gets information about renew notice
-	 *
-	 * @param string api_key
-	 * @param bool perform check flag
-	 * @return mixed (STRING || array('error' => true, 'error_string' => STRING))
-	 */
-	static public function noticePaidTill($api_key, $do_check = true)
-	{
-		$request = array(
-			'method_name' => 'notice_paid_till',
-			'auth_key' => $api_key
-		);
-		
-		$result = self::sendRawRequest(self::URL, $request);
-		$result = $do_check ? self::checkRequestResult($result, 'notice_paid_till') : $result;
-		
-		return $result;
-	}
 	
 	/**
 	 * Function gets information about account
