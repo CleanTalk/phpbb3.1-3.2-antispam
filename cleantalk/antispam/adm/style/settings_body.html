@@ -2,6 +2,13 @@
 
 <h1>{L_ACP_CLEANTALK_SETTINGS}</h1>
 
+{% if CLEANTALK_ERRORS %}
+<div class="errorbox">
+	<h3>{{ lang('WARNING') }}</h3>
+	<p>{{ CLEANTALK_ERRORS_MSG }}</p>
+</div>
+{% endif %}
+
 <form id="acp_board" method="post" action="{U_ACTION}">
 	<fieldset>
 		<dl>

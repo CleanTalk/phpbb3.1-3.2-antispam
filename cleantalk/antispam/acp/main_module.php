@@ -11,6 +11,7 @@
 namespace cleantalk\antispam\acp;
 
 use cleantalk\antispam\library\Cleantalk\Common\API;
+use cleantalk\antispam\library\Cleantalk\Errors;
 
 class main_module
 {
@@ -104,12 +105,18 @@ class main_module
                     {
                         $sfw_update = $this->sfw_update($savekey);
                         if (isset($sfw_update['error'])) {
-                            trigger_error($sfw_update['error']);
-                        }
+                        	Errors::addError('sfw_update_error', $sfw_update['error']);
+                            trigger_error($sfw_update['error'] . adm_back_link($this->u_action));
+                        } else {
+                        	Errors::removeError('sfw_update_error');
+						}
                         $sfw_send_logs = $this->sfw_send_logs($savekey);
                         if (isset($sfw_send_logs['error'])) {
-                            trigger_error($sfw_send_logs['error']);
-                        }
+							Errors::addError('sfw_send_logs_error', $sfw_send_logs['error']);
+                            trigger_error($sfw_send_logs['error'] . adm_back_link($this->u_action));
+                        } else {
+							Errors::removeError('sfw_send_logs_error');
+						}
                     }
                 }
             }
@@ -119,9 +126,14 @@ class main_module
 		}
 
         $stat_requests = isset($config['cleantalk_stats__requests']) ? json_decode($config['cleantalk_stats__requests'], true) : null;
+
+		// Errors
+		$errors = Errors::getErrors();
 		
 		$template->assign_vars(array(
 			'U_ACTION'				=> $this->u_action,
+			'CLEANTALK_ERRORS'				=> (bool) count($errors),
+			'CLEANTALK_ERRORS_MSG'			=> implode('<br />', array_values($errors)),
 			'CLEANTALK_ANTISPAM_REGS'		=> (bool)$config['cleantalk_antispam_regs'],
 			'CLEANTALK_ANTISPAM_GUESTS'		=> (bool)$config['cleantalk_antispam_guests'],
 			'CLEANTALK_ANTISPAM_NUSERS'		=> (bool)$config['cleantalk_antispam_nusers'],
