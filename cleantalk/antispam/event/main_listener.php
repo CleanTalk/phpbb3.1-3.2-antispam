@@ -30,12 +30,14 @@ class main_listener implements EventSubscriberInterface
 	{
 		return array(
 			'core.user_setup'							=> 'load_language_on_setup',
-			'core.user_setup_after'						=> 'sfw_check',
+			'core.user_setup_after'						=> array(
+				array('sfw_check', 1),
+				array('ccf_check', 2),
+			),
 			'core.page_footer_after'     			    => 'add_js_to_footer',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                 => 'check_newuser',
-			'core.common'								=> 'ccf_check',
 		);
 	}
 	const APBCT_REMOTE_CALL_SLEEP = 10;
