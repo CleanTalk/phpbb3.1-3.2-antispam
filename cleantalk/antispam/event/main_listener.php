@@ -379,7 +379,7 @@ class main_listener implements EventSubscriberInterface
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
 				{				 
 					// Output error
-					trigger_error($result['ct_result_comment']);
+					@trigger_error($result['ct_result_comment']);
 				}
 			}
 		}
