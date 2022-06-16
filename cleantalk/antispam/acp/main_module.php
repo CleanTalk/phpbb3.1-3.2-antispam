@@ -392,7 +392,7 @@ class main_module
 
 		$api_server    = !empty($request->variable('api_server', ''))    ? urldecode($request->variable('api_server', ''))    : null;
 		$data_id       = !empty($request->variable('data_id', ''))       ? urldecode($request->variable('data_id', ''))       : null;
-        $file_url_nums = !empty($request->variable('file_url_nums', '')) ? urldecode($request->variable('file_url_nums', '')) : null;
+		$file_url_nums = (!empty($request->variable('file_url_nums', '')) || (string) $request->variable('file_url_nums', '') === '0') ? urldecode($request->variable('file_url_nums', '')) : null;
 		$file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
 		
 	    if( ! isset( $api_server, $data_id, $file_url_nums ) ){
