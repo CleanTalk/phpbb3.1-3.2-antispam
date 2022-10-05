@@ -20,7 +20,7 @@
     <div id='js_passed'>
     <h3>{SFW_DIE_CLICK_TO_PASS}</h3>
     <br/>
-    <center><a href='{REQUEST_URI}'><script>document.write(window.location.href)</script></a></center>
+    <center><a href='{U_REQUEST_URI}'><script>document.write(window.location.href)</script></a></center>
     <br /><br />
     <center><p class='js_notice'>{SFW_DIE_YOU_WILL_BE_REDIRECTED}</p></center>
     </div>
@@ -33,11 +33,10 @@
         document.cookie = cookie_name + "=" + encodeURI(cookie_value) + "; path=/;expires=" + date.toUTCString() + ";";
         return null;
     }
-    document.getElementById('js_info').style.display = 'none';
-    document.getElementById('js_passed').style.display = 'block';
+
     setTimeout(function(){
-        set_spamFireWallCookie("{COOKIE_PREFIX}ct_sfw_pass_key","{SFW_COOKIE|e('js')}");
-        set_spamFireWallCookie("{COOKIE_PREFIX}ct_sfw_passed","1");
+        set_spamFireWallCookie("{COOKIE_PREFIX|e('js')}ct_sfw_pass_key","{SFW_COOKIE|e('js')}");
+        set_spamFireWallCookie("{COOKIE_PREFIX|e('js')}ct_sfw_passed","1");
     }, 50);
     setTimeout(function(){
         window.location.href = window.location.href + (window.location.search === '' ? '?sfw=pass' : '&sfw=pass');
