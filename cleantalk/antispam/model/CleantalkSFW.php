@@ -497,7 +497,7 @@ class CleantalkSFW
 			'SFW_DIE_CLICK_TO_PASS'				=> $this->user->lang('SFW_DIE_CLICK_TO_PASS'),
 			'SFW_DIE_YOU_WILL_BE_REDIRECTED'	=> $this->user->lang('SFW_DIE_YOU_WILL_BE_REDIRECTED'),
 			'REMOTE_ADDRESS'					=> $this->blocked_ip,
-			'REQUEST_URI'						=> $this->request->server('REQUEST_URI'),
+			'U_REQUEST_URI'						=> $this->request->server('REQUEST_URI'),
 			'COOKIE_PREFIX'						=> $cookie_prefix,
 			'COOKIE_DOMAIN'						=> $cookie_domain,
 			'SFW_COOKIE'						=> md5($this->blocked_ip.$this->config['cleantalk_antispam_apikey']),
