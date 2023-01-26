@@ -534,15 +534,16 @@ class main_model
      */
     private function averageRequestTime($exec_time)
     {
-        $requests = isset($this->config['cleantalk_stats__requests']) ? json_decode($this->config['cleantalk_stats__requests'], true) : null;
-
+        $requests = $this->config_text->get_array(array('cleantalk_stats__requests'));
+		$requests = isset($requests['cleantalk_stats__requests']) ? json_decode($requests['cleantalk_stats__requests'], true) : null;
+		
         // Delete old stats
-        if ( $requests && min(array_keys($requests)) < time() - (86400 * 7) ) {
+        if ( !is_null($requests) && min(array_keys($requests)) < time() - (86400 * 7) ) {
             unset($requests[min(array_keys($requests))]);
         }
 
         // Create new if newest older than 1 day
-        if ( !$requests || max(array_keys($requests)) < time() - (86400 * 1) ) {
+        if ( is_null($requests) || max(array_keys($requests)) < time() - (86400 * 1) ) {
             $requests[time()] = array('amount' => 0, 'average_time' => 0);
         }
 
@@ -552,6 +553,8 @@ class main_model
         }
         unset($weak_stat);
 
-        $this->config->set('cleantalk_stats__requests', json_encode($requests));
+		$this->config_text->set_array(array(
+			'cleantalk_stats__requests'	=> json_encode($requests),
+		));
     }
 }
