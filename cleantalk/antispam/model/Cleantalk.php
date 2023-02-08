@@ -91,6 +91,12 @@ class Cleantalk
     public $ssl_on = false;
 
     /**
+     * Flag to force ipv4
+     * @var string
+     */
+    public $force_ipv4 = false;
+
+    /**
      * Path to SSL certificate
      * @var string
      */
@@ -344,19 +350,35 @@ class Cleantalk
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Disabling CA cert verivication and
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);     // Disabling common name verification
 
+            if ($this->force_ipv4){
+                curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            }
+
             if ($this->ssl_on && $this->ssl_path != '') {
                 curl_setopt($ch, CURLOPT_CAINFO, $this->ssl_path);
             }
 
             $result = curl_exec($ch);
-            if (!$result) {
+            if ( !$result ) {
                 $curl_error = curl_error($ch);
-                // Use SSL next time, if error occurs.
-                if(!$this->ssl_on){
-                    $this->ssl_on = true;
-                    $args = func_get_args();
-                    return $this->sendRequest($args[0], $args[1], $server_timeout);
+                // Use forced IPV4 next time, if error occurs.
+                $args = func_get_args();
+                if (!$this->force_ipv4) {
+
+                    $this->force_ipv4 = true;
+                    $result = $this->sendRequest($args[0], $original_url, $server_timeout);
+
+                    // Use SSL next time, if error occurs.
+                    if ( !empty($result->errno) ) {
+
+                        $this->ssl_on = true;
+
+                        return $this->sendRequest($args[0], $original_url, $server_timeout);
+                    } else {
+                        return $result;
+                    }
                 }
+
             }
 
             curl_close($ch);

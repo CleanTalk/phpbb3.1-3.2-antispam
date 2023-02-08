@@ -17,7 +17,9 @@ class main_module
 {
 	function main($id, $mode)
 	{
-		global $user, $template, $request, $config, $db, $table_prefix, $phpbb_root_path, $phpEx;
+		global $user, $template, $request, $config, $db, $table_prefix, $phpbb_root_path, $phpEx, $phpbb_container;
+
+		$config_text = $phpbb_container->get('config_text');
 
 		$user->add_lang('acp/common');
 		$this->tpl_name = 'settings_body';
@@ -125,7 +127,8 @@ class main_module
 			trigger_error($user->lang('ACP_CLEANTALK_SETTINGS_SAVED') . adm_back_link($this->u_action));
 		}
 
-        $stat_requests = isset($config['cleantalk_stats__requests']) ? json_decode($config['cleantalk_stats__requests'], true) : null;
+		$stat_requests = $config_text->get_array(array('cleantalk_stats__requests'));
+		$stat_requests = isset($stat_requests['cleantalk_stats__requests']) ? json_decode($stat_requests['cleantalk_stats__requests'], true) : null;
 
 		// Errors
 		$errors = Errors::getErrors();
