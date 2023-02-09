@@ -50,7 +50,11 @@ class main_model
 	/** @var \phpbb\config\db_text */
 	protected $config_text;
 
-	/**
+    /** @var bool Marker of cleantalk is already executed on page  */
+    public $cleantalk_executed;
+
+
+    /**
 	* Constructor
 	*
 	* @param config			$config		Config object
@@ -69,6 +73,7 @@ class main_model
 		$this->php_ext = $php_ext;		
 		$this->cleantalk = $cleantalk;
 		$this->cleantalk_request = $cleantalk_request;
+		$this->cleantalk_executed = false;
 	}
 
 	/**
@@ -79,6 +84,9 @@ class main_model
 	*/	
 	public function check_spam( $spam_check )
 	{
+	    if ( $this->cleantalk_executed ){
+	        return array('allow' => 1);
+        }
 		
 		// Exclusions
 		$exclusion_urls = array(
@@ -173,7 +181,7 @@ class main_model
 				break;
 		}
         $exec_time = microtime(true) - $start;
-		
+
 		$ret_val = array();
 		$ret_val['errno'] = 0;
 		$ret_val['allow'] = 1;
@@ -275,10 +283,11 @@ class main_model
 					// New user or Spammer and stop_queue == 1 - display form error message.
 					$ret_val['stop_queue'] = 1;
 				}
-			}			
-		}
+			}
+        }
+        $this->cleantalk_executed = true;
 
-	return $ret_val;
+        return $ret_val;
 	}
 
 	/**
