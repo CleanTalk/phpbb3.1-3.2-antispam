@@ -543,7 +543,7 @@ class main_model
         }
 
         // Create new if newest older than 1 day
-        if ( is_null($requests) || max(array_keys($requests)) < time() - (86400 * 1) ) {
+		if ( is_null($requests) || (!empty($requests) && max(array_keys($requests)) < time() - (86400 * 1)) ) {
             $requests[time()] = array('amount' => 0, 'average_time' => 0);
         }
 
