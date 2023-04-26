@@ -538,7 +538,7 @@ class main_model
 		$requests = isset($requests['cleantalk_stats__requests']) ? json_decode($requests['cleantalk_stats__requests'], true) : null;
 
         // Delete old stats
-        if ( !is_null($requests) && min(array_keys($requests)) < time() - (86400 * 7) ) {
+        if ( ! empty($requests) && min(array_keys($requests)) < time() - (86400 * 7) ) {
             unset($requests[min(array_keys($requests))]);
         }
 
