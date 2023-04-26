@@ -59,14 +59,14 @@ class main_model
 	* @param driver_interface 	$db 		The database object
 	*/
 	public function __construct(config $config, user $user, request $request, log $phpbb_log, Cleantalk $cleantalk, CleantalkRequest $cleantalk_request, db_text $config_text, $phpbb_root_path, $php_ext )
-	{	
+	{
 		$this->config = $config;
 		$this->user = $user;
 		$this->request = $request;
 		$this->phpbb_log = $phpbb_log;
 		$this->config_text = $config_text;
 		$this->phpbb_root_path = $phpbb_root_path;
-		$this->php_ext = $php_ext;		
+		$this->php_ext = $php_ext;
 		$this->cleantalk = $cleantalk;
 		$this->cleantalk_request = $cleantalk_request;
 	}
@@ -76,15 +76,15 @@ class main_model
 	*
 	* @param array	$spam_check		array with values to check
 	* @return array				array with result flags
-	*/	
+	*/
 	public function check_spam( $spam_check )
 	{
-		
+
 		// Exclusions
 		$exclusion_urls = array(
 			'^[a-zA-Z0-9\/\.]*\/adm\/index\.php',
 		);
-		
+
 		if($this->exclusions_check__url($exclusion_urls, true)){
 			return array(
 				'errno' => 0,
@@ -92,27 +92,27 @@ class main_model
 			);
 		}
 		//End of exclusions
-		
+
 		$this->user->add_lang('acp/common');
 		$checkjs = $this->cleantalk_is_valid_js() ? 1 : 0;
-	
+
 		$this->cleantalk->work_url       = $this->config['cleantalk_antispam_work_url'];
 		$this->cleantalk->server_url     = $this->config['cleantalk_antispam_server_url'];
 		$this->cleantalk->server_ttl     = $this->config['cleantalk_antispam_server_ttl'];
 		$this->cleantalk->server_changed = $this->config['cleantalk_antispam_server_changed'];
-		
+
 		//Timezone from JS, Page set timestamp
 		$page_set_timestamp 	= $this->request->variable(self::JS_PS_TIMESTAMP, 			"none", false, \phpbb\request\request_interface::COOKIE);
 		$js_timezone 			= $this->request->variable(self::JS_TIME_ZONE_FIELD_NAME, 	"none", false, \phpbb\request\request_interface::COOKIE);
 		$previous_referer       = $this->request->variable($this->config['cookie_name'].'_'.self::JS_PREVIOUS_REFERER, "none", false, \phpbb\request\request_interface::COOKIE);
-		
+
 		$js_timezone 			= ($js_timezone 		=== "none" ? 0 : $js_timezone);
 		$page_set_timestamp 	= ($page_set_timestamp 	=== "none" ? 0 : intval($page_set_timestamp));
 		$previous_referer       = ($previous_referer    === "none" ? 0 : $previous_referer);
-				
+
 		$user_agent  = $this->request->server('HTTP_USER_AGENT');
-		$refferrer   = $this->request->server('HTTP_REFERER');	
-		$page_url    = $this->request->server('SERVER_NAME').$this->request->server('REQUEST_URI');	
+		$refferrer   = $this->request->server('HTTP_REFERER');
+		$page_url    = $this->request->server('SERVER_NAME').$this->request->server('REQUEST_URI');
 		$sender_info = json_encode(
 			array(
 			'cms_lang'               => $this->config['default_lang'],
@@ -123,7 +123,7 @@ class main_model
 			'page_set_timestamp'     => $page_set_timestamp,
 			'REFFERRER_PREVIOUS'     => $previous_referer,
 			'fields_number'          => sizeof($spam_check),
-			'cookies_enabled'        => $this->test_cookie(),	
+			'cookies_enabled'        => $this->test_cookie(),
 			)
 		);
 		$post_info = json_encode(
@@ -143,7 +143,7 @@ class main_model
 		{
 			$this->cleantalk_request->auth_key = $this->config['cleantalk_antispam_apikey'];
 		}
-		
+
 		$this->cleantalk_request->agent = 'phpbb31-' . preg_replace("/(\d+)\.(\d*)\.?(\d*)/", "$1$2$3", $composer_json->version);
 		$this->cleantalk_request->js_on = $checkjs;
 		$this->cleantalk_request->sender_info = $sender_info;
@@ -173,7 +173,7 @@ class main_model
 				break;
 		}
         $exec_time = microtime(true) - $start;
-		
+
 		$ret_val = array();
 		$ret_val['errno'] = 0;
 		$ret_val['allow'] = 1;
@@ -201,9 +201,9 @@ class main_model
 				// Cleantalk error so we go default way (no action at all).
 				$ret_val['errno'] = 1;
 				$ct_result->allow = 1;
-				
+
 				if (!empty($ct_result->errstr))
-				{	
+				{
 					if($ct_result->curl_err)
 					{
 						$ct_result->errstr = $this->user->lang('CLEANTALK_ERROR_CURL', $ct_result->curl_err);
@@ -213,7 +213,7 @@ class main_model
 						$ct_result->errstr = $this->user->lang('CLEANTALK_ERROR_NO_CURL');
 					}
 					$ct_result->errstr = $ct_result->errstr . " ". $this->user->lang('CLEANTALK_ERROR_ADDON');
-								
+
 					$ret_val['errstr'] = $this->filter_response($ct_result->errstr);
 				}
 				else
@@ -275,7 +275,7 @@ class main_model
 					// New user or Spammer and stop_queue == 1 - display form error message.
 					$ret_val['stop_queue'] = 1;
 				}
-			}			
+			}
 		}
 
 	return $ret_val;
@@ -302,7 +302,7 @@ class main_model
 
 	/**
 	* Sets cookie
-	*/	
+	*/
 	public function set_cookie()
 	{
 		// Cookie names to validate
@@ -320,8 +320,8 @@ class main_model
 		}
 		// Cookies test
 		$cookie_test_value['check_value'] = md5($cookie_test_value['check_value']);
-		$this->user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), 0);		
-	} 
+		$this->user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), 0);
+	}
 
 	/**
 	* Test cookie
@@ -330,15 +330,15 @@ class main_model
 	{
 
         if($this->request->is_set($this->config['cookie_name'].'_ct_cookies_test', \phpbb\request\request_interface::COOKIE))
-        {           
+        {
             $cookie_test = json_decode(htmlspecialchars_decode($this->request->variable($this->config['cookie_name'].'_ct_cookies_test','', false, \phpbb\request\request_interface::COOKIE)),true);
-            
+
             $check_srting = $this->config['cleantalk_antispam_apikey'];
             foreach($cookie_test['cookies_names'] as $cookie_name)
             {
                 $check_srting .= $this->request->variable($this->config['cookie_name'].'_'.$cookie_name,'', false, \phpbb\request\request_interface::COOKIE);
             } unset($cokie_name);
-            
+
             if($cookie_test['check_value'] == md5(htmlspecialchars_decode($check_srting)))
             {
                 return 1;
@@ -358,7 +358,7 @@ class main_model
 	/** Return array of JS-keys for checking
 	*
 	* @return array
-	*/	
+	*/
     public function cleantalk_get_checkjs_code()
     {
 		$config_js_keys = $this->config_text->get_array(array(
@@ -386,23 +386,23 @@ class main_model
 	            }
 	        }
 	    }
-	        
+
         // Get new key if the latest key is too old
         if (time() - $latest_key_time > 86400) {
             $keys[$key] = time();
         }
-        
+
         if (md5(json_encode($keys)) != $keys_checksum) {
         	$js_keys['keys'] = $keys;
 			$this->config_text->set_array(array(
 				'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
 			));
-        }        	
+        }
 
-		return $key;	
+		return $key;
 
-    }  
-	
+    }
+
 	/** Validating js key
 	*
 	* @return array
@@ -424,7 +424,7 @@ class main_model
 			{
 				$result = false;
 			}
-			
+
 		}
 		else
 		{
@@ -433,19 +433,19 @@ class main_model
 
 	    return  $result;
 	}
-	
+
 	/**
 	 * Checks if reuqest URI is in exclusion list
 	 *
 	 * @return bool
 	 */
 	public function exclusions_check__url( $exclusions, $is_regexp = false ){
-		
+
 		$haystack = $this->request->server('SERVER_NAME').$this->request->server('REQUEST_URI');
-		
+
 		foreach ( $exclusions as $exclusion )
 		{
-			
+
 			if(
 				( $is_regexp && preg_match( '/' . $exclusion . '/', $haystack ) === 1 ) ||
 				stripos( $haystack, $exclusion ) !== false
@@ -454,7 +454,7 @@ class main_model
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -473,11 +473,11 @@ class main_model
 		$data_id       = !empty($request->variable('data_id', ''))       ? urldecode($request->variable('data_id', ''))       : null;
 		$file_url_nums = (!empty($request->variable('file_url_nums', '')) || (string) $request->variable('file_url_nums', '') === '0') ? urldecode($request->variable('file_url_nums', '')) : null;
 		$file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
-		
+
 	    if( ! isset( $api_server, $data_id, $file_url_nums ) ){
-	    
+
 			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
-			
+
 	    } elseif( $api_server && $data_id && is_array( $file_url_nums ) && count( $file_url_nums ) ){
 
 			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update( $api_server, $data_id, $file_url_nums[0] );
@@ -488,7 +488,7 @@ class main_model
 
 				if (count($file_url_nums)) {
 					\cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
-						($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''), 
+						($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''),
 						array(
 							'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
 							'spbc_remote_call_action' => 'sfw_update',
@@ -498,14 +498,14 @@ class main_model
 		                    'file_url_nums'           => implode(',', $file_url_nums),
 						),
 						array('get', 'async')
-					);							
+					);
 				} else {
 					//Files array is empty update sfw time
 					$config->set('cleantalk_antispam_sfw_update_last_gc', time());
 
 					return $result;
 				}
-			}	    	
+			}
 	    }else
 	        return true;
 	}
@@ -513,7 +513,7 @@ class main_model
 	/**
 	 * SpamFireWall send logs function
 	 *
-	 */	
+	 */
 	public function sfw_send_logs($access_key) {
 
 		global $config;
@@ -521,7 +521,7 @@ class main_model
 		$result = \cleantalk\antispam\model\CleantalkSFW::send_logs($access_key);
 
 		if (!isset($result['error'])) {
-			$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
+			$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());
 		}
 
 		return $result;
@@ -536,7 +536,7 @@ class main_model
     {
         $requests = $this->config_text->get_array(array('cleantalk_stats__requests'));
 		$requests = isset($requests['cleantalk_stats__requests']) ? json_decode($requests['cleantalk_stats__requests'], true) : null;
-		
+
         // Delete old stats
         if ( !is_null($requests) && min(array_keys($requests)) < time() - (86400 * 7) ) {
             unset($requests[min(array_keys($requests))]);
