@@ -345,13 +345,25 @@ class main_model
             'cleantalk_antispam_js_keys'
         ));
         $js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
+
+        $key = rand();
+
         $keys = $js_keys['keys'];
         $keys_checksum = md5(json_encode($keys));
 
-        $key = rand();
         $latest_key_time = 0;
         if ( $keys ) {
-            foreach ( $keys as $k => $t ) {
+            foreach ($keys as $k => $t) {
+
+                //fix for unknown time values
+                if (!is_numeric($t)){
+                    $keys[$key] = time();
+                    $js_keys['keys'] = $keys;
+                    $this->config_text->set_array(array(
+                        'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
+                    ));
+                    return $key;
+                }
 
                 // Removing key if it's to old
                 if ( time() - $t > 14 * 86400 ) {
