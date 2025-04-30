@@ -28,7 +28,7 @@ class main_module
 
 		if ($request->is_set_post('submit') || $request->is_set_post('get_key_auto'))
 		{
-			
+
 			if (!check_form_key('cleantalk/antispam'))
 			{
 				trigger_error('FORM_INVALID');
@@ -39,34 +39,34 @@ class main_module
 			$config->set('cleantalk_antispam_nusers', $request->variable('cleantalk_antispam_nusers', 0));
 			$config->set('cleantalk_antispam_ccf', $request->variable('cleantalk_antispam_ccf',0));
 			$config->set('cleantalk_antispam_sfw_enabled', $request->variable('cleantalk_antispam_sfw_enabled', 0));
-			
+
 			$key_is_valid = false;
 			$key_is_ok = false;
-			
+
 			if($request->is_set_post('submit'))
 			{
 				$config->set('cleantalk_antispam_apikey', $request->variable('cleantalk_antispam_apikey', ''));
 			}
-			
+
 			if($request->is_set_post('get_key_auto'))
 			{
-							
+
 				$result = \cleantalk\antispam\model\CleantalkHelper::getApiKey(
 					$config['board_email'],
 					$request->server('SERVER_NAME'),
 					'phpbb31'
 				);
-				
+
 				if(empty($result['error']))
-				{						
+				{
 					$config->set('cleantalk_antispam_apikey', $result['auth_key']);
 					$savekey = $result['auth_key'];
 					$key_is_valid = true;
 				}
 			}
-			
+
 			$savekey = $key_is_valid ? $savekey : $request->variable('cleantalk_antispam_apikey', '');
-							
+
 			if(!$key_is_valid)
 			{
 				$result =\cleantalk\antispam\model\CleantalkHelper::apbct_key_is_correct($savekey);
@@ -123,7 +123,7 @@ class main_module
                 }
             }
             $config->set('cleantalk_antispam_key_is_ok', ($key_is_ok) ? 1 : 0);
-			
+
 			trigger_error($user->lang('ACP_CLEANTALK_SETTINGS_SAVED') . adm_back_link($this->u_action));
 		}
 
@@ -132,7 +132,7 @@ class main_module
 
 		// Errors
 		$errors = Errors::getErrors();
-		
+
 		$template->assign_vars(array(
 			'U_ACTION'				=> $this->u_action,
 			'CLEANTALK_ERRORS'				=> (bool) count($errors),
@@ -161,11 +161,11 @@ class main_module
             'CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => isset($config['cleantalk_stats__sfw_last_time_updated']) ? date('M d Y H:i:s', $config['cleantalk_stats__sfw_last_time_updated']) : 'unknown',
             'CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => isset($config['cleantalk_antispam_sfw_logs_send_last_gc']) ? date('M d Y H:i:s', $config['cleantalk_antispam_sfw_logs_send_last_gc']) : 'unknown',
 		));
-		
+
 		$user->add_lang_ext('cleantalk/antispam', 'common');
 
 		$table_action = $request->variable('table_actions', '', false, \phpbb\request\request_interface::POST);
-		$delete_user_ids = array();		
+		$delete_user_ids = array();
 
 		if($table_action == 'ct_delete_all')
 		{
@@ -173,14 +173,14 @@ class main_module
 			{
 				trigger_error('FORM_INVALID');
 			}
-			
+
 			if (!function_exists('user_delete'))
 			{
 				include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
 			$sql = 'SELECT user_id FROM ' . USERS_TABLE . ' WHERE ct_marked=1';
 			$result = $db->sql_query($sql);
-			
+
 			while($row = $db->sql_fetchrow($result))
 			{
 				$delete_user_ids[] = $row['user_id'];
@@ -188,7 +188,7 @@ class main_module
 
 			$db->sql_freeresult($result);
 		}
-		
+
 		if ($table_action == 'ct_delete_checked')
 		{
 			if (!check_form_key('cleantalk/antispam'))
@@ -205,7 +205,7 @@ class main_module
 				foreach($ct_del_user as $key=>$value)
 				{
 					$delete_user_ids[] = $key;
-				}				
+				}
 			}
 		}
 		if (!empty($delete_user_ids))
@@ -270,7 +270,7 @@ class main_module
 			}
 
 			$db->sql_freeresult($result);
-			
+
 			if ($data && count($data) > 0)
 			{
 				$api_check_limit = 1000;
@@ -283,12 +283,12 @@ class main_module
 						$offset+=$api_check_limit;
 
 						if(!empty($result['error']))
-						{					
+						{
 							if($result['error_string'] == 'CONNECTION_ERROR')
 							{
 								$error = $user->lang('ACP_CHECKUSERS_DONE_3');
 							}
-							else 
+							else
 							{
 								$error = $result['error_message'];
 							}
@@ -328,14 +328,14 @@ class main_module
 						}
 					}
 				}
-				
+
 			}
 			if($error!='')
 			{
 				$template->assign_var('CT_ERROR', $error);
 			}
 		}
-		$start_entry = 0;		
+		$start_entry = 0;
 		if($request->is_set('start_entry', \phpbb\request\request_interface::GET))
 		{
 			$start_entry = $request->variable('start_entry', 1);
@@ -350,7 +350,7 @@ class main_module
 		$result = $db->sql_query_limit($sql, $on_page, $start_entry);
 		$found = false;
 		while($row = $db->sql_fetchrow($result))
-		{			
+		{
 			$found = true;
 			$template->assign_block_vars('CT_SPAMMERS', array(
 				'USER_POSTS_LINK'	=> append_sid($phpbb_root_path.'search.'.$phpEx, array('author_id' => $row['user_id'], 'sr' => 'posts'), false),
@@ -364,7 +364,7 @@ class main_module
 			));
 		}
 		$db->sql_freeresult($result);
-		$pages = ceil($spam_users_count / $on_page); 
+		$pages = ceil($spam_users_count / $on_page);
 		$server_uri = append_sid($phpbb_root_path.'adm/index.'.$phpEx,array('i'=>$request->variable('i','1')));
 		if ($pages>1)
 		{
@@ -373,11 +373,11 @@ class main_module
 			{
 				$template->assign_block_vars('CT_PAGES_CHECKUSERS', array(
 					'PAGE_LINK' => $server_uri.'&start_entry='.($i-1)*$on_page.'&curr_page='.$i,
-					'PAGE_NUMBER' => $i, 
+					'PAGE_NUMBER' => $i,
 					'PAGE_STYLE' => 'background: rgba(23,96,147,'.(($request->variable('curr_page',1) == $i) ? '0.6' : '0.3').');',
 
-				));							
-			}			
+				));
+			}
 		}
 		if ($found)
 		{
@@ -393,15 +393,18 @@ class main_module
 
 		global $request, $config;
 
-		$api_server    = !empty($request->variable('api_server', ''))    ? urldecode($request->variable('api_server', ''))    : null;
-		$data_id       = !empty($request->variable('data_id', ''))       ? urldecode($request->variable('data_id', ''))       : null;
-		$file_url_nums = (!empty($request->variable('file_url_nums', '')) || (string) $request->variable('file_url_nums', '') === '0') ? urldecode($request->variable('file_url_nums', '')) : null;
-		$file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
-		
+        $api_server = $request->variable('api_server', '');
+        $api_server = !empty($api_server) ? urldecode($api_server) : null;
+        $data_id = $request->variable('data_id', '');
+        $data_id = !empty($data_id) ? urldecode($data_id) : null;
+        $file_url_nums = $request->variable('file_url_nums', '');
+        $file_url_nums = (!empty($file_url_nums) || (string)$file_url_nums === '0') ? urldecode($file_url_nums) : null;
+        $file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
+
 	    if( ! isset( $api_server, $data_id, $file_url_nums ) ){
-	    
+
 			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
-			
+
 	    } elseif( $api_server && $data_id && is_array( $file_url_nums ) && count( $file_url_nums ) ){
 
 			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update( $api_server, $data_id, $file_url_nums[0] );
@@ -412,7 +415,7 @@ class main_module
 
 				if (count($file_url_nums)) {
 					\cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
-						($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''), 
+						($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''),
 						array(
 							'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
 							'spbc_remote_call_action' => 'sfw_update',
@@ -422,14 +425,14 @@ class main_module
 		                    'file_url_nums'           => implode(',', $file_url_nums),
 						),
 						array('get', 'async')
-					);							
+					);
 				} else {
 					//Files array is empty update sfw time
 					$config->set('cleantalk_antispam_sfw_update_last_gc', time());
 
 					return $result;
 				}
-			}	    	
+			}
 	    }else
 	        return true;
 	}
@@ -440,7 +443,7 @@ class main_module
 		$result = \cleantalk\antispam\model\CleantalkSFW::send_logs($access_key);
 
 		if (!isset($result['error'])) {
-			$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());			
+			$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());
 		}
 
 		return $result;
