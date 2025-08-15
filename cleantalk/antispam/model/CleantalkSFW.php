@@ -287,7 +287,7 @@ class CleantalkSFW
 	 */
 	public static function sfw_update( $api_server = null, $data_id = null, $file_url_num = null ){
 		
-		global $config, $request, $db, $table_prefix, $config;
+		global $config, $request, $db, $table_prefix;
 
 		if( ! isset( $api_server, $data_id, $file_url_num ) ){
 
