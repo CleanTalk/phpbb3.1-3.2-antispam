@@ -313,10 +313,12 @@ class CleantalkSFW
 					
 						if( $response_code == 200 || $response_code == 501 ) {
 	
-							if(ini_get('allow_url_fopen')) {
-								
-								$base_host_url = ($request->server('HTTPS') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST');
-								
+							if (ini_get('allow_url_fopen')) {
+
+								$base_host_url = ($request->server('HTTPS') === 'on' ? "https" : "http") . "://" . $request->server('HTTP_HOST');
+								$script_path = isset($config['script_path']) && !empty($config['script_path']) ? rtrim($config['script_path'], '/') . '/' : '/';
+								$base_host_url .= $script_path;
+
 								$db->sql_query("TRUNCATE TABLE ".$table_prefix."cleantalk_sfw");
 								
 								if (preg_match('/multifiles/', $result['file_url'])) {
@@ -327,8 +329,6 @@ class CleantalkSFW
 									$gf = gzopen($result['file_url'], 'rb');
 	
 									if ($gf) {
-	
-										global $config;
 										$config->set('cleantalk_stats__sfw_nets', 0);
 										
 										$file_url_nums = array();
