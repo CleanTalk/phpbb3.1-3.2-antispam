@@ -476,7 +476,7 @@ class main_model
 
                 if ( count($file_url_nums) ) {
                     \cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
-                        ($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://" . $request->server('HTTP_HOST', ''),
+                        ($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://" . $request->server('HTTP_HOST', '') . (isset($config['script_path']) && !empty($config['script_path']) ? rtrim($config['script_path'], '/') . '/' : '/'),
                         array(
                             'spbc_remote_call_token' => md5($config['cleantalk_antispam_apikey']),
                             'spbc_remote_call_action' => 'sfw_update',
