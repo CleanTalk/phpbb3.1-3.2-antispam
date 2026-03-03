@@ -506,14 +506,14 @@ class Cleantalk
                     if ($server['host'] === 'localhost' || $server['ip'] === null)
                     {
                         $work_url = $server['host'];
+                    } else {
+                        $host = self::isCleanTalkServer($server['ip']);
+                        if (!$host) {
+                            continue;
+                        }
+                        $work_url = $url_prefix . $host;
                     }
-                    else
-                    {
-                        $server_host = $server['ip'];
-                        $work_url = $server_host;
-                    }
-                    $host = filter_var($work_url,FILTER_VALIDATE_IP) ? gethostbyaddr($work_url) : $work_url;
-                    $work_url = $url_prefix . $host;
+
                     if (isset($url_suffix))
                     {
                         $work_url = $work_url . $url_suffix;
@@ -644,6 +644,119 @@ class Cleantalk
         }
 
         return $response;
+    }
+
+    static public function ipResolve($ip)
+    {
+        // Validate IP first
+        $ip_version = self::ipValidate($ip);
+        if (!$ip_version) {
+            return false;
+        }
+
+        // Reverse DNS lookup (PTR record)
+        $hostname = gethostbyaddr($ip);
+
+        // If gethostbyaddr returns the IP itself, it means no PTR record exists
+        if (!$hostname || $hostname === $ip) {
+            return false;
+        }
+
+        // Forward DNS lookup - use dns_get_record() to support both IPv4 (A) and IPv6 (AAAA) records
+        $record_type = ($ip_version === 'v6') ? DNS_AAAA : DNS_A;
+        $ip_field = ($ip_version === 'v6') ? 'ipv6' : 'ip';
+
+        $records = @dns_get_record($hostname, $record_type);
+
+        // If forward lookup fails, we can't verify
+        if (empty($records)) {
+            return false;
+        }
+
+        // Extract IPs from DNS records
+        $forward_ips = array();
+        foreach ($records as $record) {
+            if (isset($record[$ip_field])) {
+                $forward_ips[] = $record[$ip_field];
+            }
+        }
+
+        if (empty($forward_ips)) {
+            return false;
+        }
+
+        // Check if the original IP is in the list of IPs the hostname resolves to
+        if ($ip_version === 'v6') {
+            $normalized_ip = self::ipV6Normalize($ip);
+            foreach ($forward_ips as $forward_ip) {
+                if (self::ipV6Normalize($forward_ip) === $normalized_ip) {
+                    return $hostname;
+                }
+            }
+        } elseif (in_array($ip, $forward_ips, true)) {
+            return $hostname;
+        }
+
+        return false;
+    }
+
+    /**
+     * Validating IPv4, IPv6
+     *
+     * @param string $ip
+     *
+     * @return string|bool
+     */
+    public static function ipValidate($ip)
+    {
+        if ( !$ip ) {
+            return false;
+        } // NULL || FALSE || '' || so on...
+        if ( filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) && $ip != '0.0.0.0' ) {
+            return 'v4';
+        }  // IPv4
+        if ( filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) && self::ipV6Reduce($ip) != '0::0' ) {
+            return 'v6';
+        }  // IPv6
+        return false; // Unknown
+    }
+
+    /**
+     * Expand IPv6
+     *
+     * @param string $ip
+     *
+     * @return string IPv6
+     */
+    public static function ipV6Normalize($ip)
+    {
+        $ip = trim($ip);
+        // Searching for ::ffff:xx.xx.xx.xx patterns and turn it to IPv6
+        if ( preg_match('/^::ffff:([0-9]{1,3}\.?){4}$/', $ip) ) {
+            $ip = dechex(sprintf("%u", ip2long(substr($ip, 7))));
+            $ip = '0:0:0:0:0:0:' . (strlen($ip) > 4 ? substr('abcde', 0, -4) : '0') . ':' . substr($ip, -4, 4);
+            // Normalizing hextets number
+        } elseif ( strpos($ip, '::') !== false ) {
+            $ip = str_replace('::', str_repeat(':0', 8 - substr_count($ip, ':')) . ':', $ip);
+            $ip = strpos($ip, ':') === 0 ? '0' . $ip : $ip;
+            $ip = strpos(strrev($ip), ':') === 0 ? $ip . '0' : $ip;
+        }
+        // Simplifyng hextets
+        if ( preg_match('/:0(?=[a-z0-9]+)/', $ip) ) {
+            $ip = preg_replace('/:0(?=[a-z0-9]+)/', ':', strtolower($ip));
+            $ip = self::ipV6Normalize($ip);
+        }
+        return $ip;
+    }
+
+    static public function isCleanTalkServer($ip)
+    {
+        $pattern = '/^(api|apix[0-9]+|moderate|moderate[0-9]+)\.cleantalk\.(org|ru)$/';
+        $validated_host = self::ipResolve($ip);
+        if ($validated_host && preg_match($pattern, $validated_host)) {
+            return $validated_host;
+        }
+        return false;
     }
 
     /**
