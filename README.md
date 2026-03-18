@@ -17,6 +17,10 @@ CleanTalk Anti-Spam extension for phpbb v3.1.X & v3.2.X & v3.3.X.
   * PHP 5.6+
   * CleanTalk account https://cleantalk.org/register?product=anti-spam
 
+## Websites that trust CleanTalk!
+
+![CleanTalk Anti-Spam Rating](https://cleantalk.org/webpack/img/cleantalk_rating.png)
+
 ## Technical support.
 https://cleantalk.org/forum/
 
