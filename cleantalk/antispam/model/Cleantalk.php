@@ -787,8 +787,12 @@ class Cleantalk
     {
         if ( strpos($ip, ':') !== false ) {
             $ip = preg_replace('/:0{1,4}/', ':', $ip);
+            if ( preg_match('/^[0-9a-fA-F]{1,4}(?=:)/', $ip, $matches) ) {
+                $first_hextet = ltrim($matches[0], '0');
+                $first_hextet = $first_hextet === '' ? '0' : $first_hextet;
+                $ip = $first_hextet . substr($ip, strlen($matches[0]));
+            }
             $ip = preg_replace('/:{2,}/', '::', $ip);
-            $ip = strpos($ip, '0') === 0 ? substr($ip, 1) : $ip;
         }
         return $ip;
     }
