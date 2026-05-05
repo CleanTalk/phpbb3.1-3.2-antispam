@@ -505,7 +505,7 @@ class Cleantalk
                 {
                     if ($server['host'] === 'localhost' || $server['ip'] === null)
                     {
-                        $work_url = $server['host'];
+                        $work_url = $url_prefix . $server['host'];
                     } else {
                         $host = self::ipResolve($server['ip']);
                         if (!$host) {
