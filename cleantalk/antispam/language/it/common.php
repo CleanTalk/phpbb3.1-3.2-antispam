@@ -33,6 +33,9 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_LABEL'		        => 'Modera i Nuovi Utenti Registrati',
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'Post e topic dei nuovi utenti registrati verranno controllati per lo spam. Lo spam sarà rifiutato o inviato per l’approvazione.',
 
+	'ACP_CLEANTALK_ALLUSERS_LABEL'		        => 'Modera tutti gli utenti registrati',
+	'ACP_CLEANTALK_ALLUSERS_DESCR'		        => 'Post e topic di tutti gli utenti registrati verranno controllati per lo spam, non solo quelli appena registrati. Lo spam sarà rifiutato o inviato per l’approvazione.',
+
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Controllare i moduli di contatto',
 	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Attivare l’antispam test per il modulo di contatto. Attenzione, possibili conflitti!',
 
