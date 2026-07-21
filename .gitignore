@@ -1,3 +1,5 @@
 .idea
 /phpbb/
 /index.htm
+cleantalk/antispam/composer.lock
+cleantalk/antispam/vendor/

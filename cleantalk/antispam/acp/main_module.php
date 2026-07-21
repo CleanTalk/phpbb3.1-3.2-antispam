@@ -10,14 +10,17 @@
 
 namespace cleantalk\antispam\acp;
 
-use cleantalk\antispam\library\Cleantalk\Common\API;
-use cleantalk\antispam\library\Cleantalk\Errors;
+use Cleantalk\Common\Api\Api;
+use Cleantalk\Custom\Errors;
 
 class main_module
 {
 	function main($id, $mode)
 	{
 		global $user, $template, $request, $config, $db, $table_prefix, $phpbb_root_path, $phpEx, $phpbb_container;
+
+		// Load CleanTalk common libraries
+		require_once(dirname(__DIR__) . '/lib/autoload.php');
 
 		$config_text = $phpbb_container->get('config_text');
 
@@ -389,63 +392,72 @@ class main_module
 		}
 	}
 
-	function sfw_update( $access_key = null ){
+	function sfw_update($access_key = null)
+	{
+		global $config, $request;
 
-		global $request, $config;
-
-        $api_server = $request->variable('api_server', '');
-        $api_server = !empty($api_server) ? urldecode($api_server) : null;
-        $data_id = $request->variable('data_id', '');
-        $data_id = !empty($data_id) ? urldecode($data_id) : null;
-        $file_url_nums = $request->variable('file_url_nums', '');
-        $file_url_nums = (!empty($file_url_nums) || (string)$file_url_nums === '0') ? urldecode($file_url_nums) : null;
-        $file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
-
-	    if( ! isset( $api_server, $data_id, $file_url_nums ) ){
-
-			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
-
-	    } elseif( $api_server && $data_id && is_array( $file_url_nums ) && count( $file_url_nums ) ){
-
-			$result = \cleantalk\antispam\model\CleantalkSFW::sfw_update( $api_server, $data_id, $file_url_nums[0] );
-
-			if(empty($result['error'])){
-
-				array_shift($file_url_nums);
-
-				if (count($file_url_nums)) {
-					\cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
-						($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://".$request->server('HTTP_HOST', ''),
-						array(
-							'spbc_remote_call_token'  => md5($config['cleantalk_antispam_apikey']),
-							'spbc_remote_call_action' => 'sfw_update',
-							'plugin_name'             => 'apbct',
-							'api_server'              => $api_server,
-							'data_id'                 => $data_id,
-		                    'file_url_nums'           => implode(',', $file_url_nums),
-						),
-						array('get', 'async')
-					);
-				} else {
-					//Files array is empty update sfw time
-					$config->set('cleantalk_antispam_sfw_update_last_gc', time());
-
-					return $result;
-				}
-			}
-	    }else
-	        return true;
-	}
-	function sfw_send_logs($access_key) {
-
-		global $config;
-
-		$result = \cleantalk\antispam\model\CleantalkSFW::send_logs($access_key);
-
-		if (!isset($result['error'])) {
-			$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());
+		$autoload_path = dirname(__DIR__) . '/lib/autoload.php';
+		if (file_exists($autoload_path)) {
+			require_once($autoload_path);
 		}
 
-		return $result;
+		try {
+			$api_key = $access_key ?: $config['cleantalk_antispam_apikey'];
+
+			// Enable superglobals for Common libraries that access $_SERVER directly
+			$request->enable_super_globals();
+
+			$firewall = new \Cleantalk\Common\Firewall\Firewall(
+				$api_key,
+				APBCT_TBL_FIREWALL_LOG
+			);
+
+			$result = $firewall->getUpdater()->update();
+
+			$request->disable_super_globals();
+
+			if (empty($result['error'])) {
+				$config->set('cleantalk_antispam_sfw_update_last_gc', time());
+			}
+
+			return $result;
+		} catch (\Exception $e) {
+			$request->disable_super_globals();
+			error_log('CleanTalk SFW update error: ' . $e->getMessage());
+			return array('error' => $e->getMessage());
+		}
+	}
+
+	function sfw_send_logs($access_key)
+	{
+		global $config, $request;
+
+		$autoload_path = dirname(__DIR__) . '/lib/autoload.php';
+		if (file_exists($autoload_path)) {
+			require_once($autoload_path);
+		}
+
+		try {
+			$request->enable_super_globals();
+
+			$firewall = new \Cleantalk\Common\Firewall\Firewall(
+				$access_key,
+				APBCT_TBL_FIREWALL_LOG
+			);
+
+			$result = $firewall->sendLogs();
+
+			$request->disable_super_globals();
+
+			if (!isset($result['error'])) {
+				$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());
+			}
+
+			return $result;
+		} catch (\Exception $e) {
+			$request->disable_super_globals();
+			error_log('CleanTalk SFW send logs error: ' . $e->getMessage());
+			return array('error' => $e->getMessage());
+		}
 	}
 }

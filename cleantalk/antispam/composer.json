@@ -27,11 +27,21 @@
         }
     ],
     "require": {
-        "php": ">=5.3.3",
-        "phpbb/phpbb": ">=3.1.0-RC2"
+        "php": ">=7.2",
+        "cleantalk/firewall": "*",
+        "cleantalk/dns": "*",
+        "cleantalk/api": "*",
+        "cleantalk/cron": "*",
+        "cleantalk/remote-calls": "*",
+        "cleantalk/storage-handler": "*"
     },
     "require-dev": {
         "phpbb/epv": "dev-master"
+    },
+    "config": {
+        "allow-plugins": {
+            "cleantalk/apbct-installer": true
+        }
     },
     "extra": {
         "display-name": "Antispam by CleanTalk",

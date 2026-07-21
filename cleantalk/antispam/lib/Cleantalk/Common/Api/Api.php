@@ -1,19 +1,20 @@
 <?php
 
-namespace cleantalk\antispam\library\Cleantalk\Common;
+namespace Cleantalk\Common\Api;
+
+use Cleantalk\Common\Mloader\Mloader;
 
 /**
  * CleanTalk API class.
  * Mostly contains wrappers for API methods. Check and send methods.
  * Compatible with any CMS.
  *
- * @version       4.0
  * @author        Cleantalk team (welcome@cleantalk.org)
- * @copyright (C) 2014 CleanTalk team (https://cleantalk.org)
+ * @copyright (C) 2014 CleanTalk team (http://cleantalk.org)
  * @license       GNU/GPL: http://www.gnu.org/copyleft/gpl.html
  * @see           https://github.com/CleanTalk/php-antispam
  */
-class API
+class Api
 {
     /* Default params  */
     const URL = 'https://api.cleantalk.org';
@@ -26,30 +27,28 @@ class API
      * @param string $api_key
      * @param null|string $out Data output type (JSON or file URL)
      * @param string $version API method version
-     * @param boolean $do_check
+     * @param int|null $common_lists 1 for common lists, 0 for personal lists, null for all
      *
-     * @return string|array ('error' => STRING)
+     * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodGet2sBlacklistsDb($api_key, $out = null, $version = '1_0', $do_check = true)
+    public static function methodGet2sBlacklistsDb($api_key, $out = null, $version = '1_0', $common_lists = null)
     {
         $request = array(
             'method_name' => '2s_blacklists_db',
             'auth_key'    => $api_key,
             'out'         => $out,
             'version'     => $version,
+            'common_lists' => $common_lists,
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, '2s_blacklists_db') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
      * Wrapper for get_api_key API method.
-     * Gets access key automatically.
+     * Gets Access key automatically.
      *
      * @param string $product_name Type of product
      * @param string $email Website admin email
@@ -61,7 +60,6 @@ class API
      * @param bool $wpms
      * @param bool $white_label
      * @param string $hoster_api_key
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      */
@@ -76,7 +74,7 @@ class API
         $wpms = false,
         $white_label = false,
         $hoster_api_key = '',
-        $do_check = true
+        $email_filtered = false
     ) {
         $request = array(
             'method_name'          => 'get_api_key',
@@ -90,12 +88,10 @@ class API
             'wpms_setup'           => $wpms,
             'hoster_whitelabel'    => $white_label,
             'hoster_api_key'       => $hoster_api_key,
+            'email_filtered'       => $email_filtered
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'get_api_key') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -104,13 +100,12 @@ class API
      *
      * @param string $host website host
      * @param integer $period report days
-     * @param boolean $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodGetAntispamReport($host, $period = 1, $do_check = true)
+    public static function methodGetAntispamReport($host, $period = 1)
     {
         $request = array(
             'method_name' => 'get_antispam_report',
@@ -118,10 +113,7 @@ class API
             'period'      => $period
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'get_antispam_report') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -129,33 +121,28 @@ class API
      * Ggets spam statistics.
      *
      * @param string $api_key
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodGetAntispamReportBreif($api_key, $do_check = true)
+    public static function methodGetAntispamReportBreif($api_key)
     {
         $request = array(
             'method_name' => 'get_antispam_report_breif',
             'auth_key'    => $api_key,
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'get_antispam_report_breif') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
      * Wrapper for notice_paid_till API method.
      * Gets information about renew notice.
      *
-     * @param string $api_key API key
+     * @param string $api_key Access key
      * @param string $path_to_cms Website URL
      * @param string $product_name
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
@@ -164,8 +151,7 @@ class API
     public static function methodNoticePaidTill(
         $api_key,
         $path_to_cms,
-        $product_name = 'antispam',
-        $do_check = true
+        $product_name = 'antispam'
     ) {
         $request = array(
             'method_name' => 'notice_paid_till',
@@ -177,10 +163,7 @@ class API
             $request['product_id'] = self::getProductId($product_name);
         }
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'notice_paid_till') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -188,23 +171,19 @@ class API
      * Gets IP country.
      *
      * @param string $data
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodIpInfo($data, $do_check = true)
+    public static function methodIpInfo($data)
     {
         $request = array(
             'method_name' => 'ip_info',
             'data'        => $data
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'ip_info') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -214,13 +193,12 @@ class API
      * @param string $api_key
      * @param array $data
      * @param null|string $date
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodSpamCheckCms($api_key, $data, $date = null, $do_check = true)
+    public static function methodSpamCheckCms($api_key, $data, $date = null)
     {
         $request = array(
             'method_name' => 'spam_check_cms',
@@ -232,26 +210,22 @@ class API
             $request['date'] = $date;
         }
 
-        $result = static::sendRequest($request, self::URL, 20);
-        $result = $do_check ? static::checkResponse($result, 'spam_check_cms') : $result;
-
-        return $result;
+        return static::sendRequest($request, self::URL, 20);
     }
 
     /**
      * Wrapper for notice_paid_till API method.
      * Gets information about renew notice.
      *
-     * @param string $api_key API key
+     * @param string $api_key Access key
      * @param string $path_to_cms Website URL
      * @param string $product_name
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodEmailCheck($email, $cache_only = true, $do_check = true)
+    public static function methodEmailCheck($email, $cache_only = true)
     {
         $request = array(
             'method_name' => 'email_check',
@@ -259,10 +233,7 @@ class API
             'email'       => $email,
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'email_check') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -272,13 +243,12 @@ class API
      * @param string $api_key
      * @param array $data
      * @param null|string $date
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodSpamCheck($api_key, $data, $date = null, $do_check = true)
+    public static function methodSpamCheck($api_key, $data, $date = null)
     {
         $request = array(
             'method_name' => 'spam_check',
@@ -290,10 +260,7 @@ class API
             $request['date'] = $date;
         }
 
-        $result = static::sendRequest($request, self::URL, 10);
-        $result = $do_check ? static::checkResponse($result, 'spam_check') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -302,13 +269,12 @@ class API
      *
      * @param string $api_key
      * @param array $data
-     * @param bool $do_check
      *
      * @return array|bool
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodSfwLogs($api_key, $data, $do_check = true)
+    public static function methodSfwLogs($api_key, $data)
     {
         $request = array(
             'auth_key'    => $api_key,
@@ -320,10 +286,7 @@ class API
 
         $request['data'] = str_replace('"EMPTY_ASSOCIATIVE_ARRAY"', '{}', $request['data']);
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'sfw_logs') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -332,13 +295,12 @@ class API
      *
      * @param string $api_key
      * @param array $data
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodSecurityLogs($api_key, $data, $do_check = true)
+    public static function methodSecurityLogs($api_key, $data)
     {
         $request = array(
             'auth_key'    => $api_key,
@@ -348,10 +310,7 @@ class API
             'rows'        => count($data),
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_logs') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -360,13 +319,12 @@ class API
      *
      * @param string $api_key
      * @param array $data
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodSecurityLogsSendFWData($api_key, $data, $do_check = true)
+    public static function methodSecurityLogsSendFWData($api_key, $data)
     {
         $request = array(
             'auth_key'    => $api_key,
@@ -376,10 +334,7 @@ class API
             'rows_fw'     => count($data),
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_logs') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -387,13 +342,12 @@ class API
      * Sends empty data to the cloud to syncronize version.
      *
      * @param string $api_key
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodSecurityLogsFeedback($api_key, $do_check = true)
+    public static function methodSecurityLogsFeedback($api_key)
     {
         $request = array(
             'auth_key'    => $api_key,
@@ -401,10 +355,7 @@ class API
             'data'        => '0',
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_logs') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -412,23 +363,19 @@ class API
      * Gets Securitty Firewall data to write to the local database.
      *
      * @param string $api_key
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodSecurityFirewallData($api_key, $do_check = true)
+    public static function methodSecurityFirewallData($api_key)
     {
         $request = array(
             'auth_key'    => $api_key,
             'method_name' => 'security_firewall_data',
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_firewall_data') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -436,23 +383,19 @@ class API
      * Gets URI with security firewall data in .csv.gz file to write to the local database.
      *
      * @param string $api_key
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodSecurityFirewallDataFile($api_key, $do_check = true)
+    public static function methodSecurityFirewallDataFile($api_key)
     {
         $request = array(
             'auth_key'    => $api_key,
             'method_name' => 'security_firewall_data_file',
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_firewall_data_file') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -464,7 +407,6 @@ class API
      * @param bool $scan_result
      * @param int $links_total
      * @param array $links_list
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
@@ -475,8 +417,7 @@ class API
         $scan_time,
         $scan_result,
         $links_total,
-        $links_list,
-        $do_check = true
+        $links_list
     ) {
         $request = array(
             'auth_key'          => $api_key,
@@ -487,10 +428,7 @@ class API
             'links_list'        => $links_list,
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_linksscan_logs') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -504,7 +442,6 @@ class API
      * @param int $scanned_total
      * @param array $modified List of modified files with details
      * @param array $unknown List of modified files with details
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
@@ -517,8 +454,7 @@ class API
         $scan_result,
         $scanned_total,
         $modified,
-        $unknown,
-        $do_check = true
+        $unknown
     ) {
         $request = array(
             'method_name'      => 'security_mscan_logs',
@@ -538,10 +474,7 @@ class API
             $request['unknown_files_rows'] = count($unknown);
         }
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_mscan_logs') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -553,7 +486,6 @@ class API
      * @param array $file File itself
      * @param string $file_md5 MD5 hash of file
      * @param array $weak_spots List of weak spots found in file
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
@@ -564,8 +496,7 @@ class API
         $file_path,
         $file,
         $file_md5,
-        $weak_spots,
-        $do_check = true
+        $weak_spots
     ) {
         $request = array(
             'method_name'    => 'security_mscan_files',
@@ -576,10 +507,7 @@ class API
             'dangerous_code' => $weak_spots,
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_mscan_files') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -589,13 +517,12 @@ class API
      * @param string $api_key
      * @param array|string|mixed $data
      * @param string $date
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodBacklinksCheckCms($api_key, $data, $date = null, $do_check = true)
+    public static function methodBacklinksCheckCms($api_key, $data, $date = null)
     {
         $request = array(
             'method_name' => 'backlinks_check_cms',
@@ -607,10 +534,7 @@ class API
             $request['date'] = $date;
         }
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'backlinks_check_cms') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -619,13 +543,12 @@ class API
      *
      * @param string $api_key
      * @param array $logs
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodSecurityBackendLogs($api_key, $logs, $do_check = true)
+    public static function methodSecurityBackendLogs($api_key, $logs)
     {
         $request = array(
             'method_name' => 'security_backend_logs',
@@ -634,10 +557,7 @@ class API
             'total_logs'  => count($logs),
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_backend_logs') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -650,7 +570,6 @@ class API
      * @param        $repaired_processed_files
      * @param        $repaired_total_files_proccessed
      * @param        $backup_id
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
@@ -662,8 +581,7 @@ class API
         $repair_comment,
         $repaired_processed_files,
         $repaired_total_files_proccessed,
-        $backup_id,
-        $do_check = true
+        $backup_id
     ) {
         $request = array(
             'method_name'                  => 'security_mscan_repairs',
@@ -676,10 +594,7 @@ class API
             'mscan_log_id'                 => 1,
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'security_mscan_repairs') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -688,13 +603,12 @@ class API
      *
      * @param string $api_key
      * @param string $plugins_and_themes_to_refresh
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodRequestChecksums($api_key, $plugins_and_themes_to_refresh, $do_check = true)
+    public static function methodRequestChecksums($api_key, $plugins_and_themes_to_refresh)
     {
         $request = array(
             'method_name' => 'request_checksums',
@@ -702,23 +616,19 @@ class API
             'data'        => $plugins_and_themes_to_refresh
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'request_checksums') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
      * Settings templates get API method wrapper
      *
      * @param string $api_key
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function methodServicesTemplatesGet($api_key, $product_name = 'antispam', $do_check = true)
+    public static function methodServicesTemplatesGet($api_key, $product_name = 'antispam')
     {
         $request = array(
             'method_name'        => 'services_templates_get',
@@ -726,10 +636,7 @@ class API
             'search[product_id]' => self::getProductId($product_name),
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'services_templates_get') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -737,7 +644,6 @@ class API
      *
      * @param string $api_key
      * @param null|string $template_name
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
@@ -747,8 +653,7 @@ class API
         $api_key,
         $template_name = null,
         $options = '',
-        $product_name = 'antispam',
-        $do_check = true
+        $product_name = 'antispam'
     ) {
         $request = array(
             'method_name'        => 'services_templates_add',
@@ -758,10 +663,7 @@ class API
             'search[product_id]' => self::getProductId($product_name),
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'services_templates_add') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -771,7 +673,6 @@ class API
      * @param int $template_id
      * @param string $options
      * @param string $product_name
-     * @param bool $do_check
      *
      * @return array|bool|mixed
      *
@@ -781,8 +682,7 @@ class API
         $api_key,
         $template_id,
         $options = '',
-        $product_name = 'antispam',
-        $do_check = true
+        $product_name = 'antispam'
     ) {
         $request = array(
             'method_name'        => 'services_templates_update',
@@ -793,10 +693,7 @@ class API
             'search[product_id]' => self::getProductId($product_name),
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'services_templates_update') : $result;
-
-        return $result;
+        return static::sendRequest($request);
     }
 
     /**
@@ -811,7 +708,6 @@ class API
      * @param string $note Description text
      * @param string $status allow|deny
      * @param string $expired Date Y-m-d H:i:s
-     * @param bool $do_check
      *
      * @return array|bool|bool[]|mixed|string[]
      *
@@ -826,8 +722,7 @@ class API
         $record_type,
         $note,
         $status,
-        $expired,
-        $do_check = true
+        $expired
     ) {
         $request = array(
             'method_name'  => 'private_list_add',
@@ -842,10 +737,34 @@ class API
             'expired'      => $expired,
         );
 
-        $result = static::sendRequest($request);
-        $result = $do_check ? static::checkResponse($result, 'private_list_add') : $result;
+        return static::sendRequest($request);
+    }
 
-        return $result;
+    /**
+     * Sending of local settings API method wrapper
+     *
+     * @param string $api_key
+     * @param string $hostname
+     * @param string $settings
+     *
+     * @return array|bool|mixed
+     *
+     * @psalm-suppress PossiblyUnusedMethod
+     * @psalm-suppress PossiblyUnusedReturnValue
+     */
+    public static function methodSendLocalSettings(
+        $api_key,
+        $hostname,
+        $settings
+    ) {
+        $request = array(
+            'method_name' => 'service_update_local_settings',
+            'auth_key' => $api_key,
+            'hostname' => $hostname,
+            'settings' => $settings
+        );
+
+        return static::sendRequest($request, self::URL, 0);
     }
 
     private static function getProductId($product_name)
@@ -866,96 +785,42 @@ class API
      * @param boolean $ssl use ssl on not
      * @param string $ssl_path
      *
-     * @return array|string
+     * @return array|bool
      */
     public static function sendRequest($data, $_url = self::URL, $timeout = 10, $ssl = false, $ssl_path = '')
     {
-        global $apbct_debug;
-
         // Possibility to switch agent version
         $data['agent'] = ! empty($data['agent'])
             ? $data['agent']
             : (defined('CLEANTALK_AGENT') ? CLEANTALK_AGENT : self::AGENT);
 
-        // Make URL string
-        $data_string = http_build_query($data);
-        $data_string = str_replace("&amp;", "&", $data_string);
-
-        // For debug purposes
-        if (defined('CLEANTALK_DEBUG') && CLEANTALK_DEBUG) {
-            $apbct_debug['sent_data']      = $data;
-            $apbct_debug['request_string'] = $data_string;
-        }
-
         // Possibility to switch API url
         $url = defined('CLEANTALK_API_URL') ? CLEANTALK_API_URL : $_url;
 
-        if (function_exists('curl_init')) {
-            $ch = curl_init();
+        /** @var \Cleantalk\Common\Http\Request $request_class */
+        $request_class = Mloader::get('Http\Request');
+        $http = new $request_class();
 
-            // Set diff options
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
-
-            $ssl_path = $ssl_path ?: (defined('CLEANTALK_CASERT_PATH') ? CLEANTALK_CASERT_PATH : '');
-
-            // Switch on/off SSL
-            if ($ssl && $ssl_path) {
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-                curl_setopt($ch, CURLOPT_CAINFO, $ssl_path);
-            } else {
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            }
-
-            // Make a request
-            $result = curl_exec($ch);
-            $errors = curl_error($ch);
-            curl_close($ch);
-        } else {
-            $errors = 'CURL_NOT_INSTALLED';
-        }
-
-        // Trying to use file_get_contents() to make a API call
-        if ( ! empty($errors)) {
-            if (ini_get('allow_url_fopen')) {
-                $opts    = array(
-                    'http' => array(
-                        'method'  => "POST",
-                        'timeout' => $timeout,
-                        'content' => $data_string,
-                    ),
-                );
-                $context = stream_context_create($opts);
-                $result  = @file_get_contents($url, false, $context);
-
-                $errors = $result === false
-                    ? $errors . '_FAILED_TO_USE_FILE_GET_CONTENTS'
-                    : false;
-            } else {
-                $errors .= '_AND_ALLOW_URL_FOPEN_IS_DISABLED';
-            }
-        }
-
-        return empty($result) || ! empty($errors)
-            ? array('error' => $errors)
-            : $result;
+        return $http->setUrl($url)
+                    ->setData($data)
+                    ->setPresets(['retry_with_socket'])
+                    ->addCallback(
+                        __CLASS__ . '::checkResponse',
+                        [$data['method_name']]
+                    )
+                    ->request();
     }
 
     /**
      * Function checks server response
      *
      * @param array|string $result
+     * @params null|string $_url
      * @param string $method_name
      *
      * @return mixed (array || array('error' => true))
      */
-    public static function checkResponse($result, $method_name = null)
+    public static function checkResponse($result, $_url = null, $method_name = null)
     {
         // Errors handling
         // Bad connection
@@ -1034,6 +899,10 @@ class API
                     : array('error' => 'COULDNT_ADD_WL_IP');
 
             case '2s_blacklists_db':
+                // Multifiles response contains file_url at top level
+                if ( isset($result['file_url']) ) {
+                    return $result;
+                }
                 return isset($result['data']) && isset($result['data_user_agents'])
                     ? $result
                     : $result['data'];
