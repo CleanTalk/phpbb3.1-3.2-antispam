@@ -348,6 +348,14 @@ class main_model
 
         $key = rand();
 
+        if (!is_array($js_keys) || !isset($js_keys['keys'])) {
+            $js_keys = array('keys' => array($key => time()));
+            $this->config_text->set_array(array(
+                'cleantalk_antispam_js_keys' => json_encode($js_keys),
+            ));
+            return $key;
+        }
+
         $keys = $js_keys['keys'];
         $keys_checksum = md5(json_encode($keys));
 
