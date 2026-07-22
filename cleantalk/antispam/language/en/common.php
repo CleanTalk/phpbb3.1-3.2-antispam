@@ -35,7 +35,7 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'Posts and topics from new users will be test for spam. Spam will be rejected or sent to approvement.',
 
 	'ACP_CLEANTALK_ALLUSERS_LABEL'		        => 'Moderate All Registered Users',
-	'ACP_CLEANTALK_ALLUSERS_DESCR'		        => 'Posts and topics from all registered users will be tested for spam, not only newly registered ones. Spam will be rejected or sent to approvement.',
+	'ACP_CLEANTALK_ALLUSERS_DESCR'		        => 'Posts and topics from all registered users will be tested for spam, not only newly registered ones. Spam will be rejected or sent to approval.',
 
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Check contact forms',
 	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Enable anti-spam test for contact forms. May provide confliсts!',
