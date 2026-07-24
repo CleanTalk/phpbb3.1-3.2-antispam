@@ -59,7 +59,9 @@ class ServerVariables
      *
      * @return mixed|string
      */
-    protected function getVariable($name){}
+    protected function getVariable($name)
+    {
+    }
 
     /**
      * Save variable to $this->variables[]

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Cleantalk\Common\Variables;
 
 /**

@@ -23,12 +23,12 @@ class Server extends ServerVariables
      */
     protected function getVariable($name)
     {
+        $name = strtoupper($name);
+
         // Return from memory. From $this->server
         if (isset(static::$instance->variables[$name])) {
             return static::$instance->variables[$name];
         }
-
-        $name = strtoupper($name);
 
         if ( isset($_SERVER[$name]) ) {
             $value = $this->getAndSanitize($_SERVER[$name]);
