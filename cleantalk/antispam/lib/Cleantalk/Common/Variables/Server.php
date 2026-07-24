@@ -41,8 +41,8 @@ class Server extends ServerVariables
             $value = strtoupper($value);
         }
 
-        // Convert HTML chars for HTTP_USER_AGENT, HTTP_USER_AGENT, SERVER_NAME
-        if (in_array($name, array('HTTP_USER_AGENT', 'HTTP_USER_AGENT', 'SERVER_NAME'))) {
+        // Convert HTML chars for HTTP_USER_AGENT, SERVER_NAME
+        if (in_array($name, array('HTTP_USER_AGENT', 'SERVER_NAME'))) {
             $value = htmlspecialchars($value);
         }
 
