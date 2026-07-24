@@ -227,7 +227,7 @@ class RemoteCalls
 
         if ( $do_check ) {
             $result__rc_check_website = static::performTest($host, $params, $patterns);
-            if ( !empty($result__rc_check_website['error']) ) {
+            if ( is_array($result__rc_check_website) && !empty($result__rc_check_website['error']) ) {
                 return $result__rc_check_website;
             }
         }
@@ -255,7 +255,7 @@ class RemoteCalls
     {
         // Delete async pattern to get the result in this process
         $key = array_search('async', $patterns, true);
-        if ( $key ) {
+        if ( $key !== false ) {
             unset($patterns[$key]);
         }
 
@@ -274,7 +274,7 @@ class RemoteCalls
         if ( $result === '' ) {
             $result = array('error' => 'WRONG_SITE_RESPONSE TEST ACTION : ' . $params['spbc_remote_call_action'] . ' ERROR: EMPTY_RESPONSE');
             // Wrap and pass error
-        } elseif ( !empty($result['error']) ) {
+        } elseif ( is_array($result) && !empty($result['error']) ) {
             $result = array('error' => 'WRONG_SITE_RESPONSE TEST ACTION: ' . $params['spbc_remote_call_action'] . ' ERROR: ' . $result['error']);
             // Expects 'OK' string as good response otherwise - error
         } elseif ( is_string($result) && !preg_match('@^.*?OK$@', $result) ) {

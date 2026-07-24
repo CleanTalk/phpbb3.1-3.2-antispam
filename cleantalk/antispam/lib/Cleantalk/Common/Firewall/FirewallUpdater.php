@@ -134,7 +134,7 @@ class FirewallUpdater
         $this->fwStats->updating_last_start = time();
         $fw_class::saveFwStats($this->fwStats);
 
-        if ( !empty($prepare_dir__result['error']) || !empty($test_rc_result['error']) ) {
+        if ( (is_array($prepare_dir__result) && !empty($prepare_dir__result['error'])) || !empty($test_rc_result['error']) ) {
             return $this->directUpdate();
         }
 
