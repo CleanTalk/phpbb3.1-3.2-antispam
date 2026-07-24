@@ -8,22 +8,12 @@ services:
             - '@user'
             - '@request'
             - '@dbal.conn'
-            - '@cleantalk.antispam.cleantalk_sfw'
             - '@cleantalk.antispam.main_model'
             - '@symfony_request'
-            - '%core.php_ext%'                                            
+            - '%core.php_ext%'
+            - '%core.table_prefix%'
         tags:
             - { name: event.listener }
-
-    cleantalk.antispam.cleantalk_sfw:
-        class: cleantalk\antispam\model\CleantalkSFW
-        arguments:
-            - '@template'
-            - '@config'
-            - '@user'
-            - '@request'
-            - '@dbal.conn'
-            - '%core.table_prefix%' 
 
     cleantalk.antispam.cleantalk:
         class: cleantalk\antispam\model\Cleantalk
@@ -50,7 +40,6 @@ services:
         class: cleantalk\antispam\cron\task\cleantalk_antispam_sfw_logs_send
         arguments:
             - '@config'
-            - '@cleantalk.antispam.main_model'
         calls:
             - [set_name, [cron.task.cleantalk_antispam_sfw_logs_send]]
         tags:
@@ -60,7 +49,6 @@ services:
         class: cleantalk\antispam\cron\task\cleantalk_antispam_sfw_update
         arguments:
             - '@config'
-            - '@cleantalk.antispam.main_model'
         calls:
             - [set_name, [cron.task.cleantalk_antispam_sfw_update]]
         tags:
@@ -74,4 +62,3 @@ services:
             - [set_name, [cron.task.cleantalk_antispam_check_payment_status]]
         tags:
             - { name: cron.task }
-            

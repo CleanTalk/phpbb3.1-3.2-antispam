@@ -1,0 +1,16 @@
+{
+  "name": "cleantalk/cleaner",
+  "description": "CleanTalk APBCT Sanitizing/Escaping/Validating variables classes",
+  "authors": [
+    {
+      "name": "CleanTalk Team",
+      "email": "support@cleantalk.org"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Cleantalk\\Common\\Cleaner\\": "/"
+    }
+  },
+  "license": "GPL-3.0-or-later"
+}

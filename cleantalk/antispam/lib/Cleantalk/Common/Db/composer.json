@@ -1,0 +1,20 @@
+{
+  "name": "cleantalk/db",
+  "description": "CleanTalk APBCT database classes",
+  "authors": [
+    {
+      "name": "CleanTalk Team",
+      "email": "plugins@cleantalk.org"
+    }
+  ],
+  "license": "GPL-3.0-or-later",
+  "require": {
+    "cleantalk/templates": "*",
+    "cleantalk/mloader": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Cleantalk\\Common\\Db\\": "/"
+    }
+  }
+}

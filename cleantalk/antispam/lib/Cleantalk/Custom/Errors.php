@@ -1,6 +1,6 @@
 <?php
 
-namespace cleantalk\antispam\library\Cleantalk;
+namespace Cleantalk\Custom;
 
 class Errors
 {

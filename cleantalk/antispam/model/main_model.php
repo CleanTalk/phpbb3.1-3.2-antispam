@@ -348,6 +348,14 @@ class main_model
 
         $key = rand();
 
+        if (!is_array($js_keys) || !isset($js_keys['keys'])) {
+            $js_keys = array('keys' => array($key => time()));
+            $this->config_text->set_array(array(
+                'cleantalk_antispam_js_keys' => json_encode($js_keys),
+            ));
+            return $key;
+        }
+
         $keys = $js_keys['keys'];
         $keys_checksum = md5(json_encode($keys));
 
@@ -440,80 +448,6 @@ class main_model
         }
 
         return false;
-    }
-
-    /**
-     * SpamFireWall update function
-     *
-     * @param null $access_key
-     *
-     * @return array|bool|type|int|mixed|string[]
-     */
-    public function sfw_update($access_key = null)
-    {
-
-        global $request, $config;
-
-        $api_server = $request->variable('api_server', '');
-        $api_server = !empty($api_server) ? urldecode($api_server) : null;
-        $data_id = $request->variable('data_id', '');
-        $data_id = !empty($data_id) ? urldecode($data_id) : null;
-        $file_url_nums = $request->variable('file_url_nums', '');
-        $file_url_nums = (!empty($file_url_nums) || (string)$file_url_nums === '0') ? urldecode($file_url_nums) : null;
-        $file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
-
-        if ( !isset($api_server, $data_id, $file_url_nums) ) {
-
-            $result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
-
-        } elseif ( $api_server && $data_id && is_array($file_url_nums) && count($file_url_nums) ) {
-
-            $result = \cleantalk\antispam\model\CleantalkSFW::sfw_update($api_server, $data_id, $file_url_nums[0]);
-
-            if ( empty($result['error']) ) {
-
-                array_shift($file_url_nums);
-
-                if ( count($file_url_nums) ) {
-                    \cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
-                        ($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://" . $request->server('HTTP_HOST', '') . (isset($config['script_path']) && !empty($config['script_path']) ? rtrim($config['script_path'], '/') . '/' : '/'),
-                        array(
-                            'spbc_remote_call_token' => md5($config['cleantalk_antispam_apikey']),
-                            'spbc_remote_call_action' => 'sfw_update',
-                            'plugin_name' => 'apbct',
-                            'api_server' => $api_server,
-                            'data_id' => $data_id,
-                            'file_url_nums' => implode(',', $file_url_nums),
-                        ),
-                        array('get', 'async')
-                    );
-                } else {
-                    //Files array is empty update sfw time
-                    $config->set('cleantalk_antispam_sfw_update_last_gc', time());
-
-                    return $result;
-                }
-            }
-        } else
-            return true;
-    }
-
-    /**
-     * SpamFireWall send logs function
-     *
-     */
-    public function sfw_send_logs($access_key)
-    {
-
-        global $config;
-
-        $result = \cleantalk\antispam\model\CleantalkSFW::send_logs($access_key);
-
-        if ( !isset($result['error']) ) {
-            $config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());
-        }
-
-        return $result;
     }
 
     /**
