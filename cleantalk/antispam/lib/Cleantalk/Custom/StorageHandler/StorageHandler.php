@@ -33,7 +33,7 @@ class StorageHandler implements \Cleantalk\Common\StorageHandler\StorageHandler
      */
     public function getSetting($setting_name)
     {
-        $setting_name_escaped = addslashes($setting_name);
+        $setting_name_escaped = $this->db_object->escape($setting_name);
         $query = "SELECT value FROM {$this->table_name} WHERE name = '{$setting_name_escaped}'";
         $result_raw = $this->db_object->fetch($query);
 
@@ -49,7 +49,7 @@ class StorageHandler implements \Cleantalk\Common\StorageHandler\StorageHandler
      */
     public function deleteSetting($setting_name)
     {
-        $setting_name_escaped = addslashes($setting_name);
+        $setting_name_escaped = $this->db_object->escape($setting_name);
         $query = "DELETE FROM {$this->table_name} WHERE name = '{$setting_name_escaped}'";
 
         return $this->db_object->execute($query);
@@ -61,8 +61,8 @@ class StorageHandler implements \Cleantalk\Common\StorageHandler\StorageHandler
     public function saveSetting($setting_name, $setting_value)
     {
         is_int($setting_value) && $setting_value = (string) $setting_value;
-        $setting_value_encoded = addslashes(json_encode($setting_value));
-        $setting_name_escaped = addslashes($setting_name);
+        $setting_value_encoded = $this->db_object->escape(json_encode($setting_value));
+        $setting_name_escaped = $this->db_object->escape($setting_name);
 
         // Try UPDATE first, then INSERT if no rows affected
         $query_update = "UPDATE {$this->table_name} SET value = '{$setting_value_encoded}' WHERE name = '{$setting_name_escaped}'";

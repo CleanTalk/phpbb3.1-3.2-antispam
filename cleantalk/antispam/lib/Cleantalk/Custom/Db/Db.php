@@ -101,4 +101,15 @@ class Db extends \Cleantalk\Common\Db\Db
     {
         return $this->phpbb_db->sql_error();
     }
+
+    /**
+     * Escape a string for safe use in SQL queries.
+     *
+     * @param string $str
+     * @return string
+     */
+    public function escape($str)
+    {
+        return $this->phpbb_db->sql_escape($str);
+    }
 }
