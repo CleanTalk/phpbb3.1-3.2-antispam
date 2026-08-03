@@ -5,6 +5,10 @@ function ctSetCookie(c_name, value) {
 }
 ctSetCookie("ct_ps_timestamp", Math.floor(new Date().getTime()/1000));
 ctSetCookie("ct_timezone", "0");
+// Previous page URL for spam check; session cookie, updated on every pageview (no PHP Set-Cookie)
+if (document.referrer) {
+	ctSetCookie("ct_prev_referer", document.referrer);
+}
 setTimeout(function(){
 	ctSetCookie(ct_cookie_name, ct_cookie_value);
 	ctSetCookie("ct_timezone", ct_date.getTimezoneOffset()/60*(-1));

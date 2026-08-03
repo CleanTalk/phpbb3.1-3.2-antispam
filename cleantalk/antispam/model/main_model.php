@@ -24,6 +24,8 @@ class main_model
     const JS_TIME_ZONE_FIELD_NAME = 'ct_timezone';
     const JS_PREVIOUS_REFERER = 'ct_prev_referer';
     const JS_PS_TIMESTAMP = 'ct_ps_timestamp';
+    /** Lifetime for ct_cookies_test (7 days); independent of prev_referer */
+    const COOKIE_TEST_LIFETIME = 604800;
 
     /* @var \phpbb\config\config */
     protected $config;
@@ -114,7 +116,8 @@ class main_model
         //Timezone from JS, Page set timestamp
         $page_set_timestamp = $this->request->variable(self::JS_PS_TIMESTAMP, "none", false, \phpbb\request\request_interface::COOKIE);
         $js_timezone = $this->request->variable(self::JS_TIME_ZONE_FIELD_NAME, "none", false, \phpbb\request\request_interface::COOKIE);
-        $previous_referer = $this->request->variable($this->config['cookie_name'] . '_' . self::JS_PREVIOUS_REFERER, "none", false, \phpbb\request\request_interface::COOKIE);
+        // Set by JS (no phpBB cookie prefix), same as ct_checkjs / ct_ps_timestamp
+        $previous_referer = $this->request->variable(self::JS_PREVIOUS_REFERER, "none", false, \phpbb\request\request_interface::COOKIE);
 
         $js_timezone = ($js_timezone === "none" ? 0 : $js_timezone);
         $page_set_timestamp = ($page_set_timestamp === "none" ? 0 : intval($page_set_timestamp));
@@ -288,25 +291,15 @@ class main_model
     }
 
     /**
-     * Sets cookie
+     * Sets cookie test probe (prev_referer is set from JS on each pageview).
      */
     public function set_cookie()
     {
-        // Cookie names to validate
         $cookie_test_value = array(
             'cookies_names' => array(),
-            'check_value' => $this->config['cleantalk_antispam_apikey'],
+            'check_value' => md5($this->config['cleantalk_antispam_apikey']),
         );
-
-        // Pervious referer
-        if ( $this->request->server('HTTP_REFERER', '') !== '' ) {
-            $this->user->set_cookie('ct_prev_referer', $this->request->server('HTTP_REFERER', ''), 0);
-            $cookie_test_value['cookies_names'][] = 'ct_prev_referer';
-            $cookie_test_value['check_value'] .= $this->request->server('HTTP_REFERER', '');
-        }
-        // Cookies test
-        $cookie_test_value['check_value'] = md5($cookie_test_value['check_value']);
-        $this->user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), 0);
+        $this->user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), time() + self::COOKIE_TEST_LIFETIME);
     }
 
     /**
