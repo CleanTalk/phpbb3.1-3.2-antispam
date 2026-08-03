@@ -292,12 +292,24 @@ class main_model
 
     /**
      * Sets cookie test probe (prev_referer is set from JS on each pageview).
+     * Only writes Set-Cookie when the probe is missing or invalid, to avoid
+     * sliding expiry / cache-busting headers on every pageview.
      */
     public function set_cookie()
     {
+        $expected = md5($this->config['cleantalk_antispam_apikey']);
+        $cookie_key = $this->config['cookie_name'] . '_ct_cookies_test';
+
+        if ( $this->request->is_set($cookie_key, \phpbb\request\request_interface::COOKIE) ) {
+            $existing = json_decode(htmlspecialchars_decode($this->request->variable($cookie_key, '', false, \phpbb\request\request_interface::COOKIE)), true);
+            if ( is_array($existing) && isset($existing['check_value']) && $existing['check_value'] === $expected ) {
+                return;
+            }
+        }
+
         $cookie_test_value = array(
             'cookies_names' => array(),
-            'check_value' => md5($this->config['cleantalk_antispam_apikey']),
+            'check_value' => $expected,
         );
         $this->user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), time() + self::COOKIE_TEST_LIFETIME);
     }
