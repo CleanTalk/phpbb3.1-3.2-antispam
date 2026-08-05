@@ -193,6 +193,11 @@ class main_listener implements EventSubscriberInterface
 		{
 			$moderate = true;
 		}
+		else if ($this->config['cleantalk_antispam_allusers'] && $this->user->data['is_registered'] == 1)
+		{
+			// Check ALL registered users regardless of their group or posts count
+			$moderate = true;
+		}
 		else if ($this->config['cleantalk_antispam_nusers'] && $this->user->data['is_registered'] == 1)
 		{
 			$user_group_table = USER_GROUP_TABLE;
