@@ -90,4 +90,7 @@ $lang = array_merge($lang, array(
     'ACP_CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => 'В последний раз SpamFireWall сработал в',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => 'SpamFireWall был обновлен',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => 'SpamFireWall отправил логи',
+
+	'ACP_CLEANTALK_BOT_DETECTOR_LABEL'			=> 'Использовать JavaScript библиотеку CleanTalk',
+	'ACP_CLEANTALK_BOT_DETECTOR_DESCR'			=> 'Эта опция подключает внешнюю JavaScript библиотеку CleanTalk для сбора информации о посетителях. Для применения изменений необходимо очистить кеш страниц.',
 ));

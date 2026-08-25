@@ -159,6 +159,12 @@ class CleantalkRequest
      * @var type 
      */
     public $phone = null;
+
+    /**
+     * Bot detector event token
+     * @var string
+     */
+    public $event_token = null;
     
     /**
     * Method name

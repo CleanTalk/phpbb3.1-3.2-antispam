@@ -44,6 +44,7 @@ class main_module
 			$config->set('cleantalk_antispam_allusers', $request->variable('cleantalk_antispam_allusers', 0));
 			$config->set('cleantalk_antispam_ccf', $request->variable('cleantalk_antispam_ccf',0));
 			$config->set('cleantalk_antispam_sfw_enabled', $request->variable('cleantalk_antispam_sfw_enabled', 0));
+			$config->set('cleantalk_antispam_bot_detector', $request->variable('cleantalk_antispam_bot_detector', 0));
 
 			$key_is_valid = false;
 			$key_is_ok = false;
@@ -163,6 +164,7 @@ class main_module
 			'CLEANTALK_ANTISPAM_ALLUSERS'	=> (bool)$config['cleantalk_antispam_allusers'],
 			'CLEANTALK_ANTISPAM_CCF'		=> (bool)$config['cleantalk_antispam_ccf'],
 			'CLEANTALK_ANTISPAM_SFW_ENABLED'=> (bool)$config['cleantalk_antispam_sfw_enabled'],
+			'CLEANTALK_ANTISPAM_BOT_DETECTOR'=> (bool)$config['cleantalk_antispam_bot_detector'],
 			'CLEANTALK_ANTISPAM_APIKEY'		=> $config['cleantalk_antispam_apikey'],
 			'CLEANTALK_ANTISPAM_KEY_IS_OK'	=> (bool)$config['cleantalk_antispam_key_is_ok'],
 			'CLEANTALK_ANTISPAM_USER_TOKEN'	=> $config['cleantalk_antispam_user_token'],

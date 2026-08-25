@@ -33,6 +33,7 @@ class main_listener implements EventSubscriberInterface
 				array('sfw_check', 1),
 				array('ccf_check', 2),
 			),
+			'core.page_header_after'					=> 'add_bot_detector_script',
 			'core.page_footer_after'     			    => 'add_js_to_footer',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
@@ -165,6 +166,17 @@ class main_listener implements EventSubscriberInterface
 	*
 	* @param array	$event		array with event variable values
 	*/
+	public function add_bot_detector_script($event)
+	{
+		if (!$this->config['cleantalk_antispam_key_is_ok'] || !$this->config['cleantalk_antispam_bot_detector'])
+		{
+			return;
+		}
+		$bot_detector_class = \Cleantalk\Common\Mloader\Mloader::get('BotDetectorService');
+		$bot_detector = $bot_detector_class::getInstance();
+		$this->template->assign_var('CT_BOT_DETECTOR_URL', $bot_detector->getWrapperURL());
+	}
+
 	public function add_js_to_footer($event)
 	{
 		if (!$this->config['cleantalk_antispam_key_is_ok'])
