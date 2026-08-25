@@ -162,6 +162,8 @@ class main_model
         $this->cleantalk_request->sender_nickname = array_key_exists('sender_nickname', $spam_check) ? $spam_check['sender_nickname'] : '';
         $this->cleantalk_request->sender_ip = $this->cleantalk->cleantalk_get_real_ip();
         $this->cleantalk_request->submit_time = ($page_set_timestamp !== 0) ? time() - $page_set_timestamp : null;
+        $this->cleantalk_request->event_token = $this->request->variable('ct_bot_detector_event_token', '', false, \phpbb\request\request_interface::POST)
+            ?: null;
 
         $start = microtime(true);
         switch ( $spam_check['type'] ) {

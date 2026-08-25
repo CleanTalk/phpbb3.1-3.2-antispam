@@ -172,6 +172,13 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 		$this->template->assign_var('CT_JS_VALUE', $this->main_model->cleantalk_get_checkjs_code());
+
+		if ($this->config['cleantalk_antispam_bot_detector'])
+		{
+			$bot_detector_class = \Cleantalk\Common\Mloader\Mloader::get('BotDetectorService');
+			$bot_detector = $bot_detector_class::getInstance();
+			$this->template->assign_var('CT_BOT_DETECTOR_URL', $bot_detector->getWrapperURL());
+		}
 	}
 	/**
 	* Checks post or topic to spam

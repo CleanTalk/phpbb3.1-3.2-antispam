@@ -92,4 +92,7 @@ $lang = array_merge($lang, array(
     'ACP_CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => 'Last time SpamFireWall was triggered at',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => 'SpamFireWall was updated at',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => 'SpamFireWall sent logs at',
+
+	'ACP_CLEANTALK_BOT_DETECTOR_LABEL'			=> 'Use CleanTalk JavaScript library',
+	'ACP_CLEANTALK_BOT_DETECTOR_DESCR'			=> 'This option includes CleanTalk external JavaScript library to getting visitors info data. You should flush the pages cache to make the changes work.',
 ));

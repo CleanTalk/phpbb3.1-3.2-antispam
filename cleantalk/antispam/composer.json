@@ -33,7 +33,8 @@
         "cleantalk/api": "*",
         "cleantalk/cron": "*",
         "cleantalk/remote-calls": "*",
-        "cleantalk/storage-handler": "*"
+        "cleantalk/storage-handler": "*",
+        "cleantalk/bot-detector-service": "*"
     },
     "require-dev": {
         "phpbb/epv": "dev-master"
