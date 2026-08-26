@@ -3,8 +3,17 @@ var ct_date = new Date();
 function ctSetCookie(c_name, value) {
 	document.cookie = c_name + "=" + encodeURIComponent(value) + "; path=/";
 }
+function ctDeleteCookie(c_name) {
+	document.cookie = c_name + "=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+}
 ctSetCookie("ct_ps_timestamp", Math.floor(new Date().getTime()/1000));
 ctSetCookie("ct_timezone", "0");
+// Previous page URL for spam check; session cookie, updated on every pageview (no PHP Set-Cookie)
+if (document.referrer) {
+	ctSetCookie("ct_prev_referer", document.referrer);
+} else {
+	ctDeleteCookie("ct_prev_referer");
+}
 setTimeout(function(){
 	ctSetCookie(ct_cookie_name, ct_cookie_value);
 	ctSetCookie("ct_timezone", ct_date.getTimezoneOffset()/60*(-1));

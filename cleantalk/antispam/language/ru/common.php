@@ -32,6 +32,9 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_LABEL'	            => 'Проверять вновь зарегистрированных',
 	'ACP_CLEANTALK_NUSERS_DESCR'	            => 'Посты и темы от вновь зарегистрированных будут проверяться на спам. Спам будет отвергнут или направлен на одобрение.',
 
+	'ACP_CLEANTALK_ALLUSERS_LABEL'	            => 'Проверять всех зарегистрированных',
+	'ACP_CLEANTALK_ALLUSERS_DESCR'	            => 'Посты и темы от всех зарегистрированных пользователей будут проверяться на спам, а не только от вновь зарегистрированных. Спам будет отвергнут или направлен на одобрение.',
+
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Проверять контактные формы',
 	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Включить антиспам тест для контактной формы. Внимание, возможны конфликты!',		
 
@@ -87,4 +90,7 @@ $lang = array_merge($lang, array(
     'ACP_CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => 'В последний раз SpamFireWall сработал в',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => 'SpamFireWall был обновлен',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => 'SpamFireWall отправил логи',
+
+	'ACP_CLEANTALK_BOT_DETECTOR_LABEL'			=> 'Использовать JavaScript библиотеку CleanTalk',
+	'ACP_CLEANTALK_BOT_DETECTOR_DESCR'			=> 'Эта опция подключает внешнюю JavaScript библиотеку CleanTalk для сбора информации о посетителях. Для применения изменений необходимо очистить кеш страниц.',
 ));

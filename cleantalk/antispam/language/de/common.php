@@ -34,6 +34,9 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_LABEL'		        => 'Moderiere neu registrierte Benutzer',
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'Beiträge und Themen von neuen Benutzern werden auf SPAM geprüft. SPAM wird abgelehnt oder zur Prüfung weitergeleitet.',
 
+	'ACP_CLEANTALK_ALLUSERS_LABEL'		        => 'Alle registrierten Benutzer moderieren',
+	'ACP_CLEANTALK_ALLUSERS_DESCR'		        => 'Beiträge und Themen von allen registrierten Benutzern werden auf SPAM geprüft, nicht nur von neu registrierten. SPAM wird abgelehnt oder zur Prüfung weitergeleitet.',
+
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'Kontaktformulare überprüfen',
 	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'Aktiviert Antispam für das Kontaktformular. Achtung, Konflikte sind möglich!',
 			
@@ -89,4 +92,7 @@ $lang = array_merge($lang, array(
     'ACP_CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => 'Last time SpamFireWall was triggered at',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => 'SpamFireWall was updated at',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => 'SpamFireWall sent logs at',
+
+	'ACP_CLEANTALK_BOT_DETECTOR_LABEL'			=> 'Use CleanTalk JavaScript library',
+	'ACP_CLEANTALK_BOT_DETECTOR_DESCR'			=> 'This option includes CleanTalk external JavaScript library to collect visitor information. You should flush the pages cache to make the changes work.',
 ));

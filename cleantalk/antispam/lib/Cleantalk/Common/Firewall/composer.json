@@ -1,0 +1,50 @@
+{
+  "name": "cleantalk/firewall",
+  "description": "CleanTalk APBCT `SFW` classes",
+  "authors": [
+    {
+      "name": "CleanTalk Team",
+      "email": "plugins@cleantalk.org"
+    }
+  ],
+  "license": "GPL-3.0-or-later",
+  "require": {
+    "cleantalk/mloader": "*",
+    "cleantalk/variables": "*",
+    "cleantalk/cleaner": "*",
+    "cleantalk/queue": "*",
+    "cleantalk/db": "*",
+    "cleantalk/dns": "*",
+    "cleantalk/api": "*",
+    "cleantalk/cron": "*",
+    "cleantalk/remote-calls": "*",
+    "cleantalk/storage-handler": "*",
+    "cleantalk/helper": "*",
+    "cleantalk/localize": "*"
+  },
+  "require-dev": {
+    "vimeo/psalm": "^4.8",
+    "phpunit/phpunit": "^8.5.52",
+    "squizlabs/php_codesniffer": "3.*",
+    "phpcompatibility/php-compatibility": "^9.3"
+  },
+  "scripts": {
+    "test": [
+      "vendor/bin/phpunit --configuration tests/phpunit.xml",
+      "vendor/bin/phpcs --config-set installed_paths vendor/phpcompatibility/php-compatibility",
+      "vendor/bin/phpcs --standard=tests/.phpcs.xml",
+      "vendor/bin/psalm --no-cache --config=tests/psalm.xml",
+      "vendor/bin/psalm --no-cache --config=tests/psalm.xml --taint-analysis"
+    ]
+  },
+  "autoload": {
+    "psr-4": {
+      "Cleantalk\\Common\\Firewall\\": "/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "cleantalk/apbct-installer": true
+    }
+  }
+}

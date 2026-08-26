@@ -3,7 +3,7 @@
     "type": "phpbb-extension",
     "description": "Antispam by CleanTalk",
     "homepage": "https://cleantalk.org",
-    "version": "5.8.0",
+    "version": "5.8.1",
     "time": "2017-06-07",
     "license": "GPL-2.0-only",
     "authors": [
@@ -27,11 +27,22 @@
         }
     ],
     "require": {
-        "php": ">=5.3.3",
-        "phpbb/phpbb": ">=3.1.0-RC2"
+        "php": ">=7.2",
+        "cleantalk/firewall": "*",
+        "cleantalk/dns": "*",
+        "cleantalk/api": "*",
+        "cleantalk/cron": "*",
+        "cleantalk/remote-calls": "*",
+        "cleantalk/storage-handler": "*",
+        "cleantalk/bot-detector-service": "*"
     },
     "require-dev": {
         "phpbb/epv": "dev-master"
+    },
+    "config": {
+        "allow-plugins": {
+            "cleantalk/apbct-installer": true
+        }
     },
     "extra": {
         "display-name": "Antispam by CleanTalk",

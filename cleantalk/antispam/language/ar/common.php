@@ -34,6 +34,9 @@ $lang = array_merge($lang, array(
 	'ACP_CLEANTALK_NUSERS_LABEL'		        => 'إدارة آخر الأعضاء المُسجلين ',
 	'ACP_CLEANTALK_NUSERS_DESCR'		        => 'سيتم فحص المشاركات والمواضيع بواسطة آخر الأعضاء المُسجلين. ومنع المُزعجة منها أو إرسالها للموافقة عليها بواسطة المشرفين.',
 
+	'ACP_CLEANTALK_ALLUSERS_LABEL'		        => 'مراقبة جميع الأعضاء المُسجلين',
+	'ACP_CLEANTALK_ALLUSERS_DESCR'		        => 'سيتم فحص المشاركات والمواضيع من جميع الأعضاء المُسجلين بحثاً عن الرسائل المُزعجة، وليس فقط الأعضاء المُسجلين حديثاً. ومنع المُزعجة منها أو إرسالها للموافقة عليها بواسطة المشرفين.',
+
 	'ACP_CLEANTALK_CCF_LABEL'	           		=> 'اختبار نموذج الاتصال',
 	'ACP_CLEANTALK_CCF_DESCR'	           		=> 'لتمكين مكافحة البريد المزعج اختبار نموذج الاتصال. الملاحظة التعارضات المحتملة!',
 			
@@ -89,4 +92,7 @@ $lang = array_merge($lang, array(
     'ACP_CLEANTALK_STATS__LAST_SFW_BLOCK_TIME' => 'Last time SpamFireWall was triggered at',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_UPDATED' => 'SpamFireWall was updated at',
     'ACP_CLEANTALK_STATS__SFW_LAST_TIME_SEND_LOGS' => 'SpamFireWall sent logs at',
+
+	'ACP_CLEANTALK_BOT_DETECTOR_LABEL'			=> 'Use CleanTalk JavaScript library',
+	'ACP_CLEANTALK_BOT_DETECTOR_DESCR'			=> 'This option includes CleanTalk external JavaScript library to collect visitor information. You should flush the pages cache to make the changes work.',
 ));

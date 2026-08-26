@@ -24,6 +24,8 @@ class main_model
     const JS_TIME_ZONE_FIELD_NAME = 'ct_timezone';
     const JS_PREVIOUS_REFERER = 'ct_prev_referer';
     const JS_PS_TIMESTAMP = 'ct_ps_timestamp';
+    /** Lifetime for ct_cookies_test (7 days); independent of prev_referer */
+    const COOKIE_TEST_LIFETIME = 604800;
 
     /* @var \phpbb\config\config */
     protected $config;
@@ -114,7 +116,8 @@ class main_model
         //Timezone from JS, Page set timestamp
         $page_set_timestamp = $this->request->variable(self::JS_PS_TIMESTAMP, "none", false, \phpbb\request\request_interface::COOKIE);
         $js_timezone = $this->request->variable(self::JS_TIME_ZONE_FIELD_NAME, "none", false, \phpbb\request\request_interface::COOKIE);
-        $previous_referer = $this->request->variable($this->config['cookie_name'] . '_' . self::JS_PREVIOUS_REFERER, "none", false, \phpbb\request\request_interface::COOKIE);
+        // Set by JS (no phpBB cookie prefix), same as ct_checkjs / ct_ps_timestamp
+        $previous_referer = $this->request->variable(self::JS_PREVIOUS_REFERER, "none", false, \phpbb\request\request_interface::COOKIE);
 
         $js_timezone = ($js_timezone === "none" ? 0 : $js_timezone);
         $page_set_timestamp = ($page_set_timestamp === "none" ? 0 : intval($page_set_timestamp));
@@ -159,6 +162,8 @@ class main_model
         $this->cleantalk_request->sender_nickname = array_key_exists('sender_nickname', $spam_check) ? $spam_check['sender_nickname'] : '';
         $this->cleantalk_request->sender_ip = $this->cleantalk->cleantalk_get_real_ip();
         $this->cleantalk_request->submit_time = ($page_set_timestamp !== 0) ? time() - $page_set_timestamp : null;
+        $this->cleantalk_request->event_token = $this->request->variable('ct_bot_detector_event_token', '', false, \phpbb\request\request_interface::POST)
+            ?: null;
 
         $start = microtime(true);
         switch ( $spam_check['type'] ) {
@@ -288,25 +293,27 @@ class main_model
     }
 
     /**
-     * Sets cookie
+     * Sets cookie test probe (prev_referer is set from JS on each pageview).
+     * Only writes Set-Cookie when the probe is missing or invalid, to avoid
+     * sliding expiry / cache-busting headers on every pageview.
      */
     public function set_cookie()
     {
-        // Cookie names to validate
+        $expected = md5($this->config['cleantalk_antispam_apikey']);
+        $cookie_key = $this->config['cookie_name'] . '_ct_cookies_test';
+
+        if ( $this->request->is_set($cookie_key, \phpbb\request\request_interface::COOKIE) ) {
+            $existing = json_decode(htmlspecialchars_decode($this->request->variable($cookie_key, '', false, \phpbb\request\request_interface::COOKIE)), true);
+            if ( is_array($existing) && isset($existing['check_value']) && $existing['check_value'] === $expected ) {
+                return;
+            }
+        }
+
         $cookie_test_value = array(
             'cookies_names' => array(),
-            'check_value' => $this->config['cleantalk_antispam_apikey'],
+            'check_value' => $expected,
         );
-
-        // Pervious referer
-        if ( $this->request->server('HTTP_REFERER', '') !== '' ) {
-            $this->user->set_cookie('ct_prev_referer', $this->request->server('HTTP_REFERER', ''), 0);
-            $cookie_test_value['cookies_names'][] = 'ct_prev_referer';
-            $cookie_test_value['check_value'] .= $this->request->server('HTTP_REFERER', '');
-        }
-        // Cookies test
-        $cookie_test_value['check_value'] = md5($cookie_test_value['check_value']);
-        $this->user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), 0);
+        $this->user->set_cookie('ct_cookies_test', json_encode($cookie_test_value), time() + self::COOKIE_TEST_LIFETIME);
     }
 
     /**
@@ -347,6 +354,14 @@ class main_model
         $js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
 
         $key = rand();
+
+        if (!is_array($js_keys) || !isset($js_keys['keys'])) {
+            $js_keys = array('keys' => array($key => time()));
+            $this->config_text->set_array(array(
+                'cleantalk_antispam_js_keys' => json_encode($js_keys),
+            ));
+            return $key;
+        }
 
         $keys = $js_keys['keys'];
         $keys_checksum = md5(json_encode($keys));
@@ -440,77 +455,6 @@ class main_model
         }
 
         return false;
-    }
-
-    /**
-     * SpamFireWall update function
-     *
-     * @param null $access_key
-     *
-     * @return array|bool|type|int|mixed|string[]
-     */
-    public function sfw_update($access_key = null)
-    {
-
-        global $request, $config;
-
-        $api_server = !empty($request->variable('api_server', '')) ? urldecode($request->variable('api_server', '')) : null;
-        $data_id = !empty($request->variable('data_id', '')) ? urldecode($request->variable('data_id', '')) : null;
-        $file_url_nums = (!empty($request->variable('file_url_nums', '')) || (string)$request->variable('file_url_nums', '') === '0') ? urldecode($request->variable('file_url_nums', '')) : null;
-        $file_url_nums = isset($file_url_nums) ? explode(',', $file_url_nums) : null;
-
-        if ( !isset($api_server, $data_id, $file_url_nums) ) {
-
-            $result = \cleantalk\antispam\model\CleantalkSFW::sfw_update();
-
-        } elseif ( $api_server && $data_id && is_array($file_url_nums) && count($file_url_nums) ) {
-
-            $result = \cleantalk\antispam\model\CleantalkSFW::sfw_update($api_server, $data_id, $file_url_nums[0]);
-
-            if ( empty($result['error']) ) {
-
-                array_shift($file_url_nums);
-
-                if ( count($file_url_nums) ) {
-                    \cleantalk\antispam\model\CleantalkHelper::sendRawRequest(
-                        ($request->server('HTTPS', '') === 'on' ? "https" : "http") . "://" . $request->server('HTTP_HOST', ''),
-                        array(
-                            'spbc_remote_call_token' => md5($config['cleantalk_antispam_apikey']),
-                            'spbc_remote_call_action' => 'sfw_update',
-                            'plugin_name' => 'apbct',
-                            'api_server' => $api_server,
-                            'data_id' => $data_id,
-                            'file_url_nums' => implode(',', $file_url_nums),
-                        ),
-                        array('get', 'async')
-                    );
-                } else {
-                    //Files array is empty update sfw time
-                    $config->set('cleantalk_antispam_sfw_update_last_gc', time());
-
-                    return $result;
-                }
-            }
-        } else
-            return true;
-    }
-
-    /**
-     * SpamFireWall send logs function
-     *
-     */
-    public function sfw_send_logs($access_key)
-    {
-
-        global $config;
-
-        $result = \cleantalk\antispam\model\CleantalkSFW::send_logs($access_key);
-
-        if ( !isset($result['error']) ) {
-            $config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());
-        }
-
-        return $result;
     }
 
     /**

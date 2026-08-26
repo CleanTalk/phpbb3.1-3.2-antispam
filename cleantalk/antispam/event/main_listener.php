@@ -17,7 +17,6 @@ use phpbb\template\template;
 use phpbb\request\request;
 use phpbb\user;
 use phpbb\db\driver\driver_interface;
-use cleantalk\antispam\model\CleantalkSFW;
 use cleantalk\antispam\model\main_model;
 use phpbb\symfony_request;
 
@@ -34,14 +33,14 @@ class main_listener implements EventSubscriberInterface
 				array('sfw_check', 1),
 				array('ccf_check', 2),
 			),
+			'core.page_header_after'					=> 'add_bot_detector_script',
 			'core.page_footer_after'     			    => 'add_js_to_footer',
 			'core.posting_modify_submission_errors'		=> 'check_comment',
 			'core.posting_modify_submit_post_before'	=> 'change_comment_approve',
 			'core.user_add_modify_data'                 => 'check_newuser',
 		);
 	}
-	const APBCT_REMOTE_CALL_SLEEP = 10;
-	
+
 	/* @var \phpbb\template\template */
 	protected $template;
 
@@ -57,9 +56,6 @@ class main_listener implements EventSubscriberInterface
 	/* @var \phpbb\db\driver\driver_interface */
 	protected $db;
 
-	/* @var \cleantalk\antispam\model\CleantalkSFW */
-	protected $cleantalk_sfw;
-
 	/* @var \cleantalk\antispam\model\main_model */
 	protected $main_model;
 
@@ -67,7 +63,7 @@ class main_listener implements EventSubscriberInterface
 	protected $symfony_request;
 
 	/** @var string php file extension  */
-	protected $php_ext;	
+	protected $php_ext;
 
 	/** @var \phpbb\config\db_text */
 	protected $config_text;
@@ -75,16 +71,23 @@ class main_listener implements EventSubscriberInterface
 	/* @var array Stores result of spam checking of post or topic when needed*/
 	private $ct_comment_result;
 
+	/** @var string table_prefix */
+	protected $table_prefix;
+
 	/**
 	* Constructor
 	*
-	* @param template		$template	Template object
-	* @param config			$config		Config object
-	* @param user			$user		User object
-	* @param request		$request	Request object
-	* @param driver_interface 	$db 		The database object
+	* @param template			$template	Template object
+	* @param config				$config		Config object
+	* @param user				$user		User object
+	* @param request			$request	Request object
+	* @param driver_interface	$db			The database object
+	* @param main_model			$main_model	Main model
+	* @param symfony_request	$symfony_request
+	* @param string				$php_ext
+	* @param string				$table_prefix
 	*/
-	public function __construct(template $template, config $config, db_text $config_text, user $user, request $request, driver_interface $db, CleantalkSFW $cleantalk_sfw, main_model $main_model, symfony_request $symfony_request, $php_ext)
+	public function __construct(template $template, config $config, db_text $config_text, user $user, request $request, driver_interface $db, main_model $main_model, symfony_request $symfony_request, $php_ext, $table_prefix)
 	{
 		$this->template = $template;
 		$this->config = $config;
@@ -92,10 +95,16 @@ class main_listener implements EventSubscriberInterface
 		$this->user = $user;
 		$this->request = $request;
 		$this->db = $db;
-		$this->cleantalk_sfw = $cleantalk_sfw;
 		$this->main_model = $main_model;
 		$this->symfony_request = $symfony_request;
 		$this->php_ext = $php_ext;
+		$this->table_prefix = $table_prefix;
+
+		// Initialize CleanTalk common libraries autoloader
+		$autoload_path = dirname(__DIR__) . '/lib/autoload.php';
+		if (file_exists($autoload_path)) {
+			require_once($autoload_path);
+		}
 	}
 	/**
 	* Loads language
@@ -103,7 +112,7 @@ class main_listener implements EventSubscriberInterface
 	* @param array	$event		array with event variable values
 	*/
 	public function load_language_on_setup($event)
-	{		
+	{
 		$lang_set_ext = $event['lang_set_ext'];
 		$lang_set_ext[] = array(
 			'ext_name' => 'cleantalk/antispam',
@@ -113,21 +122,63 @@ class main_listener implements EventSubscriberInterface
 
 	}
 	/**
-	* SpamFirewall Check
+	* SpamFirewall Check using Common Firewall library
 	*
 	* @param array	$event		array with event variable values
 	*/
 	public function sfw_check($event)
 	{
-		$this->cleantalk_sfw->sfw_check();		
+		if (!$this->config['cleantalk_antispam_sfw_enabled'] || !$this->config['cleantalk_antispam_key_is_ok']) {
+			return;
+		}
+
+		try {
+			$api_key = $this->config['cleantalk_antispam_apikey'];
+
+			// Enable superglobals for Common libraries that access $_SERVER directly
+			$this->request->enable_super_globals();
+
+			$firewall = new \Cleantalk\Common\Firewall\Firewall(
+				$api_key,
+				APBCT_TBL_FIREWALL_LOG
+			);
+
+			$firewall->loadFwModule(new \Cleantalk\Common\Firewall\Modules\Sfw(
+				APBCT_TBL_FIREWALL_LOG,
+				APBCT_TBL_FIREWALL_DATA,
+				array(
+					'sfw_counter'   => 0,
+					'cookie_domain' => $this->request->server('HTTP_HOST', ''),
+					'set_cookies'   => 1,
+				)
+			));
+
+			$firewall->run();
+
+			$this->request->disable_super_globals();
+		} catch (\Exception $e) {
+			$this->request->disable_super_globals();
+			error_log('CleanTalk SFW error: ' . $e->getMessage());
+		}
 	}
 	/**
 	* Fills tamplate variable by generated JS-code with unique hash
 	*
 	* @param array	$event		array with event variable values
 	*/
+	public function add_bot_detector_script($event)
+	{
+		if (!$this->config['cleantalk_antispam_key_is_ok'] || !$this->config['cleantalk_antispam_bot_detector'])
+		{
+			return;
+		}
+		$bot_detector_class = \Cleantalk\Common\Mloader\Mloader::get('BotDetectorService');
+		$bot_detector = $bot_detector_class::getInstance();
+		$this->template->assign_var('CT_BOT_DETECTOR_URL', $bot_detector->getWrapperURL());
+	}
+
 	public function add_js_to_footer($event)
-	{		
+	{
 		if (!$this->config['cleantalk_antispam_key_is_ok'])
 		{
 			return;
@@ -152,6 +203,11 @@ class main_listener implements EventSubscriberInterface
 
 		if ($this->config['cleantalk_antispam_guests'] && $this->user->data['is_registered'] == 0)
 		{
+			$moderate = true;
+		}
+		else if ($this->config['cleantalk_antispam_allusers'] && $this->user->data['is_registered'] == 1)
+		{
+			// Check ALL registered users regardless of their group or posts count
 			$moderate = true;
 		}
 		else if ($this->config['cleantalk_antispam_nusers'] && $this->user->data['is_registered'] == 1)
@@ -186,7 +242,7 @@ class main_listener implements EventSubscriberInterface
 				{
 					$moderate = true;
 				}
-				$this->db->sql_freeresult($result);								
+				$this->db->sql_freeresult($result);
 			}
 
 		}
@@ -218,10 +274,10 @@ class main_listener implements EventSubscriberInterface
 					if (array_key_exists('username', $data['post_data']))
 					{
 						$spam_check['sender_nickname'] = $data['post_data']['username'];
-					}					
+					}
 				}
 
-				if (array_key_exists('post_subject', $data['post_data'])) 
+				if (array_key_exists('post_subject', $data['post_data']))
 				{
 					$spam_check['message_title'] = $data['post_data']['post_subject'];
 				}
@@ -229,7 +285,7 @@ class main_listener implements EventSubscriberInterface
 				$result = $this->main_model->check_spam($spam_check);
 
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
-				{ 
+				{
 					if ($result['stop_queue'] == 1)
 					{
 						// Output error
@@ -313,63 +369,47 @@ class main_listener implements EventSubscriberInterface
 	{
 		$this->main_model->set_cookie();
 
-		//Remote calls
-		if ($this->request->variable('spbc_remote_call_token', '') && $this->request->variable('spbc_remote_call_action','') && in_array($this->request->variable('plugin_name',''), array('antispam','anti-spam', 'apbct')))
-		{
-	        $remote_calls_config = $this->config_text->get_array(array('cleantalk_antispam_remote_calls'));
-	        $remote_calls = isset($remote_calls_config['cleantalk_antispam_remote_calls']) ? json_decode($remote_calls_config['cleantalk_antispam_remote_calls'],true) : null;
-	        $remote_action = $this->request->variable('spbc_remote_call_action', '');
-	        $auth_key = $this->config['cleantalk_antispam_apikey'];
+		// Remote calls via Common library
+		$api_key = $this->config['cleantalk_antispam_apikey'];
+		if ($api_key) {
+			try {
+				// Enable superglobals BEFORE RC check — RemoteCalls::check() reads $_GET/$_REQUEST
+				$this->request->enable_super_globals();
+				$rc_class = \Cleantalk\Common\Mloader\Mloader::get('RemoteCalls');
+				if ($rc_class::check()) {
+					// Prevent PHP from aborting when async RC caller disconnects (3s timeout)
+					ignore_user_abort(true);
 
-	        if(array_key_exists($remote_action, $remote_calls)){
-  
-	            if(time() - $remote_calls[$remote_action]['last_call'] > self::APBCT_REMOTE_CALL_SLEEP || ($remote_action == 'sfw_update' && !empty($this->request->variable('data_id', '')))){
-
-	                $remote_calls[$remote_action]['last_call'] = time();
-	                $this->config_text->set_array(array(
-	                	'cleantalk_antispam_remote_calls' => json_encode($remote_calls),
-	                ));
-
-	                if(strtolower($this->request->variable('spbc_remote_call_token','')) == strtolower(md5($auth_key))){
-	                    // Close renew banner
-	                    if($this->request->variable('spbc_remote_call_action','') == 'close_renew_banner'){
-	                        die('OK');
-	                    // SFW update
-	                    }elseif($this->request->variable('spbc_remote_call_action','') == 'sfw_update'){   
-	                        $result = $this->main_model->sfw_update($this->config['cleantalk_antispam_apikey']);
-		                    if( ! empty( $result['error'] ) )
-			                    error_log( 'Cleantalk Antispam error while updating SFW: ' . $result['error'] );
-	                        die(empty($result['error']) ? 'OK' : 'FAIL '.json_encode(array('error' => $result['error_string'])));
-	                    // SFW send logs
-	                    }elseif($this->request->variable('spbc_remote_call_action','') == 'sfw_send_logs'){  
-	                        $result = $this->main_model->sfw_send_logs($this->config['cleantalk_antispam_apikey']);
-		                    if( ! empty( $result['error'] ) )
-			                    error_log( 'Cleantalk Antispam error while sending SFW logs: ' . $result['error'] );
-	                        die(empty($result['error']) ? 'OK' : 'FAIL '.json_encode(array('error' => $result['error_string'])));
-	                    // Update plugin
-	                    }elseif($this->request->variable('spbc_remote_call_action','') == 'update_plugin'){
-	                        //add_action('wp', 'apbct_update', 1);
-	                    }else
-	                        die('FAIL '.json_encode(array('error' => 'UNKNOWN_ACTION_2')));
-	                }else
-	                    die('FAIL '.json_encode(array('error' => 'WRONG_TOKEN')));
-	            }else
-	                die('FAIL '.json_encode(array('error' => 'TOO_MANY_ATTEMPTS')));
-	        }else
-	            die('FAIL '.json_encode(array('error' => 'UNKNOWN_ACTION')));
+					$storage_handler_class = \Cleantalk\Common\Mloader\Mloader::get('StorageHandler');
+					$remote_calls = new $rc_class($api_key, new $storage_handler_class());
+					try {
+						$rc_result = $remote_calls->process();
+						$this->request->disable_super_globals();
+						die($rc_result);
+					} catch (\Cleantalk\Common\RemoteCalls\Exceptions\RemoteCallsException $exception) {
+						$this->request->disable_super_globals();
+						error_log('CleanTalk RC error: ' . $exception->getMessage());
+						die('FAIL ' . json_encode(array('error' => $exception->getMessage())));
+					}
+				}
+				$this->request->disable_super_globals();
+			} catch (\Exception $e) {
+				$this->request->disable_super_globals();
+				error_log('CleanTalk RC init error: ' . $e->getMessage());
+			}
 		}
 
 		if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->symfony_request->getScriptName(), array('/adm/index.'.$this->php_ext,'/ucp.'.$this->php_ext,'/posting.'.$this->php_ext)) && $this->request->variable('submit',''))
 		{
 			//Checking contact form
 			$this->ct_comment_result = null;
-			$spam_check = array();	
+			$spam_check = array();
 
 			$spam_check['sender_email'] = $this->request->variable('email','');
 			$spam_check['sender_nickname'] = $this->request->variable('name','');
 			$spam_check['message_title'] = $this->request->variable('subject','');
 			$spam_check['message_body'] = $this->request->variable('message','');
-			
+
 			if ($spam_check['sender_email'] !== '' || $spam_check['message_title'] !== '' || $spam_check['message_body'] !== '' )
 			{
 				$spam_check['type'] = 'contact';
@@ -377,7 +417,7 @@ class main_listener implements EventSubscriberInterface
 				$result = $this->main_model->check_spam($spam_check);
 
 				if ($result['errno'] == 0 && $result['allow'] == 0) // Spammer exactly.
-				{				 
+				{
 					// Output error
 					@trigger_error($result['ct_result_comment']);
 				}
