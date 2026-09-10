@@ -27,6 +27,8 @@ class main_model
     /** Lifetime for ct_cookies_test (7 days); independent of prev_referer */
     const COOKIE_TEST_LIFETIME = 604800;
 
+    const DEFAULT_SERVER_URL = 'https://moderate.cleantalk.org';
+
     /* @var \phpbb\config\config */
     protected $config;
 
@@ -112,6 +114,11 @@ class main_model
         $this->cleantalk->server_url = $this->config['cleantalk_antispam_server_url'];
         $this->cleantalk->server_ttl = $this->config['cleantalk_antispam_server_ttl'];
         $this->cleantalk->server_changed = $this->config['cleantalk_antispam_server_changed'];
+
+        if ( empty($this->cleantalk->server_url) ) {
+            $this->cleantalk->server_url = self::DEFAULT_SERVER_URL;
+            $this->config->set('cleantalk_antispam_server_url', self::DEFAULT_SERVER_URL);
+        }
 
         //Timezone from JS, Page set timestamp
         $page_set_timestamp = $this->request->variable(self::JS_PS_TIMESTAMP, "none", false, \phpbb\request\request_interface::COOKIE);
