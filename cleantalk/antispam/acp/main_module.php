@@ -421,6 +421,8 @@ class main_module
 			require_once($autoload_path);
 		}
 
+		$super_globals_were_disabled = $this->super_globals_disabled($request);
+
 		try {
 			$api_key = $access_key ?: $config['cleantalk_antispam_apikey'];
 
@@ -434,7 +436,7 @@ class main_module
 
 			$result = $firewall->getUpdater()->update();
 
-			$request->disable_super_globals();
+			$this->restore_super_globals($request, $super_globals_were_disabled);
 
 			if (empty($result['error'])) {
 				$config->set('cleantalk_antispam_sfw_update_last_gc', time());
@@ -442,7 +444,7 @@ class main_module
 
 			return $result;
 		} catch (\Exception $e) {
-			$request->disable_super_globals();
+			$this->restore_super_globals($request, $super_globals_were_disabled);
 			error_log('CleanTalk SFW update error: ' . $e->getMessage());
 			return array('error' => $e->getMessage());
 		}
@@ -457,6 +459,8 @@ class main_module
 			require_once($autoload_path);
 		}
 
+		$super_globals_were_disabled = $this->super_globals_disabled($request);
+
 		try {
 			$request->enable_super_globals();
 
@@ -467,7 +471,7 @@ class main_module
 
 			$result = $firewall->sendLogs();
 
-			$request->disable_super_globals();
+			$this->restore_super_globals($request, $super_globals_were_disabled);
 
 			if (!isset($result['error'])) {
 				$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());
@@ -475,9 +479,35 @@ class main_module
 
 			return $result;
 		} catch (\Exception $e) {
-			$request->disable_super_globals();
+			$this->restore_super_globals($request, $super_globals_were_disabled);
 			error_log('CleanTalk SFW send logs error: ' . $e->getMessage());
 			return array('error' => $e->getMessage());
+		}
+	}
+
+	/**
+	* Current state of phpBB superglobals.
+	* Another integration (phpBB embedded into Joomla, etc.) may have enabled them intentionally.
+	*
+	* @param \phpbb\request\request	$request
+	* @return bool
+	*/
+	private function super_globals_disabled($request)
+	{
+		return !method_exists($request, 'super_globals_disabled') || $request->super_globals_disabled();
+	}
+
+	/**
+	* Restores the superglobals state captured before CleanTalk processing
+	*
+	* @param \phpbb\request\request	$request
+	* @param bool	$were_disabled
+	*/
+	private function restore_super_globals($request, $were_disabled)
+	{
+		if ($were_disabled)
+		{
+			$request->disable_super_globals();
 		}
 	}
 }

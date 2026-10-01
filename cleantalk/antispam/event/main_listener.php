@@ -132,6 +132,8 @@ class main_listener implements EventSubscriberInterface
 			return;
 		}
 
+		$super_globals_were_disabled = $this->super_globals_disabled();
+
 		try {
 			$api_key = $this->config['cleantalk_antispam_apikey'];
 
@@ -155,10 +157,34 @@ class main_listener implements EventSubscriberInterface
 
 			$firewall->run();
 
-			$this->request->disable_super_globals();
+			$this->restore_super_globals($super_globals_were_disabled);
 		} catch (\Exception $e) {
-			$this->request->disable_super_globals();
+			$this->restore_super_globals($super_globals_were_disabled);
 			error_log('CleanTalk SFW error: ' . $e->getMessage());
+		}
+	}
+
+	/**
+	* Current state of phpBB superglobals.
+	* Another integration (phpBB embedded into Joomla, etc.) may have enabled them intentionally.
+	*
+	* @return bool
+	*/
+	private function super_globals_disabled()
+	{
+		return !method_exists($this->request, 'super_globals_disabled') || $this->request->super_globals_disabled();
+	}
+
+	/**
+	* Restores the superglobals state captured before CleanTalk processing
+	*
+	* @param bool	$were_disabled
+	*/
+	private function restore_super_globals($were_disabled)
+	{
+		if ($were_disabled)
+		{
+			$this->request->disable_super_globals();
 		}
 	}
 	/**
@@ -372,6 +398,8 @@ class main_listener implements EventSubscriberInterface
 		// Remote calls via Common library
 		$api_key = $this->config['cleantalk_antispam_apikey'];
 		if ($api_key) {
+			$super_globals_were_disabled = $this->super_globals_disabled();
+
 			try {
 				// Enable superglobals BEFORE RC check — RemoteCalls::check() reads $_GET/$_REQUEST
 				$this->request->enable_super_globals();
@@ -384,17 +412,17 @@ class main_listener implements EventSubscriberInterface
 					$remote_calls = new $rc_class($api_key, new $storage_handler_class());
 					try {
 						$rc_result = $remote_calls->process();
-						$this->request->disable_super_globals();
+						$this->restore_super_globals($super_globals_were_disabled);
 						die($rc_result);
 					} catch (\Cleantalk\Common\RemoteCalls\Exceptions\RemoteCallsException $exception) {
-						$this->request->disable_super_globals();
+						$this->restore_super_globals($super_globals_were_disabled);
 						error_log('CleanTalk RC error: ' . $exception->getMessage());
 						die('FAIL ' . json_encode(array('error' => $exception->getMessage())));
 					}
 				}
-				$this->request->disable_super_globals();
+				$this->restore_super_globals($super_globals_were_disabled);
 			} catch (\Exception $e) {
-				$this->request->disable_super_globals();
+				$this->restore_super_globals($super_globals_were_disabled);
 				error_log('CleanTalk RC init error: ' . $e->getMessage());
 			}
 		}
