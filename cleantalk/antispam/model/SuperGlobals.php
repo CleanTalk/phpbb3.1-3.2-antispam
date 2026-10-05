@@ -18,13 +18,16 @@ class SuperGlobals
 	/**
 	* Current state of phpBB superglobals.
 	* Another integration (phpBB embedded into Joomla, etc.) may have enabled them intentionally.
+	* Returns false for an unusable request object, so nothing gets changed afterwards.
 	*
 	* @param \phpbb\request\request	$request
 	* @return bool
 	*/
 	static public function areDisabled($request)
 	{
-		return !method_exists($request, 'super_globals_disabled') || $request->super_globals_disabled();
+		return is_object($request)
+			&& method_exists($request, 'super_globals_disabled')
+			&& $request->super_globals_disabled();
 	}
 
 	/**
