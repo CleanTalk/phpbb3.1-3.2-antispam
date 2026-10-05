@@ -38,7 +38,7 @@ class SuperGlobals
 	*/
 	static public function restore($request, $were_disabled)
 	{
-		if ($were_disabled)
+		if ($were_disabled && is_object($request) && method_exists($request, 'disable_super_globals'))
 		{
 			$request->disable_super_globals();
 		}
