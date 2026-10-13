@@ -12,6 +12,7 @@ namespace cleantalk\antispam\acp;
 
 use Cleantalk\Common\Api\Api;
 use Cleantalk\Custom\Errors;
+use cleantalk\antispam\model\SuperGlobals;
 
 class main_module
 {
@@ -421,6 +422,8 @@ class main_module
 			require_once($autoload_path);
 		}
 
+		$super_globals_were_disabled = SuperGlobals::areDisabled($request);
+
 		try {
 			$api_key = $access_key ?: $config['cleantalk_antispam_apikey'];
 
@@ -434,7 +437,7 @@ class main_module
 
 			$result = $firewall->getUpdater()->update();
 
-			$request->disable_super_globals();
+			SuperGlobals::restore($request, $super_globals_were_disabled);
 
 			if (empty($result['error'])) {
 				$config->set('cleantalk_antispam_sfw_update_last_gc', time());
@@ -442,7 +445,7 @@ class main_module
 
 			return $result;
 		} catch (\Exception $e) {
-			$request->disable_super_globals();
+			SuperGlobals::restore($request, $super_globals_were_disabled);
 			error_log('CleanTalk SFW update error: ' . $e->getMessage());
 			return array('error' => $e->getMessage());
 		}
@@ -457,6 +460,8 @@ class main_module
 			require_once($autoload_path);
 		}
 
+		$super_globals_were_disabled = SuperGlobals::areDisabled($request);
+
 		try {
 			$request->enable_super_globals();
 
@@ -467,7 +472,7 @@ class main_module
 
 			$result = $firewall->sendLogs();
 
-			$request->disable_super_globals();
+			SuperGlobals::restore($request, $super_globals_were_disabled);
 
 			if (!isset($result['error'])) {
 				$config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());
@@ -475,7 +480,7 @@ class main_module
 
 			return $result;
 		} catch (\Exception $e) {
-			$request->disable_super_globals();
+			SuperGlobals::restore($request, $super_globals_were_disabled);
 			error_log('CleanTalk SFW send logs error: ' . $e->getMessage());
 			return array('error' => $e->getMessage());
 		}
