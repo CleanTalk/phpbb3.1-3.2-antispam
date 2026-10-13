@@ -2,7 +2,7 @@
 
 namespace cleantalk\antispam\cron\task;
 
-use cleantalk\antispam\lib\Cleantalk\Common\Api;
+use Cleantalk\Common\Api\Api;
 
 class cleantalk_antispam_check_payment_status extends \phpbb\cron\task\base
 {
@@ -50,4 +50,3 @@ class cleantalk_antispam_check_payment_status extends \phpbb\cron\task\base
 	}
 		
 }
-
