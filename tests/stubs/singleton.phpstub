@@ -1,0 +1,19 @@
+<?php
+// stubs/singleton.phpstub
+
+/**
+ * @psalm-suppress all
+ */
+class singleton {
+    /**
+     * @var static
+     */
+    protected static $instance;
+
+    /**
+     * @return static
+     */
+    public static function get_instance() {
+        // ...
+    }
+}

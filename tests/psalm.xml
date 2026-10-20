@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<psalm
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="https://getpsalm.org/schema/config"
+        name="Psalm for Cleantalk AntiSpam Protection"
+        autoloader="bootstrap.php"
+        errorLevel="3"
+        throwExceptionOnError="0"
+        findUnusedCode="true"
+        ensureArrayStringOffsetsExist="true"
+        ensureArrayIntOffsetsExist="true"
+        allowNamedArgumentCalls="false"
+        hoistConstants="true"
+        phpVersion="7.2"
+        hideExternalErrors="true"
+        xsi:schemaLocation="https://getpsalm.org/schema/config config.xsd"
+        limitMethodComplexity="true"
+>
+    <projectFiles>
+        <directory name="../cleantalk/"/>
+        <ignoreFiles allowMissingFiles="true">
+            <directory name="../tests"/>
+            <directory name="../**/tests"/>
+            <directory name="../vendor"/>
+            <directory name="../**/vendor"/>
+            <directory name="../node_modules"/>
+            <directory name="../**/node_modules"/>
+        </ignoreFiles>
+    </projectFiles>
+
+    <stubs>
+        <file name="stubs/singleton.phpstub" />
+    </stubs>
+</psalm>
