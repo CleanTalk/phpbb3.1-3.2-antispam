@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * @package phpBB Extension - Antispam by CleanTalk
@@ -151,7 +152,6 @@ class main_model
                 'comment_type' => $spam_check['type'],
                 'post_url' => $refferrer,
             )
-
         );
         $composer_json = json_decode(file_get_contents($this->phpbb_root_path . 'ext/cleantalk/antispam/composer.json'));
 
@@ -346,7 +346,6 @@ class main_model
         } else {
             return null;
         }
-
     }
 
     /** Return array of JS-keys for checking
@@ -376,13 +375,12 @@ class main_model
         $latest_key_time = 0;
         if ( $keys ) {
             foreach ($keys as $k => $t) {
-
                 //fix for unknown time values
-                if (!is_numeric($t)){
+                if (!is_numeric($t)) {
                     $keys[$key] = time();
                     $js_keys['keys'] = $keys;
                     $this->config_text->set_array(array(
-                        'cleantalk_antispam_js_keys'	=> json_encode($js_keys),
+                        'cleantalk_antispam_js_keys'    => json_encode($js_keys),
                     ));
                     return $key;
                 }
@@ -413,7 +411,6 @@ class main_model
         }
 
         return $key;
-
     }
 
     /** Validating js key
@@ -433,7 +430,6 @@ class main_model
             } else {
                 $result = false;
             }
-
         } else {
             $result = false;
         }
@@ -452,7 +448,6 @@ class main_model
         $haystack = $this->request->server('SERVER_NAME') . $this->request->server('REQUEST_URI');
 
         foreach ( $exclusions as $exclusion ) {
-
             if (
                 ($is_regexp && preg_match('/' . $exclusion . '/', $haystack) === 1) ||
                 stripos($haystack, $exclusion) !== false

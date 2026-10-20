@@ -1,4 +1,5 @@
 <?php
+
 /**
 *
 * @package phpBB Extension - Antispam by CleanTalk
@@ -12,15 +13,15 @@ namespace cleantalk\antispam\acp;
 
 class main_info
 {
-	function module()
-	{
-		return array(
-			'filename'	=> '\cleantalk\antispam\acp\main_module',
-			'title'		=> 'ACP_CLEANTALK_TITLE',
-			'version'	=> '5.8.2',
-			'modes'		=> array(
-				'settings'	=> array('title' => 'ACP_CLEANTALK_SETTINGS', 'auth' => 'ext_cleantalk/antispam && acl_a_board', 'cat' => array('ACP_CLEANTALK_TITLE')),
-			),
-		);
-	}
+    public function module()
+    {
+        return array(
+            'filename'  => '\cleantalk\antispam\acp\main_module',
+            'title'     => 'ACP_CLEANTALK_TITLE',
+            'version'   => '5.8.2',
+            'modes'     => array(
+                'settings'  => array('title' => 'ACP_CLEANTALK_SETTINGS', 'auth' => 'ext_cleantalk/antispam && acl_a_board', 'cat' => array('ACP_CLEANTALK_TITLE')),
+            ),
+        );
+    }
 }

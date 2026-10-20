@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cleantalk Base class
  * Compatible only with phpBB 3.1+
@@ -7,7 +8,7 @@
  * @author Cleantalk team (welcome@cleantalk.org)
  * @copyright (C) 2014 CleanTalk team (https://cleantalk.org)
  * @license GNU/GPL: http://www.gnu.org/copyleft/gpl.html
- * @see https://github.com/CleanTalk/php-antispam 
+ * @see https://github.com/CleanTalk/php-antispam
  *
  */
 
@@ -15,31 +16,30 @@ namespace cleantalk\antispam\model;
 
 class CleantalkRequest
 {
-
      /**
      *  All http request headers
      * @var string
      */
      public $all_headers = null;
-     
+
      /**
      *  IP address of connection
      * @var string
      */
      //public $remote_addr = null;
-     
+
      /**
      *  Last error number
      * @var integer
      */
      public $last_error_no = null;
-     
+
      /**
      *  Last error time
      * @var integer
      */
      public $last_error_time = null;
-     
+
      /**
      *  Last error text
      * @var string
@@ -126,17 +126,17 @@ class CleantalkRequest
      * @var int
      */
     public $submit_time = null;
-    
+
     public $x_forwarded_for = '';
     public $x_real_ip = '';
 
     /**
      * Is enable Java Script,
      * valid are 0|1|2
-	 * Status:
-	 *  null - JS html code not inserted into phpBB templates
-	 *  0 - JS disabled at the client browser
-	 *  1 - JS enabled at the client broswer
+     * Status:
+     *  null - JS html code not inserted into phpBB templates
+     *  0 - JS disabled at the client browser
+     *  1 - JS enabled at the client broswer
      * @var int
      */
     public $js_on = null;
@@ -156,7 +156,7 @@ class CleantalkRequest
 
     /**
      * Phone number
-     * @var type 
+     * @var type
      */
     public $phone = null;
 
@@ -165,23 +165,21 @@ class CleantalkRequest
      * @var string
      */
     public $event_token = null;
-    
+
     /**
     * Method name
     * @var string
     */
-    public $method_name = 'check_message'; 
+    public $method_name = 'check_message';
 
     /**
      * Fill params with constructor
      * @param type $params
      */
-    public function __construct($params = null) 
+    public function __construct($params = null)
     {
-        if (is_array($params) && count($params) > 0) 
-        {
-            foreach ($params as $param => $value) 
-            {
+        if (is_array($params) && count($params) > 0) {
+            foreach ($params as $param => $value) {
                 $this->{$param} = $value;
             }
         }

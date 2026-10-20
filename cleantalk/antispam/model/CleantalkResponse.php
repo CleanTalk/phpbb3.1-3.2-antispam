@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cleantalk Base class
  * Compatible only with phpBB 3.1+
@@ -7,7 +8,7 @@
  * @author Cleantalk team (welcome@cleantalk.org)
  * @copyright (C) 2014 CleanTalk team (https://cleantalk.org)
  * @license GNU/GPL: http://www.gnu.org/copyleft/gpl.html
- * @see https://github.com/CleanTalk/php-antispam 
+ * @see https://github.com/CleanTalk/php-antispam
  *
  */
 
@@ -15,19 +16,18 @@ namespace cleantalk\antispam\model;
 
 class CleantalkResponse
 {
-
     /**
      * Received feedback nubmer
      * @var int
      */
     public $received = null;
-	
+
     /**
      *  Is stop words
      * @var int
      */
     public $stop_words = null;
-    
+
     /**
      * Cleantalk comment
      * @var string
@@ -64,12 +64,12 @@ class CleantalkResponse
      */
     public $errstr = null;
 
-	/**
+    /**
      * Error string
      * @var string
      */
     public $curl_err = null;
-	
+
     /**
      * Is fast submit, 1|0
      * @var string
@@ -84,49 +84,49 @@ class CleantalkResponse
 
     /**
      * Is JS
-     * @var type 
+     * @var type
      */
     public $js_disabled = null;
 
     /**
      * Sms check
-     * @var type 
+     * @var type
      */
     public $sms_allow = null;
 
     /**
      * Sms code result
-     * @var type 
+     * @var type
      */
     public $sms = null;
-	
+
     /**
      * Sms error code
-     * @var type 
+     * @var type
      */
     public $sms_error_code = null;
-	
+
     /**
      * Sms error code
-     * @var type 
+     * @var type
      */
     public $sms_error_text = null;
-    
-	/**
+
+    /**
      * Stop queue message, 1|0
-     * @var int  
+     * @var int
      */
     public $stop_queue = null;
-	
+
     /**
      * Account shuld by deactivated after registration, 1|0
-     * @var int  
+     * @var int
      */
     public $inactive = null;
 
     /**
-     * Account status 
-     * @var int  
+     * Account status
+     * @var int
      */
     public $account_status = -1;
 
@@ -136,22 +136,18 @@ class CleantalkResponse
      * @param type $response
      * @param type $obj
      */
-    function __construct($response = null, $obj = null) 
+    public function __construct($response = null, $obj = null)
     {
-        if ($response && is_array($response) && count($response) > 0) 
-        {
-            foreach ($response as $param => $value) 
-            {
+        if ($response && is_array($response) && count($response) > 0) {
+            foreach ($response as $param => $value) {
                 $this->{$param} = $value;
             }
-        } 
-        else 
-        {
+        } else {
             $this->errno = $obj->errno;
             $this->errstr = $obj->errstr;
-			$this->curl_err = !empty($obj->curl_err) ? $obj->curl_err : false;
+            $this->curl_err = !empty($obj->curl_err) ? $obj->curl_err : false;
 
-			$this->errstr = preg_replace("/.+(\*\*\*.+\*\*\*).+/", "$1", $this->errstr);
+            $this->errstr = preg_replace("/.+(\*\*\*.+\*\*\*).+/", "$1", $this->errstr);
 
             $this->stop_words = isset($obj->stop_words) ? utf8_decode($obj->stop_words) : null;
             $this->comment = isset($obj->comment) ? utf8_decode($obj->comment) : null;
@@ -168,11 +164,10 @@ class CleantalkResponse
             $this->stop_queue = (isset($obj->stop_queue)) ? $obj->stop_queue : 0;
             $this->inactive = (isset($obj->inactive)) ? $obj->inactive : 0;
             $this->account_status = (isset($obj->account_status)) ? $obj->account_status : -1;
-			$this->received = (isset($obj->received)) ? $obj->received : -1;
+            $this->received = (isset($obj->received)) ? $obj->received : -1;
 
-            if ($this->errno !== 0 && $this->errstr !== null && $this->comment === null)
-            {
-                $this->comment = $this->errstr; 
+            if ($this->errno !== 0 && $this->errstr !== null && $this->comment === null) {
+                $this->comment = $this->errstr;
             }
         }
     }

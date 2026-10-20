@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package phpBB Extension - Antispam by CleanTalk
  * @author  CleanTalk team (welcome@cleantalk.org)
@@ -15,7 +16,7 @@ class release_5_9_0 extends \phpbb\db\migration\migration
         return $this->db_tools->sql_column_exists($this->table_prefix . 'cleantalk_sfw', 'source');
     }
 
-    static public function depends_on()
+    public static function depends_on()
     {
         return array('\cleantalk\antispam\migrations\release_5_7_7');
     }
