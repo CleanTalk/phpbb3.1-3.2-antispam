@@ -19,6 +19,9 @@ use phpbb\log\log;
 use cleantalk\antispam\model\Cleantalk;
 use cleantalk\antispam\model\CleantalkRequest;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class main_model
 {
     const JS_FIELD_NAME = 'ct_checkjs';

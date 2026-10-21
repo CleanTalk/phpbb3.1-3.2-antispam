@@ -24,6 +24,7 @@ use phpbb\symfony_request;
 
 /**
 * Event listener
+ * @psalm-suppress UndefinedClass
 */
 class main_listener implements EventSubscriberInterface
 {
