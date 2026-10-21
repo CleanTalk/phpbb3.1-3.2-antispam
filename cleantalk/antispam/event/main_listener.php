@@ -23,9 +23,10 @@ use cleantalk\antispam\model\SuperGlobals;
 use phpbb\symfony_request;
 
 /**
-* Event listener
+ * Event listener
+ *
  * @psalm-suppress UndefinedClass
-*/
+ */
 class main_listener implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
