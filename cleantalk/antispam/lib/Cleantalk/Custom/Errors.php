@@ -9,6 +9,9 @@ class Errors
      *
      * @return array
      */
+    /**
+     * @psalm-suppress UnusedMethod
+     */
     private static function errorsStorage()
     {
         return array(

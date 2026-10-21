@@ -14,113 +14,116 @@
 
 namespace cleantalk\antispam\model;
 
+/**
+ * @psalm-suppress PossiblyUnusedProperty Response fields are read dynamically by the extension.
+ */
 class CleantalkResponse
 {
     /**
      * Received feedback nubmer
-     * @var int
+     * @var int|null
      */
     public $received = null;
 
     /**
      *  Is stop words
-     * @var int
+     * @var string|null
      */
     public $stop_words = null;
 
     /**
      * Cleantalk comment
-     * @var string
+     * @var string|null
      */
     public $comment = null;
 
     /**
      * Is blacklisted
-     * @var int
+     * @var int|null
      */
     public $blacklisted = null;
 
     /**
      * Is allow, 1|0
-     * @var int
+     * @var int|null
      */
     public $allow = null;
 
     /**
      * Request ID
-     * @var int
+     * @var int|null
      */
     public $id = null;
 
     /**
      * Request errno
-     * @var int
+     * @var int|null
      */
     public $errno = null;
 
     /**
      * Error string
-     * @var string
+     * @var string|null
      */
     public $errstr = null;
 
     /**
      * Error string
-     * @var string
+     * @var string|false|null
      */
     public $curl_err = null;
 
     /**
      * Is fast submit, 1|0
-     * @var string
+     * @var string|int|null
      */
     public $fast_submit = null;
 
     /**
      * Is spam comment
-     * @var string
+     * @var string|int|null
      */
     public $spam = null;
 
     /**
      * Is JS
-     * @var type
+     * @var mixed|null
      */
     public $js_disabled = null;
 
     /**
      * Sms check
-     * @var type
+     * @var mixed|null
      */
     public $sms_allow = null;
 
     /**
      * Sms code result
-     * @var type
+     * @var mixed|null
      */
     public $sms = null;
 
     /**
      * Sms error code
-     * @var type
+     * @var mixed|null
      */
     public $sms_error_code = null;
 
     /**
      * Sms error code
-     * @var type
+     * @var mixed|null
      */
     public $sms_error_text = null;
 
     /**
      * Stop queue message, 1|0
-     * @var int
+     * @var int|null
      */
     public $stop_queue = null;
 
     /**
      * Account shuld by deactivated after registration, 1|0
-     * @var int
+     * @var int|null
      */
     public $inactive = null;
 
@@ -133,24 +136,26 @@ class CleantalkResponse
     /**
      * Create server response
      *
-     * @param type $response
-     * @param type $obj
+     * @param array<string, mixed>|null $response
+     * @param object|null $obj
      */
     public function __construct($response = null, $obj = null)
     {
-        if ($response && is_array($response) && count($response) > 0) {
+        if (is_array($response) && $response !== array()) {
             foreach ($response as $param => $value) {
                 $this->{$param} = $value;
             }
-        } else {
+        } elseif (is_object($obj)) {
             $this->errno = $obj->errno;
             $this->errstr = $obj->errstr;
             $this->curl_err = !empty($obj->curl_err) ? $obj->curl_err : false;
 
-            $this->errstr = preg_replace("/.+(\*\*\*.+\*\*\*).+/", "$1", $this->errstr);
+            if (is_string($this->errstr)) {
+                $this->errstr = preg_replace("/.+(\*\*\*.+\*\*\*).+/", "$1", $this->errstr);
+            }
 
-            $this->stop_words = isset($obj->stop_words) ? utf8_decode($obj->stop_words) : null;
-            $this->comment = isset($obj->comment) ? utf8_decode($obj->comment) : null;
+            $this->stop_words = isset($obj->stop_words) && is_string($obj->stop_words) ? utf8_decode($obj->stop_words) : null;
+            $this->comment = isset($obj->comment) && is_string($obj->comment) ? utf8_decode($obj->comment) : null;
             $this->blacklisted = (isset($obj->blacklisted)) ? $obj->blacklisted : null;
             $this->allow = (isset($obj->allow)) ? $obj->allow : 0;
             $this->id = (isset($obj->id)) ? $obj->id : null;
@@ -169,6 +174,9 @@ class CleantalkResponse
             if ($this->errno !== 0 && $this->errstr !== null && $this->comment === null) {
                 $this->comment = $this->errstr;
             }
+        } else {
+            $this->errno = 1;
+            $this->errstr = 'Empty response';
         }
     }
 }

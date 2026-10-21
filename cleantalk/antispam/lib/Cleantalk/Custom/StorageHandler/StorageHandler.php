@@ -11,7 +11,7 @@ use Cleantalk\Common\Mloader\Mloader;
 class StorageHandler implements \Cleantalk\Common\StorageHandler\StorageHandler
 {
     /**
-     * @var \Cleantalk\Common\Db\Db
+     * @var \Cleantalk\Custom\Db\Db
      */
     private $db_object;
 
@@ -22,7 +22,7 @@ class StorageHandler implements \Cleantalk\Common\StorageHandler\StorageHandler
 
     public function __construct()
     {
-        /** @var \Cleantalk\Common\Db\Db $db_class */
+        /** @var \Cleantalk\Custom\Db\Db $db_class */
         $db_class = Mloader::get('Db');
         $this->db_object = $db_class::getInstance();
         $this->table_name = $this->db_object->prefix . 'cleantalk_custom_storage';

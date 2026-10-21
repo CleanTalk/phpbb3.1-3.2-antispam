@@ -111,7 +111,7 @@ class main_listener implements EventSubscriberInterface
     /**
     * Loads language
     *
-    * @param array  $event      array with event variable values
+    * @param \phpbb\event\data $event
     */
     public function load_language_on_setup($event)
     {
@@ -125,7 +125,7 @@ class main_listener implements EventSubscriberInterface
     /**
     * SpamFirewall Check using Common Firewall library
     *
-    * @param array  $event      array with event variable values
+    * @param \phpbb\event\data $event
     */
     public function sfw_check($event)
     {
@@ -168,7 +168,7 @@ class main_listener implements EventSubscriberInterface
     /**
     * Fills tamplate variable by generated JS-code with unique hash
     *
-    * @param array  $event      array with event variable values
+    * @param \phpbb\event\data $event
     */
     public function add_bot_detector_script($event)
     {
@@ -190,12 +190,12 @@ class main_listener implements EventSubscriberInterface
     /**
     * Checks post or topic to spam
     *
-    * @param array  $event      array with event variable values
+    * @param \phpbb\event\data $event
     */
     public function check_comment($event)
     {
         $data = $event->get_data();
-        if (!$this->config['cleantalk_antispam_key_is_ok'] || $data['submit'] != 1) {
+        if (!$this->config['cleantalk_antispam_key_is_ok'] || !isset($data['submit']) || $data['submit'] != 1) {
             return;
         }
 
@@ -241,10 +241,9 @@ class main_listener implements EventSubscriberInterface
 
         if ($moderate) {
             if (
-                array_key_exists('post_data', $data) &&
+                isset($data['post_data']) &&
                 is_array($data['post_data']) &&
-                array_key_exists('username', $data['post_data']) &&
-                array_key_exists('post_subject', $data['post_data'])
+                isset($data['post_data']['username'], $data['post_data']['post_subject'])
             ) {
                 $spam_check = array();
                 $spam_check['type'] = 'comment';
@@ -254,24 +253,25 @@ class main_listener implements EventSubscriberInterface
                     $spam_check['sender_email'] = $this->user->data['user_email'];
                     $spam_check['sender_nickname'] = $this->user->data['username'];
                 } else {
-                    if (array_key_exists('user_email', $data['post_data'])) {
+                    if (isset($data['post_data']['user_email'])) {
                         $spam_check['sender_email'] = $data['post_data']['user_email'];
                     }
-                    if (array_key_exists('username', $data['post_data'])) {
+                    if (isset($data['post_data']['username'])) {
                         $spam_check['sender_nickname'] = $data['post_data']['username'];
                     }
                 }
 
-                if (array_key_exists('post_subject', $data['post_data'])) {
+                if (isset($data['post_data']['post_subject'])) {
                     $spam_check['message_title'] = $data['post_data']['post_subject'];
                 }
                 $spam_check['message_body'] = $this->request->variable('message', '', true);
                 $result = $this->main_model->check_spam($spam_check);
 
                 if ($result['errno'] == 0 && $result['allow'] == 0) { // Spammer exactly.
-                    if ($result['stop_queue'] == 1) {
+                    if (isset($result['stop_queue']) && $result['stop_queue'] == 1) {
                         // Output error
-                        array_push($data['error'], $result['ct_result_comment']);
+                        $data['error'] = isset($data['error']) && is_array($data['error']) ? $data['error'] : array();
+                        array_push($data['error'], isset($result['ct_result_comment']) ? $result['ct_result_comment'] : '');
                         $event->set_data($data);
                     } else {
                         // No error output but send comment to manual approvement
@@ -284,7 +284,7 @@ class main_listener implements EventSubscriberInterface
     /**
     * Marks soft-spam post or comment as manual approvement needed
     *
-    * @param array  $event      array with event variable values
+    * @param \phpbb\event\data $event
     */
     public function change_comment_approve($event)
     {
@@ -293,7 +293,10 @@ class main_listener implements EventSubscriberInterface
         }
 
         // 'stop_queue' = 0 means to manual approvement
-        if (isset($this->ct_comment_result) && is_array($this->ct_comment_result) && $this->ct_comment_result['stop_queue'] == 0) {
+        if (isset($this->ct_comment_result) && is_array($this->ct_comment_result)
+            && isset($this->ct_comment_result['stop_queue'])
+            && $this->ct_comment_result['stop_queue'] == 0
+        ) {
             $data = $event->get_data();
             $data['data']['post_visibility'] = ITEM_UNAPPROVED;
             $data['data']['topic_visibility'] = ITEM_UNAPPROVED;
@@ -304,7 +307,7 @@ class main_listener implements EventSubscriberInterface
     /**
     * Checks user registration to spam
     *
-    * @param array  $event      array with event variable values
+    * @param \phpbb\event\data $event
     */
     public function check_newuser($event)
     {
@@ -315,16 +318,19 @@ class main_listener implements EventSubscriberInterface
         if ($this->config['cleantalk_antispam_regs']) {
             $data = $event->get_data();
             if (
-                array_key_exists('user_row', $data) &&
+                isset($data['user_row']) &&
                 is_array($data['user_row']) &&
-                array_key_exists('username', $data['user_row']) &&
-                array_key_exists('user_email', $data['user_row'])
+                isset($data['user_row']['username'], $data['user_row']['user_email'])
             ) {
                 $spam_check = array();
                 $spam_check['type'] = 'register';
-                $spam_check['sender_email'] = $data['user_row']['user_email'];
-                $spam_check['sender_nickname'] = $data['user_row']['username'];
-                if (array_key_exists('user_timezone', $data['user_row'])) {
+                $spam_check['sender_email'] = isset($data['user_row']['user_email'])
+                    ? $data['user_row']['user_email']
+                    : '';
+                $spam_check['sender_nickname'] = isset($data['user_row']['username'])
+                    ? $data['user_row']['username']
+                    : '';
+                if (isset($data['user_row']['user_timezone'])) {
                     $spam_check['timezone'] = $data['user_row']['user_timezone'];
                 }
                 $result = $this->main_model->check_spam($spam_check);
@@ -337,7 +343,7 @@ class main_listener implements EventSubscriberInterface
     /**
     * CCF check
     *
-    * @param array  $event      array with event variable values
+    * @param \phpbb\event\data $event
     */
     public function ccf_check($event)
     {

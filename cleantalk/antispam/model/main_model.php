@@ -87,7 +87,7 @@ class main_model
      * Checks data to spam
      *
      * @param array $spam_check array with values to check
-     * @return array                array with result flags
+     * @return array<string, mixed> array with result flags
      */
     public function check_spam($spam_check)
     {
@@ -147,9 +147,12 @@ class main_model
                 'cookies_enabled' => $this->test_cookie(),
             )
         );
+        $spam_check_type = isset($spam_check['type']) && is_string($spam_check['type'])
+            ? $spam_check['type']
+            : '';
         $post_info = json_encode(
             array(
-                'comment_type' => $spam_check['type'],
+                'comment_type' => $spam_check_type,
                 'post_url' => $refferrer,
             )
         );
@@ -172,8 +175,9 @@ class main_model
         $this->cleantalk_request->event_token = $this->request->variable('ct_bot_detector_event_token', '', false, \phpbb\request\request_interface::POST)
             ?: null;
 
+        $ct_result = false;
         $start = microtime(true);
-        switch ( $spam_check['type'] ) {
+        switch ($spam_check_type) {
             case 'contact':
             case 'comment':
                 $this->cleantalk_request->message = (array_key_exists('message_title', $spam_check) ? $spam_check['message_title'] : '') .
@@ -186,7 +190,7 @@ class main_model
                 $ct_result = $this->cleantalk->isAllowUser($this->cleantalk_request);
                 break;
             case 'send_feedback':
-                $this->cleantalk_request->feedback = $spam_check['feedback'];
+                $this->cleantalk_request->feedback = isset($spam_check['feedback']) ? $spam_check['feedback'] : '';
                 $ct_result = $this->cleantalk->sendFeedback($this->cleantalk_request);
                 break;
         }
@@ -195,7 +199,7 @@ class main_model
         $ret_val = array();
         $ret_val['errno'] = 0;
         $ret_val['allow'] = 1;
-        $ret_val['ct_request_id'] = $ct_result->id;
+        $ret_val['ct_request_id'] = $ct_result ? $ct_result->id : null;
 
         // Last spam check time
         $this->config->set('cleantalk_stats__last_spam_request_time', time());
@@ -210,7 +214,7 @@ class main_model
         }
         if ( $ct_result ) {
             // First check errstr flag.
-            if ( !empty($ct_result->errstr) && $checkjs = 1
+            if ( !empty($ct_result->errstr) && $checkjs === 1
                     || (!empty($ct_result->inactive) && $ct_result->inactive == 1)
             ) {
                 // Cleantalk error so we go default way (no action at all).
@@ -259,7 +263,7 @@ class main_model
                 }
 
                 return $ret_val;
-            } elseif ( !empty($ct_result->errstr) && $checkjs = 0 ) {
+            } elseif ( !empty($ct_result->errstr) && $checkjs === 0 ) {
                 $ct_result->allow = 0;
             }
 
@@ -269,7 +273,7 @@ class main_model
                 $ret_val['ct_result_comment'] = $this->filter_response($ct_result->comment);
 
                 // Check stop_queue flag.
-                if ( $spam_check['type'] == 'comment' && $ct_result->stop_queue == 0 ) {
+                if ($spam_check_type === 'comment' && $ct_result->stop_queue == 0) {
                     // Spammer and stop_queue == 0 - to manual approvement.
                     $ret_val['stop_queue'] = 0;
                 } else {
@@ -331,13 +335,14 @@ class main_model
 
         if ( $this->request->is_set($this->config['cookie_name'] . '_ct_cookies_test', \phpbb\request\request_interface::COOKIE) ) {
             $cookie_test = json_decode(htmlspecialchars_decode($this->request->variable($this->config['cookie_name'] . '_ct_cookies_test', '', false, \phpbb\request\request_interface::COOKIE)), true);
+            if (!is_array($cookie_test) || !isset($cookie_test['cookies_names'], $cookie_test['check_value']) || !is_array($cookie_test['cookies_names'])) {
+                return 0;
+            }
 
             $check_srting = $this->config['cleantalk_antispam_apikey'];
             foreach ( $cookie_test['cookies_names'] as $cookie_name ) {
                 $check_srting .= $this->request->variable($this->config['cookie_name'] . '_' . $cookie_name, '', false, \phpbb\request\request_interface::COOKIE);
             }
-            unset($cokie_name);
-
             if ( $cookie_test['check_value'] == md5(htmlspecialchars_decode($check_srting)) ) {
                 return 1;
             } else {
@@ -348,9 +353,9 @@ class main_model
         }
     }
 
-    /** Return array of JS-keys for checking
+    /** Return a JS key for checking
      *
-     * @return array
+     * @return int|string
      */
     public function cleantalk_get_checkjs_code()
     {
@@ -361,7 +366,7 @@ class main_model
 
         $key = rand();
 
-        if (!is_array($js_keys) || !isset($js_keys['keys'])) {
+        if (!is_array($js_keys) || !isset($js_keys['keys']) || !is_array($js_keys['keys'])) {
             $js_keys = array('keys' => array($key => time()));
             $this->config_text->set_array(array(
                 'cleantalk_antispam_js_keys' => json_encode($js_keys),
@@ -370,7 +375,7 @@ class main_model
         }
 
         $keys = $js_keys['keys'];
-        $keys_checksum = md5(json_encode($keys));
+        $keys_checksum = md5((string)json_encode($keys));
 
         $latest_key_time = 0;
         if ( $keys ) {
@@ -403,7 +408,7 @@ class main_model
             $keys[$key] = time();
         }
 
-        if ( md5(json_encode($keys)) != $keys_checksum ) {
+        if ( md5((string)json_encode($keys)) != $keys_checksum ) {
             $js_keys['keys'] = $keys;
             $this->config_text->set_array(array(
                 'cleantalk_antispam_js_keys' => json_encode($js_keys),
@@ -415,17 +420,17 @@ class main_model
 
     /** Validating js key
      *
-     * @return array
+     * @return bool
      */
     public function cleantalk_is_valid_js()
     {
         $ct_checkjs_val = $this->request->variable(self::JS_FIELD_NAME, '', false, \phpbb\request\request_interface::COOKIE);
 
-        if ( isset($ct_checkjs_val) ) {
+        if ( $ct_checkjs_val !== '' ) {
             $config_js_keys = $this->config_text->get_array(array('cleantalk_antispam_js_keys'));
             $js_keys = isset($config_js_keys['cleantalk_antispam_js_keys']) ? json_decode($config_js_keys['cleantalk_antispam_js_keys'], true) : null;
 
-            if ( $js_keys ) {
+            if ( is_array($js_keys) && isset($js_keys['keys']) && is_array($js_keys['keys']) ) {
                 $result = array_key_exists($ct_checkjs_val, $js_keys['keys']);
             } else {
                 $result = false;
@@ -468,14 +473,19 @@ class main_model
     {
         $requests = $this->config_text->get_array(array('cleantalk_stats__requests'));
         $requests = isset($requests['cleantalk_stats__requests']) ? json_decode($requests['cleantalk_stats__requests'], true) : null;
+        if (!is_array($requests)) {
+            $requests = array();
+        }
 
         // Delete old stats
-        if ( !empty($requests) && min(array_keys($requests)) < time() - (86400 * 7) ) {
-            unset($requests[min(array_keys($requests))]);
+        $request_keys = array_keys($requests);
+        if ($request_keys !== array() && min($request_keys) < time() - (86400 * 7)) {
+            unset($requests[min($request_keys)]);
+            $request_keys = array_keys($requests);
         }
 
         // Create new if newest older than 1 day
-        if ( is_null($requests) || (!empty($requests) && max(array_keys($requests)) < time() - (86400 * 1)) ) {
+        if ($request_keys === array() || max($request_keys) < time() - 86400) {
             $requests[time()] = array('amount' => 0, 'average_time' => 0);
         }
 

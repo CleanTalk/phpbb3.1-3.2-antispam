@@ -1,0 +1,18 @@
+<?php
+
+namespace {
+    const ANONYMOUS = 1;
+    const GROUPS_TABLE = 'groups';
+    const ITEM_UNAPPROVED = 0;
+    const USER_GROUP_TABLE = 'user_group';
+    const USERS_TABLE = 'users';
+
+    function add_form_key($form_name) {}
+    function adm_back_link($url) {}
+    function append_sid($url, $params = false, $is_amp = true, $session_id = false, $is_route = false) {}
+    function check_form_key($form_name, $timespan = false) {}
+    function current_time($type = 'mysql', $gmt = 0) {}
+    function get_username_string($mode, $user_id, $username, $username_colour = '', $guest_username = false, $custom_profile_url = false) {}
+    function phpbb_mail($to, $subject, $message, $headers = array(), $eol = "\n", &$error = '') {}
+    function user_delete($mode, $user_ids, $retain_username = true) {}
+}

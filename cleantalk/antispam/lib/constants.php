@@ -32,6 +32,12 @@ if (!defined('APBCT_WRITE_LIMIT')) {
 if (!defined('APBCT_SELECT_LIMIT')) {
     define('APBCT_SELECT_LIMIT', 5000);
 }
+if (!defined('APBCT_SESSION__LIVE_TIME')) {
+    define('APBCT_SESSION__LIVE_TIME', 86400);
+}
+if (!defined('APBCT_SFW_SEND_LOGS_LIMIT')) {
+    define('APBCT_SFW_SEND_LOGS_LIMIT', 1000);
+}
 if (!defined('APBCT_DIR_PATH')) {
     define('APBCT_DIR_PATH', dirname(__DIR__));
 }

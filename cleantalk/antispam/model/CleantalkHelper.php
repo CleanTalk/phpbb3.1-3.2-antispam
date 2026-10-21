@@ -142,7 +142,7 @@ class CleantalkHelper
         );
 
         $result = self::sendRawRequest(self::URL, $request);
-        $result = $do_check ? $result = self::checkRequestResult($result, 'spam_check_cms') : $result;
+        $result = $do_check ? self::checkRequestResult($result, 'spam_check_cms') : $result;
 
         return $result;
     }
@@ -164,7 +164,7 @@ class CleantalkHelper
         );
 
         $result = self::sendRawRequest(self::URL, $request);
-        $result = $do_check ? $result = self::checkRequestResult($result, 'get_antispam_report') : $result;
+        $result = $do_check ? self::checkRequestResult($result, 'get_antispam_report') : $result;
 
         return $result;
     }
@@ -246,7 +246,7 @@ class CleantalkHelper
      * @param array data to send
      * @param boolean is data have to be JSON encoded or not
      * @param integer connect timeout
-     * @return type
+     * @return array|string|int|bool
      */
     public static function sendRawRequest($url, $data = array(), $presets = null, $opts = array(), $timeout = 3)
     {
@@ -299,7 +299,11 @@ class CleantalkHelper
                         break;
 
                     case 'get':
-                        $opts[CURLOPT_URL] .= $data ? '?' . str_replace("&amp;", "&", http_build_query($data)) : '';
+                        $request_url = isset($opts[CURLOPT_URL]) && is_string($opts[CURLOPT_URL])
+                            ? $opts[CURLOPT_URL]
+                            : $url;
+                        $opts[CURLOPT_URL] = $request_url
+                            . ($data ? '?' . str_replace("&amp;", "&", http_build_query($data)) : '');
                         $opts[CURLOPT_CUSTOMREQUEST] = 'GET';
                         $opts[CURLOPT_POST] = false;
                         $opts[CURLOPT_POSTFIELDS] = null;
@@ -327,7 +331,7 @@ class CleantalkHelper
                 return true;
             }
 
-            if ($result) {
+            if (is_string($result) && $result !== '') {
                 if (strpos($result, PHP_EOL) !== false && !in_array('dont_split_to_array', $presets)) {
                     $result = explode(PHP_EOL, $result);
                 }
@@ -335,7 +339,7 @@ class CleantalkHelper
                 // Get code crossPHP method
                 if (in_array('get_code', $presets)) {
                     $curl_info = curl_getinfo($ch);
-                    $result = $curl_info['http_code'];
+                    $result = isset($curl_info['http_code']) ? $curl_info['http_code'] : 0;
                 }
                 curl_close($ch);
                 $out = $result;
@@ -353,7 +357,8 @@ class CleantalkHelper
             && isset($out['error']) && $out['error'] == 'CURL_NOT_INSTALLED'
         ) {
             $headers = get_headers($url);
-            $out = (int)preg_replace('/.*(\d{3}).*/', '$1', $headers[0]);
+            $first_header = is_array($headers) && isset($headers[0]) ? $headers[0] : '';
+            $out = (int)preg_replace('/.*(\d{3}).*/', '$1', $first_header);
         }
 
         return $out;
