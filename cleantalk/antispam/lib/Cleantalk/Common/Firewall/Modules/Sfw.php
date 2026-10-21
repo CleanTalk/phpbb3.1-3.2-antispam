@@ -511,7 +511,7 @@ class Sfw extends \Cleantalk\Common\Firewall\FirewallModule
                 $additional = $additional ?: 'EMPTY_ASSOCIATIVE_ARRAY';
 
                 $data[] = array(
-                    trim($value['ip']),
+                    trim($value['ip'], " \n\r\t\v\x00"),
                     // IP
                     $value['blocked_entries'],
                     // Count showing of block pages

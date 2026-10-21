@@ -101,7 +101,7 @@ class RemoteCalls extends \Cleantalk\Common\RemoteCalls\RemoteCalls
     /**
      * Add private/personal SFW record
      *
-     * @return bool|int
+     * @return array|false
      */
     public function action__private_record_add()
     {
@@ -109,16 +109,22 @@ class RemoteCalls extends \Cleantalk\Common\RemoteCalls\RemoteCalls
         $db_class = Mloader::get('Db');
         $db = $db_class::getInstance();
 
+        $metadata = \Cleantalk\Common\Variables\Request::get('metadata');
+        if (!is_array($metadata)) {
+            return false;
+        }
+
         return \Cleantalk\Common\Firewall\Modules\Sfw::privateRecordsAdd(
             $db,
-            $db->prefix . 'cleantalk_sfw_personal'
+            $db->prefix . 'cleantalk_sfw_personal',
+            $metadata
         );
     }
 
     /**
      * Delete private/personal SFW record
      *
-     * @return bool
+     * @return array|false
      */
     public function action__private_record_delete()
     {
@@ -126,9 +132,15 @@ class RemoteCalls extends \Cleantalk\Common\RemoteCalls\RemoteCalls
         $db_class = Mloader::get('Db');
         $db = $db_class::getInstance();
 
+        $metadata = \Cleantalk\Common\Variables\Request::get('metadata');
+        if (!is_array($metadata)) {
+            return false;
+        }
+
         return \Cleantalk\Common\Firewall\Modules\Sfw::privateRecordsDelete(
             $db,
-            $db->prefix . 'cleantalk_sfw_personal'
+            $db->prefix . 'cleantalk_sfw_personal',
+            $metadata
         );
     }
 }

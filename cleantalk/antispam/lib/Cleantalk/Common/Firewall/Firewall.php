@@ -375,7 +375,7 @@ class Firewall
                 $value['status'] = $value['status'] === 'DENY_SFW' ? null : $value['status'];
 
                 $data[] = array(
-                    trim($value['ip']),
+                    trim($value['ip'], " \n\r\t\v\x00"),
                     // IP
                     $value['blocked_entries'],
                     // Count showing of block pages
