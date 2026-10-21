@@ -34,6 +34,7 @@
         <file name="stubs/singleton.phpstub" />
         <file name="stubs/phpbb.phpstub" />
         <file name="stubs/phpbb-global.phpstub" />
+        <file name="stubs/symfony.phpstub" />
     </stubs>
 
     <issueHandlers>
