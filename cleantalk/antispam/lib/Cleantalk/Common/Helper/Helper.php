@@ -124,10 +124,11 @@ class Helper
                     $tmp = strpos($source, ',') !== false
                         ? explode(',', $source)
                         : (array)$source;
-                    $ip_version = self::ipValidate(trim($tmp[0]));
+                    $ip_version = self::ipValidate(trim($tmp[0], " \n\r\t\v\x00"));
                     if ( $ip_version ) {
-                        $out = $ip_version === 'v6' && !$v4_only ? self::ipV6Normalize(trim($tmp[0])) : trim(
-                            $tmp[0]
+                        $out = $ip_version === 'v6' && !$v4_only ? self::ipV6Normalize(trim($tmp[0], " \n\r\t\v\x00")) : trim(
+                            $tmp[0],
+                            " \n\r\t\v\x00"
                         );
                     }
                 }
@@ -266,8 +267,8 @@ class Helper
             case 'x_forwarded_for':
                 $headers = $headers ?: self::httpGetHeaders();
                 if ( isset($headers['X-Forwarded-For']) ) {
-                    $tmp = explode(',', trim($headers['X-Forwarded-For']));
-                    $tmp = trim($tmp[0]);
+                    $tmp = explode(',', trim($headers['X-Forwarded-For'], " \n\r\t\v\x00"));
+                    $tmp = trim($tmp[0], " \n\r\t\v\x00");
                     $ip_version = self::ipValidate($tmp);
                     if ( $ip_version ) {
                         $out = $ip_version === 'v6' && !$v4_only ? self::ipV6Normalize($tmp) : $tmp;
@@ -279,8 +280,8 @@ class Helper
             case 'x_real_ip':
                 $headers = $headers ?: self::httpGetHeaders();
                 if ( isset($headers['X-Real-Ip']) ) {
-                    $tmp = explode(",", trim($headers['X-Real-Ip']));
-                    $tmp = trim($tmp[0]);
+                    $tmp = explode(",", trim($headers['X-Real-Ip'], " \n\r\t\v\x00"));
+                    $tmp = trim($tmp[0], " \n\r\t\v\x00");
                     $ip_version = self::ipValidate($tmp);
                     if ( $ip_version ) {
                         $out = $ip_version === 'v6' && !$v4_only ? self::ipV6Normalize($tmp) : $tmp;
@@ -507,7 +508,7 @@ class Helper
      */
     public static function ipV6Normalize($ip)
     {
-        $ip = trim($ip);
+        $ip = trim($ip, " \n\r\t\v\x00");
         // Searching for ::ffff:xx.xx.xx.xx patterns and turn it to IPv6
         if ( preg_match('/^::ffff:([0-9]{1,3}\.?){4}$/', $ip) ) {
             $ip = dechex((int)sprintf("%u", ip2long(substr($ip, 7))));
@@ -1024,7 +1025,7 @@ class Helper
     {
         $buffer = (array)$buffer;
         foreach ( $buffer as $indx => &$line ) {
-            $line = trim($line);
+            $line = trim($line, " \n\r\t\v\x00");
             if ( $line === '' ) {
                 unset($buffer[$indx]);
             }
@@ -1093,7 +1094,7 @@ class Helper
      */
     public static function bufferCsvPopLineToArray(&$csv, $map = array())
     {
-        $line = trim(static::bufferCsvPopLine($csv));
+        $line = trim(static::bufferCsvPopLine($csv), " \n\r\t\v\x00");
         $line = strpos($line, '\'') === 0
             ? str_getcsv($line, ',', '\'')
             : explode(',', $line);

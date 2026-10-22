@@ -3,27 +3,14 @@
     "type": "phpbb-extension",
     "description": "Antispam by CleanTalk",
     "homepage": "https://cleantalk.org",
-    "version": "5.8.1",
+    "version": "6.0.0",
     "time": "2017-06-07",
     "license": "GPL-2.0-only",
     "authors": [
         {
-            "name": "Alexey Znaev",
-            "email": "welcome@cleantalk.org",
-            "homepage": "https://cleantalk.org",
-            "role": "Developer"
-        },
-        {
-            "name": "Roman Safronov",
-            "email": "welcome@cleantalk.org",
-            "homepage": "https://cleantalk.org",
-            "role": "Developer"
-        },
-        {
-            "name": "Artyom Davydov",
-            "email": "welcome@cleantalk.org",
-            "homepage": "https://cleantalk.org",
-            "role": "Developer"
+            "name": "CleanTalk Team",
+            "email": "plugins@cleantalk.org",
+            "homepage": "https://cleantalk.org"
         }
     ],
     "require": {

@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<psalm
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="https://getpsalm.org/schema/config"
+        name="Psalm for Cleantalk AntiSpam Protection"
+        autoloader="bootstrap.php"
+        errorLevel="3"
+        throwExceptionOnError="0"
+        findUnusedCode="true"
+        ensureArrayStringOffsetsExist="true"
+        ensureArrayIntOffsetsExist="true"
+        allowNamedArgumentCalls="false"
+        hoistConstants="true"
+        phpVersion="7.2"
+        hideExternalErrors="true"
+        xsi:schemaLocation="https://getpsalm.org/schema/config config.xsd"
+        limitMethodComplexity="true"
+>
+    <projectFiles>
+        <directory name="../cleantalk/"/>
+        <ignoreFiles allowMissingFiles="true">
+            <directory name="../tests"/>
+            <directory name="../**/tests"/>
+            <directory name="../cleantalk/antispam/language"/>
+            <directory name="../cleantalk/antispam/lib/Cleantalk/Common/"/>
+            <directory name="../vendor"/>
+            <directory name="../**/vendor"/>
+            <directory name="../node_modules"/>
+            <directory name="../**/node_modules"/>
+        </ignoreFiles>
+    </projectFiles>
+
+    <stubs>
+        <file name="stubs/singleton.phpstub" />
+        <file name="stubs/phpbb.phpstub" />
+        <file name="stubs/phpbb-global.phpstub" />
+        <file name="stubs/symfony.phpstub" />
+    </stubs>
+
+    <issueHandlers>
+        <UnusedClass>
+            <errorLevel type="suppress">
+                <directory name="../cleantalk/antispam/acp"/>
+                <directory name="../cleantalk/antispam/cron/task"/>
+                <directory name="../cleantalk/antispam/event"/>
+                <directory name="../cleantalk/antispam/lib/Cleantalk"/>
+                <directory name="../cleantalk/antispam/migrations"/>
+            </errorLevel>
+        </UnusedClass>
+        <PossiblyUnusedMethod>
+            <errorLevel type="suppress">
+                <directory name="../cleantalk/antispam/lib/Cleantalk/Common"/>
+                <directory name="../cleantalk/antispam/model"/>
+            </errorLevel>
+        </PossiblyUnusedMethod>
+        <PossiblyUnusedParam>
+            <errorLevel type="suppress">
+                <directory name="../cleantalk/antispam/lib/Cleantalk/Common"/>
+                <directory name="../cleantalk/antispam/model"/>
+            </errorLevel>
+        </PossiblyUnusedParam>
+        <PossiblyUnusedProperty>
+            <errorLevel type="suppress">
+                <directory name="../cleantalk/antispam/lib/Cleantalk/Common"/>
+            </errorLevel>
+        </PossiblyUnusedProperty>
+        <UnusedProperty>
+            <errorLevel type="suppress">
+                <directory name="../cleantalk/antispam/lib/Cleantalk/Common"/>
+            </errorLevel>
+        </UnusedProperty>
+    </issueHandlers>
+</psalm>

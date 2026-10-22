@@ -1,0 +1,118 @@
+<?php
+
+namespace phpbb\request;
+
+interface request_interface
+{
+    public const POST = 0;
+    public const GET = 1;
+    public const REQUEST = 2;
+    public const COOKIE = 3;
+    public const SERVER = 4;
+
+    public function variable($var_name, $default, $multibyte = false, $super_global = self::REQUEST);
+    public function server($var_name, $default = '');
+    public function is_set($var_name, $super_global = self::REQUEST);
+    public function is_set_post($name);
+}
+
+class request implements request_interface
+{
+    public function variable($var_name, $default, $multibyte = false, $super_global = self::REQUEST) {}
+    public function server($var_name, $default = '') {}
+    public function is_set($var_name, $super_global = self::REQUEST) {}
+    public function is_set_post($name) {}
+}
+
+namespace phpbb\config;
+
+class config implements \ArrayAccess
+{
+    public function offsetExists($offset) {}
+    public function offsetGet($offset) {}
+    public function offsetSet($offset, $value) {}
+    public function offsetUnset($offset) {}
+    public function set($key, $value, $use_cache = true) {}
+}
+
+class db_text
+{
+    public function get_array(array $keys) {}
+    public function set_array(array $data) {}
+}
+
+namespace phpbb\db\driver;
+
+interface driver_interface
+{
+    public function sql_return_on_error($fail = false);
+    public function sql_query($query = '', $cache_ttl = 0);
+    public function sql_affectedrows();
+    public function sql_fetchrow($query_id = false);
+    public function sql_fetchrowset($query_id = false);
+    public function sql_freeresult($query_id = false);
+    public function sql_escape($msg);
+    public function sql_error($sql = '');
+}
+
+namespace phpbb\event;
+
+class data implements \ArrayAccess
+{
+    public function offsetExists($offset) {}
+    public function offsetGet($offset) {}
+    public function offsetSet($offset, $value) {}
+    public function offsetUnset($offset) {}
+    /** @return array */
+    public function get_data() {}
+    public function set_data(array $data) {}
+}
+
+namespace phpbb\db\migration;
+
+abstract class migration
+{
+    public $config;
+    public $db;
+    public $table_prefix;
+}
+
+namespace phpbb\cron\task;
+
+abstract class base
+{
+    public function set_name($name) {}
+}
+
+namespace phpbb\log;
+
+class log
+{
+    public function add($mode, $user_id, $ip, $log_operation, $log_time = false, $additional_data = array()) {}
+}
+
+namespace phpbb\template;
+
+class template
+{
+    public function assign_vars(array $vars) {}
+    public function assign_var($name, $value) {}
+    public function assign_block_vars($block, array $vars) {}
+}
+
+namespace phpbb;
+
+class user
+{
+    public $lang = array();
+    public function lang($key) {}
+    public function add_lang($lang) {}
+    public function add_lang_ext($ext_name, $lang) {}
+    public function set_cookie($name, $value, $expire) {}
+    public function format_date($time) {}
+}
+
+class symfony_request
+{
+    public function getScriptName() {}
+}

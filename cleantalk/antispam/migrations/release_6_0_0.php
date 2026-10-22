@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package phpBB Extension - Antispam by CleanTalk
  * @author  CleanTalk team (welcome@cleantalk.org)
@@ -15,7 +16,7 @@ class release_6_0_0 extends \phpbb\db\migration\migration
         return isset($this->config['cleantalk_antispam_bot_detector']);
     }
 
-    static public function depends_on()
+    public static function depends_on()
     {
         return array('\cleantalk\antispam\migrations\release_5_9_0');
     }

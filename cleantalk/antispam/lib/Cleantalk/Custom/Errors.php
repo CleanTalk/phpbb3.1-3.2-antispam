@@ -4,57 +4,60 @@ namespace Cleantalk\Custom;
 
 class Errors
 {
-	/**
-	 * Please, add new errors type used in code
-	 *
-	 * @return array
-	 */
-	private static function errorsStorage()
-	{
-		return array(
-			'sfw_update_error',
-			'sfw_send_logs_error'
-		);
-	}
+    /**
+     * Please, add new errors type used in code
+     *
+     * @return array
+     */
+    /**
+     * @psalm-suppress UnusedMethod
+     */
+    private static function errorsStorage()
+    {
+        return array(
+            'sfw_update_error',
+            'sfw_send_logs_error'
+        );
+    }
 
-	/**
-	 * Get saved errors
-	 *
-	 * @return array
-	 */
-	public static function getErrors()
-	{
-		global $config;
+    /**
+     * Get saved errors
+     *
+     * @return array
+     */
+    public static function getErrors()
+    {
+        global $config;
 
-		return isset($config['cleantalk_errors']) ? json_decode($config['cleantalk_errors'], true) : array();
-	}
+        return isset($config['cleantalk_errors']) ? json_decode($config['cleantalk_errors'], true) : array();
+    }
 
-	/**
-	 * Add new error
-	 */
-	public static function addError($errorId, $errorMessage)
-	{
-		global $config;
+    /**
+     * Add new error
+     */
+    public static function addError($errorId, $errorMessage)
+    {
+        global $config;
 
-		$errors = self::getErrors();
-		$errors[$errorId] = $errorMessage;
+        $errors = self::getErrors();
+        $errors[$errorId] = $errorMessage;
 
-		$config->set('cleantalk_errors',  json_encode($errors));
-	}
+        $config->set('cleantalk_errors', json_encode($errors));
+    }
 
-	/**
-	 * Remove error
-	 */
-	public static function removeError($errorId)
-	{
-		global $config;
+    /**
+     * Remove error
+     */
+    public static function removeError($errorId)
+    {
+        global $config;
 
-		$errors = self::getErrors();
+        $errors = self::getErrors();
 
-		if (isset($errors[$errorId])) {
-			unset($errors[$errorId]);
-		}
+        if (isset($errors[$errorId])) {
+            unset($errors[$errorId]);
+        }
 
-		$config->set('cleantalk_errors',  json_encode($errors));
-	}
+        $config->set('cleantalk_errors', json_encode($errors));
+    }
 }

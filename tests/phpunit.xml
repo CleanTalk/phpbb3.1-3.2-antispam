@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpunit
+        bootstrap="bootstrap.php"
+        colors="true"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true"
+        stopOnFailure="true"
+        beStrictAboutOutputDuringTests="true"
+>
+    <testsuites>
+        <testsuite name="CleanTalk Unit Tests">
+            <directory suffix=".php">./</directory>
+            <exclude>./bootstrap.php</exclude>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">../cleantalk/</directory>
+            <exclude>
+                <directory>../vendor</directory>
+                <directory>../tests</directory>
+                <directory>../node_modules</directory>
+                <file>../bootstrap.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>
