@@ -27,6 +27,8 @@ class main_model
     /** Lifetime for ct_cookies_test (7 days); independent of prev_referer */
     const COOKIE_TEST_LIFETIME = 604800;
 
+    const DEFAULT_MODERATE_URL = 'https://moderate.cleantalk.org';
+
     /* @var \phpbb\config\config */
     protected $config;
 
@@ -108,10 +110,14 @@ class main_model
         $this->user->add_lang('acp/common');
         $checkjs = $this->cleantalk_is_valid_js() ? 1 : 0;
 
-        $this->cleantalk->work_url = $this->config['cleantalk_antispam_work_url'];
-        $this->cleantalk->server_url = $this->config['cleantalk_antispam_server_url'];
-        $this->cleantalk->server_ttl = $this->config['cleantalk_antispam_server_ttl'];
-        $this->cleantalk->server_changed = $this->config['cleantalk_antispam_server_changed'];
+        $this->cleantalk->work_url = isset($this->config['cleantalk_antispam_work_url'])
+            ? $this->config['cleantalk_antispam_work_url'] : '';
+        $this->cleantalk->server_url = !empty($this->config['cleantalk_antispam_server_url'])
+            ? $this->config['cleantalk_antispam_server_url'] : self::DEFAULT_MODERATE_URL;
+        $this->cleantalk->server_ttl = isset($this->config['cleantalk_antispam_server_ttl'])
+            ? (int) $this->config['cleantalk_antispam_server_ttl'] : 0;
+        $this->cleantalk->server_changed = isset($this->config['cleantalk_antispam_server_changed'])
+            ? (int) $this->config['cleantalk_antispam_server_changed'] : 0;
 
         //Timezone from JS, Page set timestamp
         $page_set_timestamp = $this->request->variable(self::JS_PS_TIMESTAMP, "none", false, \phpbb\request\request_interface::COOKIE);
