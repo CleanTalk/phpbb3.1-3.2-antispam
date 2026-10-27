@@ -56,13 +56,13 @@ class Cleantalk
      * WOrk url ttl
      * @var int|null
      */
-    public $server_ttl = null;
+    public $server_ttl = 0;
 
     /**
      * Time wotk_url changer
      * @var int|null
      */
-    public $server_changed = null;
+    public $server_changed = 0;
 
     /**
      * Flag is change server url
@@ -422,6 +422,8 @@ class Cleantalk
         $msg->x_real_ip = $this->request->server('X_REAL_IP');
 
         $msg->sender_info = json_encode($si);
+        $this->server_changed = !empty($this->server_changed) && is_int($this->server_changed) ? $this->server_changed : 0;
+        $this->server_ttl = !empty($this->server_ttl) && is_int($this->server_ttl) ? $this->server_ttl : 0;
         if (((isset($this->work_url) && $this->work_url !== '') && ($this->server_changed + $this->server_ttl > time()))
                 || $this->stay_on_server == true) {
             $url = (!empty($this->work_url)) ? $this->work_url : $this->server_url;

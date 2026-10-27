@@ -13,10 +13,10 @@ namespace cleantalk\antispam\migrations;
 
 class release_5_7_7 extends \phpbb\db\migration\migration
 {
-    public function effectively_installed()
-    {
-        return isset($this->config['cleanalk_antispam_apikey']);
-    }
+	public function effectively_installed()
+	{
+		return isset($this->config['cleantalk_antispam_apikey']);
+	}
 
     public static function depends_on()
     {
