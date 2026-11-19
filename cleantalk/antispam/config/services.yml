@@ -40,6 +40,7 @@ services:
         class: cleantalk\antispam\cron\task\cleantalk_antispam_sfw_logs_send
         arguments:
             - '@config'
+            - '@request'
         calls:
             - [set_name, [cron.task.cleantalk_antispam_sfw_logs_send]]
         tags:
@@ -49,6 +50,7 @@ services:
         class: cleantalk\antispam\cron\task\cleantalk_antispam_sfw_update
         arguments:
             - '@config'
+            - '@request'
         calls:
             - [set_name, [cron.task.cleantalk_antispam_sfw_update]]
         tags:
