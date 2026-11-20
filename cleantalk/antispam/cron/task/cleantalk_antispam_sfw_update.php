@@ -2,13 +2,17 @@
 
 namespace cleantalk\antispam\cron\task;
 
+use cleantalk\antispam\model\SuperGlobals;
+
 class cleantalk_antispam_sfw_update extends \phpbb\cron\task\base
 {
     protected $config;
+    protected $request;
 
-    public function __construct(\phpbb\config\config $config)
+    public function __construct(\phpbb\config\config $config, \phpbb\request\request $request)
     {
         $this->config = $config;
+        $this->request = $request;
     }
 
     public function run()
@@ -18,7 +22,13 @@ class cleantalk_antispam_sfw_update extends \phpbb\cron\task\base
             require_once($autoload_path);
         }
 
+        $super_globals_were_disabled = SuperGlobals::areDisabled($this->request);
+
         try {
+            if ($super_globals_were_disabled) {
+                $this->request->enable_super_globals();
+            }
+
             $api_key = $this->config['cleantalk_antispam_apikey'];
             $firewall = new \Cleantalk\Common\Firewall\Firewall(
                 $api_key,
@@ -32,6 +42,8 @@ class cleantalk_antispam_sfw_update extends \phpbb\cron\task\base
             }
         } catch (\Exception $e) {
             error_log('CleanTalk SFW update error: ' . $e->getMessage());
+        } finally {
+            SuperGlobals::restore($this->request, $super_globals_were_disabled);
         }
     }
 
