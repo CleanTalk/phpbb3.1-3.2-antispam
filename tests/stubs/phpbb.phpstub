@@ -14,6 +14,8 @@ interface request_interface
     public function server($var_name, $default = '');
     public function is_set($var_name, $super_global = self::REQUEST);
     public function is_set_post($name);
+    /** @return array */
+    public function get_super_global($super_global = self::REQUEST);
 }
 
 class request implements request_interface
@@ -22,6 +24,8 @@ class request implements request_interface
     public function server($var_name, $default = '') {}
     public function is_set($var_name, $super_global = self::REQUEST) {}
     public function is_set_post($name) {}
+    /** @return array */
+    public function get_super_global($super_global = self::REQUEST) {}
 }
 
 namespace phpbb\config;
@@ -98,6 +102,29 @@ class template
     public function assign_vars(array $vars) {}
     public function assign_var($name, $value) {}
     public function assign_block_vars($block, array $vars) {}
+    public function set_filenames(array $filename_array) {}
+    /** @return string */
+    public function assign_display($handle, $template_var = '', $return_content = true) {}
+    public function append_var($varname, $varval) {}
+    /** @return mixed */
+    public function retrieve_var($varname) {}
+}
+
+namespace phpbb\language;
+
+class language
+{
+    /** @return string */
+    public function lang() {}
+    public function add_lang($component, $extension_name = null) {}
+}
+
+namespace phpbb\extension;
+
+abstract class base
+{
+    /** @var mixed */
+    protected $container;
 }
 
 namespace phpbb;

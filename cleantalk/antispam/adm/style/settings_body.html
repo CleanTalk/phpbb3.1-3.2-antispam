@@ -9,8 +9,31 @@
 </div>
 {% endif %}
 
+{% if not CLEANTALK_ANTISPAM_PRIVACY_CONFIRMED %}
+<div class="errorbox">
+	<p>{{ lang('ACP_CLEANTALK_PRIVACY_NOT_CONFIRMED') }}</p>
+</div>
+{% endif %}
+
 <form id="acp_board" method="post" action="{U_ACTION}">
 	<fieldset>
+		<legend>{{ lang('ACP_CLEANTALK_PRIVACY_LEGEND') }}</legend>
+		<p>
+			{{ lang('ACP_CLEANTALK_DATA_NOTICE') }}
+			<a href="https://cleantalk.org/privacy" target="_blank" rel="noopener">{{ lang('ACP_CLEANTALK_PRIVACY_LINK') }}</a>
+		</p>
+		<dl>
+			<dt>
+				<label for="cleantalk_antispam_privacy_confirmed">{{ lang('ACP_CLEANTALK_PRIVACY_CONFIRM_LABEL') }}</label><br /><span>{{ lang('ACP_CLEANTALK_PRIVACY_CONFIRM_DESCR') }}</span>
+			</dt>
+			<dd>
+				<label><input type="checkbox" class="radio" id="cleantalk_antispam_privacy_confirmed" name="cleantalk_antispam_privacy_confirmed" value="1"{% if CLEANTALK_ANTISPAM_PRIVACY_CONFIRMED %} checked="checked"{% endif %} /> {{ lang('ACP_CLEANTALK_PRIVACY_CONFIRM') }}</label>
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>{{ lang('ACP_CLEANTALK_SETTINGS') }}</legend>
 		<dl>
 			<dt>
 				<label for="cleantalk_antispam_regs">{L_ACP_CLEANTALK_REGS_LABEL}</label><br /><span>{L_ACP_CLEANTALK_REGS_DESCR}</span>

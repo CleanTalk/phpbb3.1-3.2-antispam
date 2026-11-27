@@ -6,6 +6,7 @@ namespace {
     const ITEM_UNAPPROVED = 0;
     const USER_GROUP_TABLE = 'user_group';
     const USERS_TABLE = 'users';
+    const PHPBB_VERSION = '3.3.0';
 
     function add_form_key($form_name) {}
     function adm_back_link($url) {}
@@ -15,4 +16,11 @@ namespace {
     function get_username_string($mode, $user_id, $username, $username_colour = '', $guest_username = false, $custom_profile_url = false) {}
     function phpbb_mail($to, $subject, $message, $headers = array(), $eol = "\n", &$error = '') {}
     function user_delete($mode, $user_ids, $retain_username = true) {}
+    /** @return string */
+    function utf8_htmlspecialchars($value) {}
+    /** @return bool */
+    function phpbb_version_compare($version1, $version2, $operator = null) {}
+    function garbage_collection() {}
+    /** @return never */
+    function exit_handler() {}
 }

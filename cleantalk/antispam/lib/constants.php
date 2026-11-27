@@ -5,6 +5,10 @@
  * Table names (without DB prefix — prefix is added by the Db driver).
  */
 
+if (!defined('IN_PHPBB')) {
+    exit;
+}
+
 if (!defined('APBCT_TBL_FIREWALL_DATA')) {
     define('APBCT_TBL_FIREWALL_DATA', 'cleantalk_sfw');
 }

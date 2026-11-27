@@ -23,6 +23,7 @@
             <directory name="../**/tests"/>
             <directory name="../cleantalk/antispam/language"/>
             <directory name="../cleantalk/antispam/lib/Cleantalk/Common/"/>
+            <directory name="../cleantalk/antispam/vendor"/>
             <directory name="../vendor"/>
             <directory name="../**/vendor"/>
             <directory name="../node_modules"/>

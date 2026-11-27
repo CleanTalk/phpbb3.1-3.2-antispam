@@ -6,6 +6,7 @@ services:
             - '@config'
             - '@config_text'
             - '@user'
+            - '@language'
             - '@request'
             - '@dbal.conn'
             - '@cleantalk.antispam.main_model'
@@ -41,6 +42,7 @@ services:
         arguments:
             - '@config'
             - '@request'
+            - '@cleantalk.antispam.main_model'
         calls:
             - [set_name, [cron.task.cleantalk_antispam_sfw_logs_send]]
         tags:
@@ -51,6 +53,7 @@ services:
         arguments:
             - '@config'
             - '@request'
+            - '@cleantalk.antispam.main_model'
         calls:
             - [set_name, [cron.task.cleantalk_antispam_sfw_update]]
         tags:

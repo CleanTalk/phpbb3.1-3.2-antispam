@@ -6,6 +6,8 @@
 !/README.md
 !/cleantalk
 !/tests
+!/build
+/build/out/
 /tests/.phpunit.result.cache
 cleantalk/antispam/composer.lock
 cleantalk/antispam/vendor/

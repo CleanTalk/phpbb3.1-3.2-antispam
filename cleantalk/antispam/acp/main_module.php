@@ -13,7 +13,7 @@ namespace cleantalk\antispam\acp;
 
 use Cleantalk\Common\Api\Api;
 use Cleantalk\Custom\Errors;
-use cleantalk\antispam\model\SuperGlobals;
+use cleantalk\antispam\model\RequestBridge;
 
 /**
  * @psalm-suppress UnusedClass Loaded by phpBB's ACP extension discovery.
@@ -30,6 +30,7 @@ class main_module
 
         // Load CleanTalk common libraries
         require_once(dirname(__DIR__) . '/lib/autoload.php');
+        RequestBridge::init($request);
 
         $config_text = $phpbb_container->get('config_text');
 
@@ -51,6 +52,7 @@ class main_module
             $config->set('cleantalk_antispam_ccf', $request->variable('cleantalk_antispam_ccf', 0));
             $config->set('cleantalk_antispam_sfw_enabled', $request->variable('cleantalk_antispam_sfw_enabled', 0));
             $config->set('cleantalk_antispam_bot_detector', $request->variable('cleantalk_antispam_bot_detector', 0));
+            $config->set('cleantalk_antispam_privacy_confirmed', $request->variable('cleantalk_antispam_privacy_confirmed', 0));
 
             $key_is_valid = false;
             $key_is_ok = false;
@@ -128,7 +130,7 @@ class main_module
                     $config->set('cleantalk_antispam_check_payment_status_last_gc', time());
                     $config->set('cleantalk_antispam_account_name_ob', $result['account_name_ob']);
 
-                    if ($config['cleantalk_antispam_sfw_enabled']) {
+                    if ($config['cleantalk_antispam_sfw_enabled'] && $config['cleantalk_antispam_privacy_confirmed']) {
                         $sfw_update = $this->sfw_update($savekey);
                         if (isset($sfw_update['error'])) {
                             Errors::addError('sfw_update_error', $sfw_update['error']);
@@ -191,6 +193,7 @@ class main_module
             'CLEANTALK_ANTISPAM_CCF'        => (bool)$config['cleantalk_antispam_ccf'],
             'CLEANTALK_ANTISPAM_SFW_ENABLED' => (bool)$config['cleantalk_antispam_sfw_enabled'],
             'CLEANTALK_ANTISPAM_BOT_DETECTOR' => (bool)$config['cleantalk_antispam_bot_detector'],
+            'CLEANTALK_ANTISPAM_PRIVACY_CONFIRMED' => (bool)$config['cleantalk_antispam_privacy_confirmed'],
             'CLEANTALK_ANTISPAM_APIKEY'     => $config['cleantalk_antispam_apikey'],
             'CLEANTALK_ANTISPAM_KEY_IS_OK'  => (bool)$config['cleantalk_antispam_key_is_ok'],
             'CLEANTALK_ANTISPAM_USER_TOKEN' => $config['cleantalk_antispam_user_token'],
@@ -253,6 +256,10 @@ class main_module
         if ($request->variable('check_spam', '', false, \phpbb\request\request_interface::POST)) {
             if (!\check_form_key('cleantalk/antispam')) {
                 trigger_error('FORM_INVALID');
+            }
+
+            if (!$config['cleantalk_antispam_privacy_confirmed']) {
+                trigger_error($user->lang('ACP_CLEANTALK_PRIVACY_NOT_CONFIRMED') . \adm_back_link($this->u_action), E_USER_WARNING);
             }
 
             $error = "";
@@ -394,29 +401,15 @@ class main_module
 
     public function sfw_update($access_key = null)
     {
-        global $config, $request;
-
-        $autoload_path = dirname(__DIR__) . '/lib/autoload.php';
-        if (file_exists($autoload_path)) {
-            require_once($autoload_path);
-        }
-
-        $super_globals_were_disabled = SuperGlobals::areDisabled($request);
+        global $config;
 
         try {
-            $api_key = $access_key ?: $config['cleantalk_antispam_apikey'];
-
-            // Enable superglobals for Common libraries that access $_SERVER directly
-            $request->enable_super_globals();
-
             $firewall = new \Cleantalk\Common\Firewall\Firewall(
-                $api_key,
+                $access_key ?: $config['cleantalk_antispam_apikey'],
                 APBCT_TBL_FIREWALL_LOG
             );
 
             $result = $firewall->getUpdater()->update();
-
-            SuperGlobals::restore($request, $super_globals_were_disabled);
 
             if (empty($result['error'])) {
                 $config->set('cleantalk_antispam_sfw_update_last_gc', time());
@@ -424,26 +417,15 @@ class main_module
 
             return $result;
         } catch (\Exception $e) {
-            SuperGlobals::restore($request, $super_globals_were_disabled);
-            error_log('CleanTalk SFW update error: ' . $e->getMessage());
             return array('error' => $e->getMessage());
         }
     }
 
     public function sfw_send_logs($access_key)
     {
-        global $config, $request;
-
-        $autoload_path = dirname(__DIR__) . '/lib/autoload.php';
-        if (file_exists($autoload_path)) {
-            require_once($autoload_path);
-        }
-
-        $super_globals_were_disabled = SuperGlobals::areDisabled($request);
+        global $config;
 
         try {
-            $request->enable_super_globals();
-
             $firewall = new \Cleantalk\Common\Firewall\Firewall(
                 $access_key,
                 APBCT_TBL_FIREWALL_LOG
@@ -451,16 +433,12 @@ class main_module
 
             $result = $firewall->sendLogs();
 
-            SuperGlobals::restore($request, $super_globals_were_disabled);
-
             if (!isset($result['error'])) {
                 $config->set('cleantalk_antispam_sfw_logs_send_last_gc', time());
             }
 
             return $result;
         } catch (\Exception $e) {
-            SuperGlobals::restore($request, $super_globals_were_disabled);
-            error_log('CleanTalk SFW send logs error: ' . $e->getMessage());
             return array('error' => $e->getMessage());
         }
     }

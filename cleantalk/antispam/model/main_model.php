@@ -87,6 +87,28 @@ class main_model
     }
 
     /**
+     * Spam protection works only with a valid access key and after the administrator
+     * confirmed that board users are informed about the data sent to CleanTalk.
+     *
+     * @return bool
+     */
+    public function is_active()
+    {
+        return !empty($this->config['cleantalk_antispam_key_is_ok'])
+            && !empty($this->config['cleantalk_antispam_privacy_confirmed']);
+    }
+
+    /**
+     * Adds an error to the phpBB critical log
+     *
+     * @param string $message
+     */
+    public function log_error($message)
+    {
+        $this->phpbb_log->add('critical', ANONYMOUS, '127.0.0.1', 'CLEANTALK_ERROR_LOG', time(), array($message));
+    }
+
+    /**
      * Checks data to spam
      *
      * @param array $spam_check array with values to check
