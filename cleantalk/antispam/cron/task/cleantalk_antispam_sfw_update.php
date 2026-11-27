@@ -2,36 +2,32 @@
 
 namespace cleantalk\antispam\cron\task;
 
-use cleantalk\antispam\model\SuperGlobals;
+use cleantalk\antispam\model\main_model;
+use cleantalk\antispam\model\RequestBridge;
 
 class cleantalk_antispam_sfw_update extends \phpbb\cron\task\base
 {
     protected $config;
     protected $request;
 
-    public function __construct(\phpbb\config\config $config, \phpbb\request\request $request)
+    /** @var main_model */
+    protected $main_model;
+
+    public function __construct(\phpbb\config\config $config, \phpbb\request\request $request, main_model $main_model)
     {
         $this->config = $config;
         $this->request = $request;
+        $this->main_model = $main_model;
     }
 
     public function run()
     {
-        $autoload_path = dirname(dirname(__DIR__)) . '/lib/autoload.php';
-        if (file_exists($autoload_path)) {
-            require_once($autoload_path);
-        }
-
-        $super_globals_were_disabled = SuperGlobals::areDisabled($this->request);
+        require_once(dirname(dirname(__DIR__)) . '/lib/autoload.php');
+        RequestBridge::init($this->request);
 
         try {
-            if ($super_globals_were_disabled) {
-                $this->request->enable_super_globals();
-            }
-
-            $api_key = $this->config['cleantalk_antispam_apikey'];
             $firewall = new \Cleantalk\Common\Firewall\Firewall(
-                $api_key,
+                $this->config['cleantalk_antispam_apikey'],
                 APBCT_TBL_FIREWALL_LOG
             );
 
@@ -41,15 +37,13 @@ class cleantalk_antispam_sfw_update extends \phpbb\cron\task\base
                 $this->config->set('cleantalk_antispam_sfw_update_last_gc', time());
             }
         } catch (\Exception $e) {
-            error_log('CleanTalk SFW update error: ' . $e->getMessage());
-        } finally {
-            SuperGlobals::restore($this->request, $super_globals_were_disabled);
+            $this->main_model->log_error('SpamFireWall update: ' . $e->getMessage());
         }
     }
 
     public function is_runnable()
     {
-        return ($this->config['cleantalk_antispam_sfw_enabled'] && $this->config['cleantalk_antispam_key_is_ok']);
+        return $this->config['cleantalk_antispam_sfw_enabled'] && $this->main_model->is_active();
     }
 
     public function should_run()

@@ -5,6 +5,10 @@
  * Loads constants and registers PSR-4 style class autoloader.
  */
 
+if (!defined('IN_PHPBB')) {
+    exit;
+}
+
 require_once __DIR__ . '/constants.php';
 
 /**

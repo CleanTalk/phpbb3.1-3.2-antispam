@@ -3,6 +3,7 @@
 namespace Cleantalk\Custom\RemoteCalls;
 
 use Cleantalk\Common\Mloader\Mloader;
+use Cleantalk\Common\Variables\Server;
 
 /**
  * phpBB-specific Remote Calls handler for CleanTalk common libraries.
@@ -20,14 +21,10 @@ class RemoteCalls extends \Cleantalk\Common\RemoteCalls\RemoteCalls
      */
     public static function getSiteUrl()
     {
-        $scheme = (
-            isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'
-                ? 'https'
-                : 'http'
-        );
+        $scheme = Server::get('HTTPS') === 'on' ? 'https' : 'http';
 
-        $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
-        $host = preg_replace('/[^A-Za-z0-9.\-:\[\]]/', '', $host);
+        $host = Server::get('HTTP_HOST');
+        $host = preg_replace('/[^A-Za-z0-9.\-:\[\]]/', '', is_string($host) ? $host : '');
 
         return $scheme . '://' . $host . '/';
     }

@@ -14,12 +14,13 @@ namespace cleantalk\antispam\event;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use phpbb\config\config;
 use phpbb\config\db_text;
+use phpbb\language\language;
 use phpbb\template\template;
 use phpbb\request\request;
 use phpbb\user;
 use phpbb\db\driver\driver_interface;
 use cleantalk\antispam\model\main_model;
-use cleantalk\antispam\model\SuperGlobals;
+use cleantalk\antispam\model\RequestBridge;
 use phpbb\symfony_request;
 
 /**
@@ -36,6 +37,7 @@ class main_listener implements EventSubscriberInterface
                 array('ccf_check', 2),
             ),
             'core.page_header_after'                    => 'add_bot_detector_script',
+            'core.page_footer'                          => 'append_privacy_policy',
             'core.page_footer_after'                    => 'add_js_to_footer',
             'core.posting_modify_submission_errors'     => 'check_comment',
             'core.posting_modify_submit_post_before'    => 'change_comment_approve',
@@ -76,12 +78,17 @@ class main_listener implements EventSubscriberInterface
     /** @var string table_prefix */
     protected $table_prefix;
 
+    /** @var \phpbb\language\language */
+    protected $language;
+
     /**
     * Constructor
     *
     * @param template           $template   Template object
     * @param config             $config     Config object
+    * @param db_text            $config_text
     * @param user               $user       User object
+    * @param language           $language   Language object
     * @param request            $request    Request object
     * @param driver_interface   $db         The database object
     * @param main_model         $main_model Main model
@@ -89,12 +96,13 @@ class main_listener implements EventSubscriberInterface
     * @param string             $php_ext
     * @param string             $table_prefix
     */
-    public function __construct(template $template, config $config, db_text $config_text, user $user, request $request, driver_interface $db, main_model $main_model, symfony_request $symfony_request, $php_ext, $table_prefix)
+    public function __construct(template $template, config $config, db_text $config_text, user $user, language $language, request $request, driver_interface $db, main_model $main_model, symfony_request $symfony_request, $php_ext, $table_prefix)
     {
         $this->template = $template;
         $this->config = $config;
         $this->config_text = $config_text;
         $this->user = $user;
+        $this->language = $language;
         $this->request = $request;
         $this->db = $db;
         $this->main_model = $main_model;
@@ -102,11 +110,8 @@ class main_listener implements EventSubscriberInterface
         $this->php_ext = $php_ext;
         $this->table_prefix = $table_prefix;
 
-        // Initialize CleanTalk common libraries autoloader
-        $autoload_path = dirname(__DIR__) . '/lib/autoload.php';
-        if (file_exists($autoload_path)) {
-            require_once($autoload_path);
-        }
+        require_once(dirname(__DIR__) . '/lib/autoload.php');
+        RequestBridge::init($this->request);
     }
     /**
     * Loads language
@@ -129,20 +134,13 @@ class main_listener implements EventSubscriberInterface
     */
     public function sfw_check($event)
     {
-        if (!$this->config['cleantalk_antispam_sfw_enabled'] || !$this->config['cleantalk_antispam_key_is_ok']) {
+        if (!$this->config['cleantalk_antispam_sfw_enabled'] || !$this->main_model->is_active()) {
             return;
         }
 
-        $super_globals_were_disabled = SuperGlobals::areDisabled($this->request);
-
         try {
-            $api_key = $this->config['cleantalk_antispam_apikey'];
-
-            // Enable superglobals for Common libraries that access $_SERVER directly
-            $this->request->enable_super_globals();
-
             $firewall = new \Cleantalk\Common\Firewall\Firewall(
-                $api_key,
+                $this->config['cleantalk_antispam_apikey'],
                 APBCT_TBL_FIREWALL_LOG
             );
 
@@ -157,11 +155,8 @@ class main_listener implements EventSubscriberInterface
             ));
 
             $firewall->run();
-
-            SuperGlobals::restore($this->request, $super_globals_were_disabled);
         } catch (\Exception $e) {
-            SuperGlobals::restore($this->request, $super_globals_were_disabled);
-            error_log('CleanTalk SFW error: ' . $e->getMessage());
+            $this->main_model->log_error('SpamFireWall: ' . $e->getMessage());
         }
     }
 
@@ -172,7 +167,7 @@ class main_listener implements EventSubscriberInterface
     */
     public function add_bot_detector_script($event)
     {
-        if (!$this->config['cleantalk_antispam_key_is_ok'] || !$this->config['cleantalk_antispam_bot_detector']) {
+        if (!$this->main_model->is_active() || !$this->config['cleantalk_antispam_bot_detector']) {
             return;
         }
         $bot_detector_class = \Cleantalk\Common\Mloader\Mloader::get('BotDetectorService');
@@ -182,11 +177,34 @@ class main_listener implements EventSubscriberInterface
 
     public function add_js_to_footer($event)
     {
-        if (!$this->config['cleantalk_antispam_key_is_ok']) {
+        if (!$this->main_model->is_active()) {
             return;
         }
         $this->template->assign_var('CT_JS_VALUE', $this->main_model->cleantalk_get_checkjs_code());
     }
+
+    /**
+    * Appends the CleanTalk data processing disclosure to the board's Privacy Policy (ucp.php?mode=privacy)
+    */
+    public function append_privacy_policy()
+    {
+        if (!$this->main_model->is_active()
+            || !$this->template->retrieve_var('S_AGREEMENT')
+            || $this->template->retrieve_var('AGREEMENT_TITLE') !== $this->language->lang('PRIVACY')
+        ) {
+            return;
+        }
+
+        $this->template->assign_vars(array(
+            'S_CLEANTALK_PRIVACY_SFW'           => (bool) $this->config['cleantalk_antispam_sfw_enabled'],
+            'S_CLEANTALK_PRIVACY_BOT_DETECTOR'  => (bool) $this->config['cleantalk_antispam_bot_detector'],
+        ));
+        $this->template->set_filenames(array(
+            'cleantalk_privacy_policy' => '@cleantalk_antispam/privacy_policy.html',
+        ));
+        $this->template->append_var('AGREEMENT_TEXT', $this->template->assign_display('cleantalk_privacy_policy'));
+    }
+
     /**
     * Checks post or topic to spam
     *
@@ -195,7 +213,7 @@ class main_listener implements EventSubscriberInterface
     public function check_comment($event)
     {
         $data = $event->get_data();
-        if (!$this->config['cleantalk_antispam_key_is_ok'] || !isset($data['submit']) || $data['submit'] != 1) {
+        if (!$this->main_model->is_active() || !isset($data['submit']) || $data['submit'] != 1) {
             return;
         }
 
@@ -288,7 +306,7 @@ class main_listener implements EventSubscriberInterface
     */
     public function change_comment_approve($event)
     {
-        if (!$this->config['cleantalk_antispam_key_is_ok']) {
+        if (!$this->main_model->is_active()) {
             return;
         }
 
@@ -311,7 +329,7 @@ class main_listener implements EventSubscriberInterface
     */
     public function check_newuser($event)
     {
-        if (!$this->config['cleantalk_antispam_key_is_ok']) {
+        if (!$this->main_model->is_active()) {
             return;
         }
 
@@ -347,38 +365,30 @@ class main_listener implements EventSubscriberInterface
     */
     public function ccf_check($event)
     {
+        if (!$this->main_model->is_active()) {
+            return;
+        }
+
         $this->main_model->set_cookie();
 
-        // Remote calls via Common library
-        $api_key = $this->config['cleantalk_antispam_apikey'];
-        if ($api_key) {
-            $super_globals_were_disabled = SuperGlobals::areDisabled($this->request);
+        try {
+            $rc_class = \Cleantalk\Common\Mloader\Mloader::get('RemoteCalls');
+            if ($rc_class::check()) {
+                // Prevent PHP from aborting when async RC caller disconnects (3s timeout)
+                ignore_user_abort(true);
 
-            try {
-                // Enable superglobals BEFORE RC check — RemoteCalls::check() reads $_GET/$_REQUEST
-                $this->request->enable_super_globals();
-                $rc_class = \Cleantalk\Common\Mloader\Mloader::get('RemoteCalls');
-                if ($rc_class::check()) {
-                    // Prevent PHP from aborting when async RC caller disconnects (3s timeout)
-                    ignore_user_abort(true);
-
-                    $storage_handler_class = \Cleantalk\Common\Mloader\Mloader::get('StorageHandler');
-                    $remote_calls = new $rc_class($api_key, new $storage_handler_class());
-                    try {
-                        $rc_result = $remote_calls->process();
-                        SuperGlobals::restore($this->request, $super_globals_were_disabled);
-                        die($rc_result);
-                    } catch (\Cleantalk\Common\RemoteCalls\Exceptions\RemoteCallsException $exception) {
-                        SuperGlobals::restore($this->request, $super_globals_were_disabled);
-                        error_log('CleanTalk RC error: ' . $exception->getMessage());
-                        die('FAIL ' . json_encode(array('error' => $exception->getMessage())));
-                    }
+                $storage_handler_class = \Cleantalk\Common\Mloader\Mloader::get('StorageHandler');
+                $remote_calls = new $rc_class($this->config['cleantalk_antispam_apikey'], new $storage_handler_class());
+                try {
+                    $rc_result = $remote_calls->process();
+                } catch (\Cleantalk\Common\RemoteCalls\Exceptions\RemoteCallsException $exception) {
+                    $this->main_model->log_error('Remote call: ' . $exception->getMessage());
+                    $rc_result = 'FAIL ' . json_encode(array('error' => $exception->getMessage()));
                 }
-                SuperGlobals::restore($this->request, $super_globals_were_disabled);
-            } catch (\Exception $e) {
-                SuperGlobals::restore($this->request, $super_globals_were_disabled);
-                error_log('CleanTalk RC init error: ' . $e->getMessage());
+                $this->send_remote_call_response($rc_result);
             }
+        } catch (\Exception $e) {
+            $this->main_model->log_error('Remote call init: ' . $e->getMessage());
         }
 
         if ($this->config['cleantalk_antispam_ccf'] && !in_array($this->symfony_request->getScriptName(), array('/adm/index.' . $this->php_ext,'/ucp.' . $this->php_ext,'/posting.' . $this->php_ext)) && $this->request->variable('submit', '')) {
@@ -402,5 +412,18 @@ class main_listener implements EventSubscriberInterface
                 }
             }
         }
+    }
+
+    /**
+    * Outputs the remote call result and ends the request the phpBB way
+    *
+    * @param string $output
+    */
+    protected function send_remote_call_response($output)
+    {
+        $response = new \Symfony\Component\HttpFoundation\Response((string) $output);
+        $response->send();
+        garbage_collection();
+        exit_handler();
     }
 }

@@ -94,4 +94,21 @@ $lang = array_merge($lang, array(
 
     'ACP_CLEANTALK_BOT_DETECTOR_LABEL'          => 'Use CleanTalk JavaScript library',
     'ACP_CLEANTALK_BOT_DETECTOR_DESCR'          => 'This option includes CleanTalk external JavaScript library to collect visitor information. You should flush the pages cache to make the changes work.',
+
+    'ACP_CLEANTALK_PRIVACY_LEGEND'              => 'Privacy',
+    'ACP_CLEANTALK_DATA_NOTICE'                 => 'To check registrations, posts and contact forms for spam, the extension sends the e-mail address, IP address, browser user agent, username and message text of the submitter, as well as the page address and referrer, to CleanTalk servers. SpamFireWall sends the IP address, browser user agent and visited addresses of blocked visitors. The data is used only for spam checking.',
+    'ACP_CLEANTALK_PRIVACY_LINK'                => 'CleanTalk Privacy Policy',
+    'ACP_CLEANTALK_PRIVACY_CONFIRM_LABEL'       => 'Users are informed',
+    'ACP_CLEANTALK_PRIVACY_CONFIRM_DESCR'       => 'Spam protection works only when this option is enabled. It also adds a section about CleanTalk to the Privacy Policy of your board.',
+    'ACP_CLEANTALK_PRIVACY_CONFIRM'             => 'I have informed my users that submissions are checked by CleanTalk (privacy policy updated)',
+    'ACP_CLEANTALK_PRIVACY_NOT_CONFIRMED'       => 'Spam protection is paused. No data is sent to CleanTalk until you confirm that your users are informed.',
+
+    'CLEANTALK_PRIVACY_POLICY_TITLE'            => 'Spam protection by CleanTalk',
+    'CLEANTALK_PRIVACY_POLICY_CHECKS'           => 'When you register, post or submit a form on “%1$s”, your e-mail address, IP address, browser user agent, username and message text, as well as the address of the page and the referring page, are sent to CleanTalk servers to check the submission for spam.',
+    'CLEANTALK_PRIVACY_POLICY_SFW'              => 'To stop known spam bots, the IP address of every visitor is compared with a CleanTalk blacklist stored on this board. The IP address, browser user agent and visited addresses of visitors who were blocked or had to pass the check are periodically sent to CleanTalk.',
+    'CLEANTALK_PRIVACY_POLICY_BOT_DETECTOR'     => 'Pages of this board load a JavaScript file from CleanTalk servers that collects technical information about your browser and how the page is used, for example mouse and keyboard activity, to tell humans from bots.',
+    'CLEANTALK_PRIVACY_POLICY_COOKIES'          => 'The spam check sets cookies, for example to confirm that JavaScript and cookies are enabled in your browser.',
+    'CLEANTALK_PRIVACY_POLICY_PURPOSE'          => 'This data is used only to protect “%1$s” from spam. CleanTalk processes it according to its privacy policy:',
+
+    'CLEANTALK_REQUIREMENTS_PHP'                => 'Antispam by CleanTalk requires PHP %s or newer.',
 ));

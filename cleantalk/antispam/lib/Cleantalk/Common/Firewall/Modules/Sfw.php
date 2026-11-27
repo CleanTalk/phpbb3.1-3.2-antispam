@@ -111,7 +111,11 @@ class Sfw extends \Cleantalk\Common\Firewall\FirewallModule
         $helper_class = $this->helper;
 
         if ( $this->test ) {
-            unset($_COOKIE['ct_sfw_pass_key']);
+            // Platforms like phpBB replace $_COOKIE with a read-only object
+            if ( is_array($_COOKIE) ) {
+                unset($_COOKIE['ct_sfw_pass_key']);
+            }
+            Cookie::getInstance()->variables['ct_sfw_pass_key'] = '';
             Cookie::set('ct_sfw_pass_key', '0');
         }
 
